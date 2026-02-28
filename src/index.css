@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@layer base {
+  body {
+    @apply bg-background-light text-[#0d131b] transition-colors duration-300;
+  }
+  [data-theme='dark'] body {
+    background-color: var(--color-background-dark);
+    color: #f8fafc;
+  }
+}
+
+@theme {
+  /* TUS VARIABLES ACTUALES */
+  --color-primary: #136dec;
+  --color-primary-dark: #0c4bad; /* Agregado para hover */
+  --color-primary-light: #5494f1; /* Agregado */
+  
+  --color-background-light: #f6f7f8;
+  --color-background-dark: #101822;
+  
+  /* NUEVAS VARIABLES PARA EL DASHBOARD (NECESARIAS) */
+  --color-surface-dark: #1a2430;
+  --color-surface-darker: #151e29;
+
+  --font-display: "Inter", sans-serif;
+  --font-sans: "Inter", sans-serif;
+
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+}
+
+/* ESTILOS DEL DASHBOARD (Scrollbars y Gráficos) */
+@layer utilities {
+  .chart-grid {
+    background-image: linear-gradient(to right, #2d3b4e 1px, transparent 1px),
+                      linear-gradient(to bottom, #2d3b4e 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  }
+  
+  /* Ocultar scrollbar pero permitir scroll */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
