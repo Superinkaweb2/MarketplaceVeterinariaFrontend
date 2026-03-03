@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
-import { PawPrint, Mail, Lock, Eye, EyeOff, ArrowLeft, ArrowRight, Building2, User, Heart } from "lucide-react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, ArrowRight, Building2, User, Heart } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -56,15 +56,17 @@ const ROLES = [
 export const Register = () => {
   const { register: registerUser } = useRegister();
   const { isAuthenticated, role } = useAuth();
-  
+  const [searchParams] = useSearchParams();
+  const selectedPlan = searchParams.get("plan");
+
   // State
   const [step, setStep] = useState<1 | 2>(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  
+
   // Guardamos las credenciales entre los pasos
   const [credentials, setCredentials] = useState<RegisterFormData | null>(null);
-  
+
   // Estado para la mutación final
   const [isSubmittingRole, setIsSubmittingRole] = useState(false);
 
@@ -90,7 +92,7 @@ export const Register = () => {
   // Submit del Paso 2 (Selección de Rol)
   const onSelectRole = async (selectedRole: RoleType) => {
     if (!credentials) return;
-    
+
     setIsSubmittingRole(true);
     try {
       await registerUser({
@@ -119,8 +121,12 @@ export const Register = () => {
         <div className="relative z-10 flex flex-col justify-end p-16 h-full w-full">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6 text-white">
-              <PawPrint size={48} className="text-primary" strokeWidth={2.5} />
-              <span className="text-4xl font-bold tracking-tight">VetSaaS</span>
+              <img
+                src="/LOGO HUELLA360_logo primario.png"
+                alt="Logo Huella360"
+                className="h-12 w-auto object-contain"
+              />
+              <span className="text-4xl font-bold tracking-tight">Huella360</span>
             </div>
             <blockquote className="text-white text-2xl font-medium leading-relaxed max-w-lg italic">
               "Únete a la red veterinaria más avanzada. Una cuenta, un ecosistema completo para ti y tus mascotas."
@@ -152,13 +158,29 @@ export const Register = () => {
 
         <div className="lg:hidden mb-12">
           <div className="flex items-center gap-2 text-slate-900 dark:text-white">
-            <PawPrint size={32} className="text-primary" />
-            <span className="text-2xl font-bold">VetSaaS</span>
+            <img
+              src="/LOGO HUELLA360_logo primario.png"
+              alt="Logo Huella360"
+              className="h-8 w-auto object-contain"
+            />
+            <span className="text-2xl font-bold">Huella360</span>
           </div>
         </div>
 
         <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          
+
+          {selectedPlan && (
+            <div className="bg-primary/10 border border-primary/20 p-4 rounded-xl flex items-center gap-3">
+              <div className="bg-primary text-white p-2 rounded-lg">
+                <Heart size={18} />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-primary uppercase tracking-wider">Plan Seleccionado</p>
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Has elegido el plan: <span className="text-primary">{selectedPlan}</span></p>
+              </div>
+            </div>
+          )}
+
           {/* ────── PASO 1: CREAR CUENTA ────── */}
           {step === 1 && (
             <>
@@ -189,9 +211,8 @@ export const Register = () => {
                         placeholder="ejemplo@correo.com"
                         {...formRegister("correo")}
                         aria-invalid={!!errors.correo}
-                        className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${
-                          errors.correo ? "border-red-400 dark:border-red-500" : "border-slate-200 dark:border-slate-700"
-                        }`}
+                        className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${errors.correo ? "border-red-400 dark:border-red-500" : "border-slate-200 dark:border-slate-700"
+                          }`}
                       />
                     </div>
                     {errors.correo && <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">{errors.correo.message}</p>}
@@ -213,9 +234,8 @@ export const Register = () => {
                         placeholder="••••••••"
                         {...formRegister("password")}
                         aria-invalid={!!errors.password}
-                        className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${
-                          errors.password ? "border-red-400 dark:border-red-500" : "border-slate-200 dark:border-slate-700"
-                        }`}
+                        className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${errors.password ? "border-red-400 dark:border-red-500" : "border-slate-200 dark:border-slate-700"
+                          }`}
                       />
                       <button
                         type="button"
@@ -244,9 +264,8 @@ export const Register = () => {
                         placeholder="••••••••"
                         {...formRegister("confirmPassword")}
                         aria-invalid={!!errors.confirmPassword}
-                        className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${
-                          errors.confirmPassword ? "border-red-400 dark:border-red-500" : "border-slate-200 dark:border-slate-700"
-                        }`}
+                        className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${errors.confirmPassword ? "border-red-400 dark:border-red-500" : "border-slate-200 dark:border-slate-700"
+                          }`}
                       />
                       <button
                         type="button"
@@ -282,7 +301,7 @@ export const Register = () => {
                   Selecciona tu rol
                 </h1>
                 <p className="mt-3 text-slate-500 dark:text-slate-400">
-                  Cuentanos un poco sobre ti para personalizar tu experiencia en VetSaaS.
+                  Cuentanos un poco sobre ti para personalizar tu experiencia en Huella360.
                 </p>
               </div>
 
@@ -292,9 +311,8 @@ export const Register = () => {
                     key={roleDef.id}
                     onClick={() => onSelectRole(roleDef.id)}
                     disabled={isSubmittingRole}
-                    className={`w-full flex items-start p-5 rounded-2xl border bg-white dark:bg-surface-dark transition-all text-left shadow-sm hover:shadow-md hover:border-primary dark:hover:border-primary ${
-                      roleDef.border
-                    } ${isSubmittingRole ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                    className={`w-full flex items-start p-5 rounded-2xl border bg-white dark:bg-surface-dark transition-all text-left shadow-sm hover:shadow-md hover:border-primary dark:hover:border-primary ${roleDef.border
+                      } ${isSubmittingRole ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                   >
                     <div className={`p-3 rounded-xl ${roleDef.color} shrink-0`}>
                       <roleDef.icon size={26} />

@@ -1,111 +1,67 @@
-import { PlayCircle, CheckCircle2, ArrowRight} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "../components/ui/Button";
-
-const TRUST_BADGES = [
-  {label: "Cumple con normativas de privacidad" },
-  {label: "14 días gratis, sin tarjeta" },
-] as const;
+import { useNavigate } from "react-router-dom";
 
 export const Hero = () => {
+  const navigate = useNavigate();
   return (
     <section
-      aria-label="Sección principal de VetSaaS"
-      className="w-full max-w-7xl mx-auto px-4 md:px-10 py-12 md:py-20 overflow-hidden"
+      aria-label="Sección principal de Huella360"
+      className="relative pt-8 pb-10 lg:pt-10 lg:pb-18 overflow-hidden"
     >
-      <div className="@container">
-        <div className="flex flex-col-reverse gap-10 md:gap-16 lg:flex-row items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-          {/* ── Lado Izquierdo: Contenido ── */}
-          <div className="flex flex-col gap-8 flex-1 text-center lg:text-left">
-            <div className="flex flex-col gap-4">
+          <div className="text-center lg:text-left">
 
-              {/* Eyebrow: keyword visible para SEO on-page */}
-              <p className="text-primary font-bold text-sm tracking-widest uppercase inline-block m-0">
-                Software veterinario todo en uno
-              </p>
-
-              {/* H1: única por página, con keyword principal */}
-              <h1 className="text-[#0d131b] dark:text-white text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight">
-                La plataforma integral para{" "}
-                <span className="text-primary">clínicas veterinarias modernas</span>
-              </h1>
-
-              {/* Párrafo descriptivo: amplía las keywords naturalmente */}
-              <p className="text-[#4c6c9a] dark:text-slate-400 text-lg md:text-xl font-normal leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Gestiona tu clínica veterinaria, las historias clínicas de tus
-                pacientes y haz crecer tu negocio con nuestro ecosistema integrado
-                de marketplace y herramientas profesionales.
-              </p>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold tracking-wide uppercase mb-6 dark:bg-primary/20">
+              <span className="w-2 h-2 rounded-full bg-primary"></span>
+              Lanzamiento Próximo
             </div>
 
-            {/* CTA principal + secundario */}
-            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+            <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-secondary dark:text-white mb-6 leading-tight">
+              La Plataforma
+              <p>Todo en Uno para el</p> 
+              <span className="text-primary">Cuidado Animal Moderno</span>
+            </h1>
+
+            <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              Optimiza tu práctica veterinaria, gestiona historiales médicos y haz crecer tu negocio con nuestro ecosistema de marketplace integrado.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button
                 variant="primary"
-                aria-label="Comenzar prueba gratuita de VetSaaS por 14 días"
-                className="h-14 px-8 text-base font-bold rounded-xl group transition-all"
+                onClick={() => navigate('/register')}
+                aria-label="Iniciar Prueba Gratuita"
+                className="inline-flex items-center justify-center px-8 py-3.5 border border-transparent text-base font-semibold rounded-full text-white bg-secondary hover:bg-opacity-90 shadow-lg shadow-secondary/30 transition-all group"
               >
-                <span>Comenzar gratis</span>
+                <span>Iniciar Prueba Gratuita</span>
                 <ArrowRight
                   size={18}
                   aria-hidden="true"
                   className="ml-2 group-hover:translate-x-1 transition-transform"
                 />
               </Button>
-
-              <Button
-                variant="outline"
-                aria-label="Ver demostración de VetSaaS"
-                className="h-14 px-8 text-base font-semibold rounded-xl border-2"
-              >
-                <span className="flex items-center gap-2">
-                  <PlayCircle size={20} aria-hidden="true" className="text-primary" />
-                  Ver demostración
-                </span>
-              </Button>
             </div>
 
-            {/* Trust badges */}
-            <ul
-              role="list"
-              aria-label="Garantías de VetSaaS"
-              className="flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3 pt-2 text-sm font-medium text-[#4c6c9a] dark:text-slate-500 list-none p-0 m-0"
-            >
-              {TRUST_BADGES.map(({ label }) => (
-                <li key={label} className="flex items-center gap-2">
-                  <CheckCircle2 size={18} aria-hidden="true" className="text-emerald-500 shrink-0" />
-                  <span>{label}</span>
-                </li>
-              ))}
-            </ul>
+            <p className="mt-6 text-sm text-slate-500 dark:text-slate-500">
+              Únete a las primeras clínicas que están transformando el cuidado animal.
+            </p>
           </div>
 
-          {/* ── Lado Derecho: Visual ── */}
-          <div className="w-full flex-1 relative group">
-            {/* Glow decorativo */}
-            <div
-              aria-hidden="true"
-              className="absolute -inset-4 bg-linear-to-r from-primary/30 to-blue-400/20 dark:from-primary/10 dark:to-blue-900/10 rounded-4xl blur-3xl opacity-60 group-hover:opacity-100 transition duration-1000"
+          <div className="relative lg:h-auto group">
+
+            <div className="absolute -top-20 -right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl dark:bg-primary/20 transition-opacity duration-1000 group-hover:opacity-80"></div>
+            <div className="absolute bottom-0 left-0 w-72 h-72 bg-secondary/10 rounded-full blur-3xl dark:bg-secondary/20 transition-opacity duration-1000 group-hover:opacity-80"></div>
+
+            <img
+              alt="Veterinario examinando a un perro"
+              className="relative rounded-full shadow-2xl border-4 border-white dark:border-surface-dark z-10 transform rotate-1 group-hover:rotate-0 transition-transform duration-500 w-full object-cover aspect-square"
+              src="/hero-huella360.jpg"
+              loading="eager"
             />
-
-            {/* Imagen principal con aspect-ratio fijo para evitar CLS */}
-            <div className="relative w-full aspect-square sm:aspect-video lg:aspect-4/3 rounded-4xl overflow-hidden shadow-2xl bg-slate-200 border-4 border-white dark:border-slate-800">
-              <img
-                src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1200"
-                alt="Veterinario profesional usando VetSaaS en su tablet para gestionar la clínica"
-                width={1200}
-                height={900}
-                loading="eager"
-                decoding="async"
-                fetchPriority="high"
-                className="w-full h-full object-cover transform transition duration-1000 group-hover:scale-105"
-              />
-
-              {/* Ring inset decorativo */}
-              <div aria-hidden="true" className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-4xl" />
-            </div>
           </div>
-
         </div>
       </div>
     </section>

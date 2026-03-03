@@ -1,4 +1,4 @@
-import { Menu, Search, Bell } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -34,11 +34,6 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
         {/* Botón de búsqueda solo visible en móvil (opcional) */}
         <button className="sm:hidden p-2 text-slate-600 dark:text-slate-300">
           <Search size={20} />
-        </button>
-
-        <button className="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer">
-          <Bell size={20} />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-900"></span>
         </button>
 
         <div className="flex items-center gap-3 pl-2 md:pl-4 md:border-l border-slate-200 dark:border-slate-700">

@@ -13,23 +13,29 @@
 }
 
 @theme {
-  /* TUS VARIABLES ACTUALES */
-  --color-primary: #136dec;
-  --color-primary-dark: #0c4bad; /* Agregado para hover */
-  --color-primary-light: #5494f1; /* Agregado */
+  /* COLORES */
+  --color-primary: #1ea59c;
+  --color-secondary: #2D3E82;
   
-  --color-background-light: #f6f7f8;
-  --color-background-dark: #101822;
+  --color-background-light: #f6f8f8;
+  --color-background-dark: #12201f;
   
-  /* NUEVAS VARIABLES PARA EL DASHBOARD (NECESARIAS) */
-  --color-surface-dark: #1a2430;
-  --color-surface-darker: #151e29;
+  --color-surface-light: #F8FAFC;
+  --color-surface-dark: #1a2c2b;
 
-  --font-display: "Inter", sans-serif;
-  --font-sans: "Inter", sans-serif;
+  /* FUENTES */
+  --font-display: "Montserrat", sans-serif;
+  --font-body: "Montserrat", sans-serif;
+  --font-sans: "Montserrat", sans-serif; /* Recomendado mantener para las clases base de Tailwind */
 
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+  /* BORDES (Border Radius) */
+  --radius-DEFAULT: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+
+  /* SOMBRAS (Box Shadow) */
+  --shadow-soft: 0 4px 20px -2px rgba(30, 165, 156, 0.05);
 }
 
 /* ESTILOS DEL DASHBOARD (Scrollbars y Gráficos) */

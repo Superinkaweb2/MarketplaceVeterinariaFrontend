@@ -23,7 +23,7 @@ const LOGOS: TrustedLogo[] = [
 export const TrustedBy = () => {
   return (
     <section
-      aria-label="Clínicas y empresas que confían en VetSaaS"
+      aria-label="Clínicas y empresas que confían en Huella360"
       className="w-full border-y border-[#e7ecf3] dark:border-slate-800 bg-white dark:bg-background-dark py-10 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 md:px-10 flex flex-col lg:flex-row items-center gap-10">

@@ -54,11 +54,13 @@ export const Sidebar = ({ isMobileOpen, setMobileOpen }: SidebarProps) => {
         <div className="h-16 flex items-center justify-between px-6 shrink-0 border-b border-gray-100 dark:border-gray-800">
           {!isCollapsed && (
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded bg-linear-to-br from-primary to-primary-dark flex items-center justify-center text-white shadow-md shadow-primary/20">
-                <PawPrint size={18} strokeWidth={2.5} />
-              </div>
+              <img 
+                src="/LOGO HUELLA360_logo primario.png" 
+                alt="Logo Huella360" 
+                className="h-8 w-auto object-contain"
+              />
               <span className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-                VetSaaS
+                Huella360
               </span>
             </Link>
           )}
@@ -70,8 +72,12 @@ export const Sidebar = ({ isMobileOpen, setMobileOpen }: SidebarProps) => {
             <X size={20} />
           </button>
           {isCollapsed && (
-            <div className="w-8 h-8 rounded bg-linear-to-br from-primary to-primary-dark flex items-center justify-center mx-auto text-white shadow-md shadow-primary/20">
-              <PawPrint size={18} strokeWidth={2.5} />
+            <div className="flex items-center justify-center mx-auto">
+              <img 
+                src="/LOGO HUELLA360_logo primario.png" 
+                alt="Logo Huella360" 
+                className="h-8 w-auto object-contain"
+              />
             </div>
           )}
           <button
@@ -140,4 +146,3 @@ export const Sidebar = ({ isMobileOpen, setMobileOpen }: SidebarProps) => {
     </>
   );
 };
-

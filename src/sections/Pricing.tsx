@@ -24,44 +24,43 @@ export const Pricing = () => {
     fetchPlans();
   }, []);
 
-  const handleStart = () => {
-    navigate("/register");
+  const handleStart = (planName: string) => {
+    navigate(`/register?plan=${encodeURIComponent(planName)}`);
   };
 
   return (
     <section
+      id="pricing"
       aria-labelledby="pricing-heading"
-      className="w-full bg-background-dark text-white py-24 relative overflow-hidden"
+      // Fondo azul oscuro del diseño HTML original
+      className="w-full py-24 bg-secondary text-white relative overflow-hidden"
     >
-      {/* Glows decorativos */}
-      <div
-        aria-hidden="true"
-        className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl"
-      />
+      {/* Glows decorativos del HTML */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10 pointer-events-none">
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary rounded-full blur-3xl" />
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-10 relative z-10">
-        {/* Encabezado */}
-        <div className="text-center mb-16 space-y-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+        {/* Encabezado adaptado al HTML */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
           <h2
             id="pricing-heading"
-            className="text-4xl md:text-6xl font-black tracking-tighter"
+            className="text-3xl md:text-4xl font-bold mb-4"
           >
-            Planes <span className="text-primary">Simples</span> y Transparentes
+            Precios Simples y Transparentes
           </h2>
-          <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-            Elige el plan que mejor se adapta a tu clínica. Diseñados para escalar junto a tu negocio, desde clínicas independientes hasta redes hospitalarias.
+          <p className="text-blue-100 text-lg">
+            Elige el plan que mejor se adapte al tamaño y necesidades de tu práctica.
           </p>
         </div>
 
-        {/* Loading State or Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8" role="list">
+        {/* Grid de Planes */}
+        <div className="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto" role="list">
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-[500px] bg-slate-800/30 rounded-3xl animate-pulse border border-slate-700/50" />
+              <div key={i} className="h-[500px] bg-white/10 rounded-xl animate-pulse" />
             ))
           ) : (
             plans?.map((plan) => {
@@ -69,48 +68,59 @@ export const Pricing = () => {
               const isPremium = plan.nombre.toLowerCase().includes('premium');
 
               const icons = {
-                'básico': <Shield className="text-blue-400" size={32} />,
-                'pro': <Zap className="text-amber-400" size={32} />,
-                'premium': <Crown className="text-primary" size={32} />,
+                'básico': <Shield size={28} />,
+                'pro': <Zap size={28} />,
+                'premium': <Crown size={28} />,
               };
 
-              const planIcon = icons[plan.nombre.toLowerCase() as keyof typeof icons] || <Shield size={32} />;
+              const planIcon = icons[plan.nombre.toLowerCase() as keyof typeof icons] || <Shield size={28} />;
 
               return (
                 <article
                   key={plan.id}
                   role="listitem"
                   aria-label={`Plan ${plan.nombre}`}
-                  className={`relative group rounded-[2.5rem] p-8 md:p-10 border transition-all duration-500 flex flex-col ${isPro
-                    ? "bg-slate-900 border-primary/50 shadow-2xl shadow-primary/10 ring-1 ring-primary/20 scale-105 z-10"
-                    : "bg-slate-800/40 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/60"
+                  // Lógica visual: Si es Pro, usa la tarjeta verde elevada. Si no, usa la tarjeta blanca.
+                  className={`relative group rounded-xl p-8 flex flex-col transition-all duration-300 shadow-xl ${isPro
+                    ? "bg-primary text-white border-4 border-primary-light/50 transform lg:-translate-y-4 z-10"
+                    : "bg-white text-slate-800 dark:bg-surface-dark dark:text-slate-200 border border-transparent"
                     }`}
                 >
                   {isPro && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] px-6 py-2 rounded-full shadow-xl">
-                      Más Popular
+                    <div className="absolute top-0 right-0 bg-secondary text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">
+                      POPULAR
                     </div>
                   )}
 
-                  <div className="flex justify-between items-start mb-8">
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 group-hover:scale-110 transition-transform duration-500">
+                  <div className="mb-6">
+                    {/* Contenedor del icono que tenías, adaptado a los colores de la tarjeta */}
+                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110 ${isPro ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
+                      }`}>
                       {planIcon}
                     </div>
+
+                    <h3 className={`text-2xl font-bold mb-2 ${isPro ? "" : "text-secondary dark:text-white"}`}>
+                      {plan.nombre}
+                    </h3>
+                    <p className={`text-sm min-h-[40px] ${isPro ? "text-white/80" : "text-slate-500"}`}>
+                      {plan.descripcion}
+                    </p>
                   </div>
 
-                  <h3 className="text-2xl font-black mb-2">{plan.nombre}</h3>
-                  <p className="text-slate-400 text-sm mb-10 min-h-[40px]">
-                    {plan.descripcion}
-                  </p>
-
-                  <div className="flex items-baseline gap-1 mb-10">
-                    <span className="text-5xl font-black tracking-tighter">S/ {plan.precioMensual}</span>
-                    <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">/mes</span>
+                  {/* Precios */}
+                  <div className="flex items-baseline gap-1 mb-8">
+                    <span className={`text-4xl font-bold ${isPro ? "" : "text-secondary dark:text-white"}`}>
+                      S/ {plan.precioMensual}
+                    </span>
+                    <span className={`font-bold uppercase text-[10px] tracking-widest ${isPro ? "text-white/80" : "text-slate-400"}`}>
+                      /mes
+                    </span>
                   </div>
 
-                  <hr className="border-white/5 mb-10" />
+                  <hr className={`mb-8 ${isPro ? "border-white/20" : "border-slate-100 dark:border-slate-800"}`} />
 
-                  <ul className="space-y-5 mb-12 flex-1">
+                  {/* Lista de Features usando tu componente interno */}
+                  <ul className="space-y-4 mb-10 flex-1">
                     <FeatureItem text={`${plan.limiteMascotas === 0 ? 'Mascotas Ilimitadas' : `Hasta ${plan.limiteMascotas} Mascotas`}`} included={true} isFeatured={isPro} />
                     <FeatureItem text={`${plan.limiteProductos === 0 ? 'Productos Ilimitados' : `Hasta ${plan.limiteProductos} Productos`}`} included={true} isFeatured={isPro} />
                     <FeatureItem text="Gestión de Citas" included={true} isFeatured={isPro} />
@@ -119,10 +129,13 @@ export const Pricing = () => {
                     <FeatureItem text="Soporte VIP 24/7" included={isPremium} isFeatured={isPro} />
                   </ul>
 
+                  {/* Tu componente Button con clases para simular el HTML */}
                   <Button
-                    variant={isPro ? "primary" : "outline"}
-                    onClick={handleStart}
-                    className={`w-full py-7 rounded-2xl font-black uppercase tracking-widest text-xs h-auto shadow-2xl transition-all transform hover:scale-[1.02] ${isPro ? "shadow-primary/30" : "border-slate-700 hover:border-slate-500"
+                    variant={isPro ? "secondary" : "outline"} // Ajusta la variante según soporte tu UI
+                    onClick={() => handleStart(plan.nombre)}
+                    className={`w-full py-4 rounded-lg font-bold text-sm h-auto transition-all ${isPro
+                      ? "bg-white text-primary hover:bg-slate-50 shadow-lg"
+                      : "border-2 border-primary text-primary hover:bg-primary hover:text-white"
                       }`}
                   >
                     Comenzar Ahora
@@ -137,15 +150,18 @@ export const Pricing = () => {
   );
 };
 
+// Tu FeatureItem restaurado y adaptado para que se vea bien en fondos blancos y verdes
 const FeatureItem = ({ text, included, isFeatured }: { text: string, included: boolean, isFeatured: boolean }) => (
-  <li className={`flex items-center gap-4 text-sm font-semibold transition-colors ${included ? (isFeatured ? "text-white" : "text-slate-200") : "text-slate-600"}`}>
+  <li className={`flex items-center gap-4 text-sm font-semibold transition-colors ${included
+    ? (isFeatured ? "text-white" : "text-slate-700 dark:text-slate-200")
+    : (isFeatured ? "text-white/50" : "text-slate-400")
+    }`}>
     <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${included
-      ? (isFeatured ? "bg-white/20 text-white" : "bg-primary/10 text-primary")
-      : "bg-slate-800/50 text-slate-700"
+      ? (isFeatured ? "bg-white/20 text-white" : "bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400")
+      : (isFeatured ? "bg-black/10 text-white/40" : "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500")
       }`}>
       {included ? <Check size={14} strokeWidth={4} /> : <X size={14} />}
     </div>
     <span className={included ? "" : "line-through opacity-50"}>{text}</span>
   </li>
 );
-

@@ -1,24 +1,33 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Hero } from "../sections/Hero";
-import { TrustedBy } from "../sections/TrustedBy";
 import { Segments } from "../sections/Segments";
 import { Pricing } from "../sections/Pricing";
 import { CTA } from "../sections/CTA";
+import { ProfilesInfo } from "./ProfileInfo";
 
 function Home() {
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      setTimeout(() => {
+        const element = document.getElementById(hash.replace('#', ''));
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [hash]);
+
   return (
     <>
       <Hero />
-      <TrustedBy />
       <Segments />
 
-      <div className="w-full max-w-7xl px-4 md:px-10 py-20">
-        <div className="flex justify-between items-end mb-8">
-          <h2 className="text-[#0d131b] dark:text-white text-3xl font-bold">
-            Marketplace Preview
-          </h2>
-        </div>
-        {/* Aqui va productos o servicios */}
-      </div>
+      <ProfilesInfo />
 
       <Pricing />
       <CTA />

@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 import type { ReactNode } from "react";
 
 export interface AuthContextType {
@@ -21,18 +21,52 @@ export const useAuth = () => {
   return context;
 };
 
+// [NUEVO] Helper para decodificar y validar la expiración del JWT
+const isTokenExpired = (token: string | null): boolean => {
+  if (!token) return true;
+  try {
+    const payloadBase64 = token.split('.')[1];
+    const decodedJson = atob(payloadBase64);
+    const payload = JSON.parse(decodedJson);
+    const exp = payload.exp;
+    if (!exp) return false;
+    return exp * 1000 < Date.now();
+  } catch (error) {
+    return true; // Si falla la decodificación, se asume inválido
+  }
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
-  const [role, setRole] = useState<string | null>(localStorage.getItem("userRole"));
+  // [MODIFICADO] Verificamos el token antes de inicializar los estados
+  const initialToken = localStorage.getItem("token");
+  const isExpired = isTokenExpired(initialToken);
+
+  // Si el token inicial está expirado, limpiamos localStorage inmediatamente
+  if (initialToken && isExpired) {
+    ["token", "userRole", "empresaId", "userNombre", "perfilCompleto"].forEach((k) =>
+      localStorage.removeItem(k)
+    );
+  }
+
+  // Inicializamos estados asegurándonos de que sean null/false si expiró
+  const [token, setToken] = useState<string | null>(isExpired ? null : initialToken);
+  const [role, setRole] = useState<string | null>(isExpired ? null : localStorage.getItem("userRole"));
   const [empresaId, setEmpresaId] = useState<number | null>(() => {
+    if (isExpired) return null;
     const stored = localStorage.getItem("empresaId");
     return stored ? Number(stored) : null;
   });
-  const [nombre, setNombre] = useState<string | null>(localStorage.getItem("userNombre"));
+  const [nombre, setNombre] = useState<string | null>(isExpired ? null : localStorage.getItem("userNombre"));
   const [perfilCompleto, setPerfilCompletoState] = useState<boolean>(
-    // Sólo se marca como true si existe la key y es "true"
-    localStorage.getItem("perfilCompleto") === "true",
+    isExpired ? false : localStorage.getItem("perfilCompleto") === "true",
   );
+
+  // Capa extra: si el token expira mientras la app está abierta sin hacer peticiones
+  useEffect(() => {
+    if (token && isTokenExpired(token)) {
+      logout();
+    }
+  }, [token]);
 
   const login = (
     newToken: string,
@@ -84,4 +118,3 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
-
