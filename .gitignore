@@ -1,4 +1,15 @@
-# Logs
+# --- Dependencias ---
+node_modules/
+.pnp
+.pnp.js
+
+# --- Build / Salida ---
+dist/
+dist-ssr/
+build/
+*.stats.json
+
+# --- Logs de error ---
 logs
 *.log
 npm-debug.log*
@@ -7,18 +18,37 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# --- Variables de Entorno (¡CRÍTICO!) ---
+# Nunca subas tus llaves API o credenciales de DB
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Excepto el ejemplo para que otros sepan qué variables usar
+!.env.example
 
-# Editor directories and files
+# --- Editor: VS Code ---
 .vscode/*
 !.vscode/extensions.json
-.idea
+!.vscode/settings.json
+!.vscode/launch.json
+
+# --- Editor: IntelliJ / WebStorm ---
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# --- Sistema Operativo ---
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+desktop.ini
+
+# --- Otros (Cache y Tests) ---
+.eslintcache
+.stylelintcache
+.vite/
+.vercel
+.next/
+coverage/

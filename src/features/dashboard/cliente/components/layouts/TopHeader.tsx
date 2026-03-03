@@ -1,4 +1,4 @@
-import { Search, Menu, NotebookIcon } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import { useAuth } from "../../../../auth/context/useAuth";
 
 interface TopHeaderProps {
@@ -34,11 +34,6 @@ export const TopHeader = ({ onMenuClick }: TopHeaderProps) => {
 
             {/* Actions */}
             <div className="flex items-center gap-4 ml-4">
-                <button className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-surface-darker text-gray-400 hover:text-primary transition-colors border border-gray-100 dark:border-gray-800">
-                    <NotebookIcon size={20} />
-                    <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-surface-dark animate-pulse"></span>
-                </button>
-
                 <div className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-800">
                     <div className="text-right hidden lg:block">
                         <p className="text-sm font-bold text-gray-900 dark:text-white">{nombre}</p>

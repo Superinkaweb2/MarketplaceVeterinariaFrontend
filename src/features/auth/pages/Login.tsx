@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { PawPrint, Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -66,8 +66,12 @@ export const Login = () => {
         <div className="relative z-10 flex flex-col justify-end p-16 h-full w-full">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6 text-white">
-              <PawPrint size={48} className="text-primary" strokeWidth={2.5} />
-              <span className="text-4xl font-bold tracking-tight">VetSaaS</span>
+              <img 
+                src="/LOGO HUELLA360_logo primario.png" 
+                alt="Logo Huella360" 
+                className="h-12 w-auto object-contain"
+              />
+              <span className="text-4xl font-bold tracking-tight">Huella360</span>
             </div>
             <blockquote className="text-white text-2xl font-medium leading-relaxed max-w-lg italic">
               "El ecosistema más eficiente para profesionales modernos del
@@ -92,8 +96,12 @@ export const Login = () => {
         {/* Logo móvil */}
         <div className="lg:hidden mb-12">
           <div className="flex items-center gap-2 text-slate-900 dark:text-white">
-            <PawPrint size={32} className="text-primary" />
-            <span className="text-2xl font-bold">VetSaaS</span>
+            <img 
+              src="/LOGO HUELLA360_logo primario.png" 
+              alt="Logo Huella360" 
+              className="h-8 w-auto object-contain"
+            />
+            <span className="text-2xl font-bold">Huella360</span>
           </div>
         </div>
 

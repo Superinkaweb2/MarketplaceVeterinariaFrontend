@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { SidebarUser } from "../SidebarUser";
 import * as LucideIcons from "lucide-react";
-import { PawPrint, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 const MENU_ITEMS = [
   {
@@ -58,11 +58,13 @@ export const Sidebar = () => {
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-linear-to-br from-primary to-primary-dark flex items-center justify-center text-white">
-              <PawPrint size={18} strokeWidth={2.5} />
-            </div>
+            <img 
+              src="/LOGO HUELLA60_logo primario.png" 
+              alt="Logo Huella360" 
+              className="h-8 w-auto object-contain"
+            />
             <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white">
-              VetSaaS
+              Huella360
             </span>
           </div>
         </div>

@@ -296,7 +296,7 @@ export const DashboardHome = () => {
           <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                Máss Vendidos
+                Más Vendidos
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">Total ventas histórico</p>
             </div>

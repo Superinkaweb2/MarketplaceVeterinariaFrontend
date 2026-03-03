@@ -47,8 +47,19 @@ export const SubscriptionAdminPage = () => {
         });
 
         if (result.isConfirmed) {
-            // TODO: Implementar toggle en backend si es necesario
-            Swal.fire('Proximamente', 'Esta función se habilitará pronto.', 'info');
+            try {
+                await subscriptionService.togglePlanStatus(plan.id);
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: `El plan ha sido ${plan.activo ? 'desactivado' : 'activado'} correctamente.`,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                fetchPlans();
+            } catch (error) {
+                Swal.fire('Error', 'No se pudo cambiar el estado del plan.', 'error');
+            }
         }
     };
 

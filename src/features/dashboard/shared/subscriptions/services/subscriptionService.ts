@@ -37,5 +37,20 @@ export const subscriptionService = {
             params: { empresaId, planId }
         });
         return response.data.data;
+    },
+
+    /**
+     * Genera una preferencia de pago en Mercado Pago para un plan específico.
+     */
+    async createSubscriptionCheckout(planId: number): Promise<{ preferenceId: string }> {
+        const { data } = await api.post<ApiResponse<{ preferenceId: string }>>(`${BASE_URL}/checkout/${planId}`);
+        return data.data;
+    },
+
+    /**
+     * Alterna el estado activo/inactivo de un plan (Solo Admin).
+     */
+    async togglePlanStatus(planId: number): Promise<void> {
+        await api.patch(`${BASE_URL}/plans/${planId}/toggle`);
     }
 };

@@ -9,6 +9,12 @@ import { Footer } from "./components/layouts/Footer";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RequiresProfile } from "./components/RequiresProfile";
 import Home from "./pages/Home";
+import { SobreNosotros } from "./pages/SobreNosotros";
+import { Empleos } from "./pages/Empleos";
+import { Blog } from "./pages/Blog";
+import { Contacto } from "./pages/Contacto";
+import { Privacidad } from "./pages/Privacidad";
+import { Terminos } from "./pages/Terminos";
 import { Marketplace } from "./features/marketplace/pages/Marketplace";
 import { ProductDetails } from "./features/marketplace/pages/ProductDetails";
 import { CheckoutPage } from "./features/marketplace/pages/CheckoutPage";
@@ -31,6 +37,7 @@ import { ServiciosPage } from "./features/dashboard/empresa/pages/ServiciosPage"
 import { EquipoPage } from "./features/dashboard/empresa/pages/EquipoPage";
 import { FacturacionPage } from "./features/dashboard/empresa/pages/FacturacionPage";
 import { MySubscriptionPage } from "./features/dashboard/empresa/pages/MySubscriptionPage";
+import { PaymentSuccessPage as PaymentSuccessPageEmpresa } from "./features/dashboard/empresa/pages/PaymentSuccessPage";
 
 // Portal Admin
 import { EmpresasPage } from "./features/dashboard/admin/pages/EmpresasPage";
@@ -108,6 +115,7 @@ function App() {
                 <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
                 <Route path="configuracion" element={<EmpresaConfigPage />} />
                 <Route path="oauth/mercadopago" element={<OAuthCallbackPage />} />
+                <Route path="pago-exitoso" element={<PaymentSuccessPageEmpresa />} />
               </Route>
             </Route>
           </Route>
@@ -148,6 +156,12 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/home" element={<Navigate to="/" replace />} />
+                    <Route path="/sobre-nosotros" element={<SobreNosotros />} />
+                    <Route path="/empleos" element={<Empleos />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/contacto" element={<Contacto />} />
+                    <Route path="/privacidad" element={<Privacidad />} />
+                    <Route path="/terminos" element={<Terminos />} />
                     <Route
                       path="/marketplace/*"
                       element={

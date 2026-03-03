@@ -5,7 +5,6 @@ export const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Interceptor de Solicitud: Inyectar Token automáticamente
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
 
@@ -28,8 +27,6 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-
-// Interceptor de Respuesta: Manejar Expiración de Token (401/403)
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -39,8 +36,9 @@ api.interceptors.response.use(
         const isAuthRequest = url.includes("/auth/login") || url.includes("/auth/register");
 
         if ((status === 401 || status === 403) && !isAuthRequest) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("userRole");
+            ["token", "userRole", "empresaId", "userNombre", "perfilCompleto"].forEach((k) =>
+                localStorage.removeItem(k)
+            );
 
             await Swal.fire({
                 icon: "warning",

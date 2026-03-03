@@ -11,7 +11,8 @@ import {
     ShieldCheck,
     Mail,
     Phone,
-    MapPin
+    MapPin,
+    AlertCircle
 } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { api } from "../../../../shared/http/api";
@@ -256,6 +257,23 @@ export const EmpresaConfigPage = () => {
                                 </div>
                             </div>
 
+                            {import.meta.env.VITE_MP_PUBLIC_KEY?.startsWith("TEST-") && (
+                                <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 p-4 rounded-2xl mb-6 flex gap-4 items-center">
+                                    <div className="bg-blue-600 p-2 rounded-xl text-white">
+                                        <AlertCircle size={20} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Modo Sandbox</span>
+                                            <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">Entorno de Pruebas Activo</span>
+                                        </div>
+                                        <p className="text-sm text-blue-600/80 dark:text-blue-300/80">
+                                            Se detectaron credenciales de prueba. Puedes usar las tarjetas ficticias de Mercado Pago para simular pagos sin costo real.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-4 rounded-2xl mb-8 flex gap-4">
                                 <ShieldCheck className="text-amber-600 dark:text-amber-500 shrink-0" size={24} />
                                 <div className="text-sm text-amber-800 dark:text-amber-300">
@@ -273,7 +291,8 @@ export const EmpresaConfigPage = () => {
                                     onClick={() => {
                                         const clientId = import.meta.env.VITE_MP_CLIENT_ID || "TU_CLIENT_ID_AQUI";
                                         const redirectUri = window.location.origin + "/portal/empresa/oauth/mercadopago";
-                                        const mpUrl = `https://auth.mercadopago.com.pe/authorization?client_id=${clientId}&response_type=code&platform_id=mp&redirect_uri=${encodeURIComponent(redirectUri)}`;
+                                        // Usamos el dominio global .com para mayor compatibilidad
+                                        const mpUrl = `https://auth.mercadopago.com/authorization?client_id=${clientId}&response_type=code&platform_id=mp&redirect_uri=${encodeURIComponent(redirectUri)}`;
                                         window.location.href = mpUrl;
                                     }}
                                     className="w-full sm:w-auto px-8 py-3 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
@@ -295,23 +314,29 @@ export const EmpresaConfigPage = () => {
                             <form onSubmit={handleSubmitMP(onUpdateMP)} className="space-y-6 max-w-2xl">
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Public Key (Producción)</label>
+                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex justify-between">
+                                            Public Key
+                                            <span className="text-[10px] text-slate-400 font-normal italic uppercase">Ej: TEST-... o APP_USR-...</span>
+                                        </label>
                                         <input
                                             {...registerMP("mpPublicKey")}
                                             type="text"
                                             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none font-mono text-sm"
-                                            placeholder="APP_USR-..."
+                                            placeholder="TEST-XXX..."
                                         />
                                         {errorsMP.mpPublicKey && <p className="text-xs text-red-500">{errorsMP.mpPublicKey.message}</p>}
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Access Token (Producción)</label>
+                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex justify-between">
+                                            Access Token
+                                            <span className="text-[10px] text-slate-400 font-normal italic uppercase text-right">Tu token privado de seguridad</span>
+                                        </label>
                                         <input
                                             {...registerMP("mpAccessToken")}
                                             type="password"
                                             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none font-mono text-sm"
-                                            placeholder="APP_USR-..."
+                                            placeholder="TEST-XXX..."
                                         />
                                         {errorsMP.mpAccessToken && <p className="text-xs text-red-500">{errorsMP.mpAccessToken.message}</p>}
                                     </div>

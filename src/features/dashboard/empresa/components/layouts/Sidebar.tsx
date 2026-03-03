@@ -1,7 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../auth/context/useAuth";
 import {
-  PawPrint,
   LayoutDashboard,
   Stethoscope,
   Package,
@@ -53,12 +52,14 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             {/* Branding Header con Botón de Cierre para Móvil */}
             <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white shrink-0">
-                  <PawPrint size={24} />
-                </div>
+                <img 
+                  src="/LOGO HUELLA360_logo primario.png" 
+                  alt="Logo Huella360" 
+                  className="h-8 w-auto object-contain shrink-0"
+                />
                 <div className="flex flex-col">
                   <h1 className="text-slate-900 dark:text-white text-base font-bold leading-none">
-                    VetSaaS
+                    Huella360
                   </h1>
                   <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1">
                     Business Admin
@@ -117,8 +118,6 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 label="Facturación"
                 to="/portal/empresa/facturacion"
               />
-
-
             </nav>
           </div>
 
