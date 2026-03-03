@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle2, ArrowRight, CreditCard, LayoutDashboard } from 'lucide-react';
+import { CheckCircle2, ArrowRight, LayoutDashboard } from 'lucide-react';
 import { Button } from '../../../../components/ui/Button';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
