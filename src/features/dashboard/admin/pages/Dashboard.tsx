@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { StatsGrid } from "../components/StatsGrid";
 import { ActivityTable } from "../components/ActivityTable";
-import { FileDown, UserPlus, BarChart3, LineChart } from "lucide-react";
+import { BarChart3, LineChart } from "lucide-react";
 import { adminService } from "../services/adminService";
 import type { AdminStats } from "../types/admin.types";
 
@@ -26,17 +26,6 @@ export default function Dashboard() {
           <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
             Vista global de la plataforma <span className="text-primary font-medium">VetSaaS</span>.
           </p>
-        </div>
-
-        <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-3">
-          <button className="inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-xl shadow-sm text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-surface-darker">
-            <FileDown size={18} className="mr-2 opacity-70" />
-            Exportar
-          </button>
-          <button className="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-primary hover:bg-primary-dark transition-all active:scale-95">
-            <UserPlus size={18} className="mr-2" />
-            Invitar Usuario
-          </button>
         </div>
       </div>
 
