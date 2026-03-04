@@ -12,6 +12,7 @@ import {
   Heart,
   Inbox,
   Zap,
+  Search,
 } from "lucide-react";
 
 
@@ -52,9 +53,9 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             {/* Branding Header con Botón de Cierre para Móvil */}
             <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-3">
-                <img 
-                  src="/LOGO HUELLA360_logo primario.png" 
-                  alt="Logo Huella360" 
+                <img
+                  src="/LOGO HUELLA360_logo primario.png"
+                  alt="Logo Huella360"
                   className="h-8 w-auto object-contain shrink-0"
                 />
                 <div className="flex flex-col">
@@ -107,6 +108,11 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 icon={<Users size={20} />}
                 label="Equipo"
                 to="/portal/empresa/equipo"
+              />
+              <NavItem
+                icon={<Search size={20} />}
+                label="Talento"
+                to="/portal/empresa/talento"
               />
               <NavItem
                 icon={<Zap size={20} />}

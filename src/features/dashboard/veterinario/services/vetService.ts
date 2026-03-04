@@ -48,4 +48,13 @@ export const vetService = {
   rejectInvitation: async (staffId: number): Promise<void> => {
     await api.put(`/companies/staff/invitations/${staffId}/reject`);
   },
+
+  /**
+   * Actualiza el perfil del veterinario.
+   * Endpoint: PUT /veterinarians/profile
+   */
+  updateProfile: async (profile: Partial<VetProfile>): Promise<VetProfile> => {
+    const { data } = await api.put<ApiResponse<VetProfile>>("/veterinarians/profile", profile);
+    return data.data;
+  },
 };

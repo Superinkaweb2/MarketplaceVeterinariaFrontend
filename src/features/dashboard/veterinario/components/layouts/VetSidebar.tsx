@@ -1,7 +1,6 @@
 import { NavLink, Link } from "react-router-dom";
 import { useAuth } from "../../../../auth/context/useAuth";
 import {
-    PawPrint,
     LayoutDashboard,
     Stethoscope,
     Mail,
@@ -9,11 +8,15 @@ import {
     LogOut,
     ChevronLeft,
     X,
+    Clock,
+    PawPrint,
 } from "lucide-react";
 import { useState } from "react";
 
 const MENU_ITEMS = [
     { label: "Dashboard", icon: LayoutDashboard, href: "/portal/veterinario", end: true },
+    { label: "Agenda", icon: Clock, href: "/portal/veterinario/citas" },
+    { label: "Pacientes", icon: PawPrint, href: "/portal/veterinario/pacientes" },
     { label: "Mis Servicios", icon: Stethoscope, href: "/portal/veterinario/servicios" },
     { label: "Invitaciones", icon: Mail, href: "/portal/veterinario/invitaciones" },
 ];
@@ -50,20 +53,26 @@ export const VetSidebar = ({ isMobileOpen, setMobileOpen }: VetSidebarProps) => 
                 <div className="h-16 flex items-center justify-between px-6 shrink-0 border-b border-gray-100 dark:border-gray-800">
                     {!isCollapsed && (
                         <Link to="/" className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white shadow-md shadow-teal-500/20">
-                                <PawPrint size={18} strokeWidth={2.5} />
-                            </div>
+                            <img
+                                src="/LOGO HUELLA360_logo primario.png"
+                                alt="Logo Huella360"
+                                className="h-8 w-auto object-contain shrink-0"
+                            />
                             <div className="flex flex-col">
                                 <span className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-white">
-                                    VetSaaS
+                                    Huella360
                                 </span>
                                 <span className="text-[10px] font-medium text-slate-400 -mt-0.5">Veterinario</span>
                             </div>
                         </Link>
                     )}
                     {isCollapsed && (
-                        <div className="w-8 h-8 rounded bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center mx-auto text-white shadow-md shadow-teal-500/20">
-                            <PawPrint size={18} strokeWidth={2.5} />
+                        <div className="flex items-center justify-center mx-auto">
+                            <img
+                                src="/favicon-03.png"
+                                alt="Huella360"
+                                className="h-7 w-auto object-contain"
+                            />
                         </div>
                     )}
                     {/* Mobile close */}

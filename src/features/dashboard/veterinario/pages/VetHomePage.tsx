@@ -145,10 +145,10 @@ export const VetHomePage = () => {
 
                             {/* Stats row */}
                             <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <StatCard icon={Stethoscope} label="Especialidad" value={profile.especialidad || "General"} />
-                                <StatCard icon={Award} label="Colegiatura" value={profile.numeroColegiatura} />
-                                <StatCard icon={Clock} label="Experiencia" value={`${profile.aniosExperiencia} años`} />
-                                <StatCard icon={Mail} label="Invitaciones" value={`${invitations.length} pendientes`} />
+                                <StatCard icon={Stethoscope} label="Especialidad" value={profile.especialidad || "General"} color="text-teal-500" />
+                                <StatCard icon={Award} label="Colegiatura" value={profile.numeroColegiatura} color="text-indigo-500" />
+                                <StatCard icon={Clock} label="Experiencia" value={`${profile.aniosExperiencia} años`} color="text-emerald-500" />
+                                <StatCard icon={Mail} label="Invitaciones" value={`${invitations.length} independientes`} color="text-amber-500" />
                             </div>
 
                             {profile.biografia && (
@@ -226,12 +226,14 @@ export const VetHomePage = () => {
 
 /* ── Subcomponent ─────────────────────────────────────────── */
 
-const StatCard = ({ icon: Icon, label, value }: { icon: typeof Stethoscope; label: string; value: string }) => (
-    <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-        <Icon size={18} className="text-teal-500 shrink-0" />
+const StatCard = ({ icon: Icon, label, value, color = "text-teal-500" }: { icon: any; label: string; value: string; color?: string }) => (
+    <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 hover:border-teal-500/20 transition-all">
+        <div className={`p-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm ${color}`}>
+            <Icon size={18} />
+        </div>
         <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
-            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{value}</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{value}</p>
         </div>
     </div>
 );

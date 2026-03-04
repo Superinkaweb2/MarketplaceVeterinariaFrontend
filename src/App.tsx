@@ -38,6 +38,7 @@ import { EquipoPage } from "./features/dashboard/empresa/pages/EquipoPage";
 import { FacturacionPage } from "./features/dashboard/empresa/pages/FacturacionPage";
 import { MySubscriptionPage } from "./features/dashboard/empresa/pages/MySubscriptionPage";
 import { PaymentSuccessPage as PaymentSuccessPageEmpresa } from "./features/dashboard/empresa/pages/PaymentSuccessPage";
+import { TalentoPage } from "./features/dashboard/empresa/pages/TalentoPage";
 
 // Portal Admin
 import { EmpresasPage } from "./features/dashboard/admin/pages/EmpresasPage";
@@ -58,6 +59,9 @@ import DashboardVeterinario from "./features/dashboard/veterinario/pages/Dashboa
 import { VetHomePage } from "./features/dashboard/veterinario/pages/VetHomePage";
 import { VetServiciosPage } from "./features/dashboard/veterinario/pages/VetServiciosPage";
 import { InvitacionesPage } from "./features/dashboard/veterinario/pages/InvitacionesPage";
+import { VetConfiguracionPage } from "./features/dashboard/veterinario/pages/VetConfiguracionPage";
+import { VetCitasPage } from "./features/dashboard/veterinario/pages/VetCitasPage";
+import { VetPacientesPage } from "./features/dashboard/veterinario/pages/VetPacientesPage";
 
 
 function App() {
@@ -114,6 +118,7 @@ function App() {
                 <Route path="adopciones" element={<AdopcionesPage />} />
                 <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
                 <Route path="configuracion" element={<EmpresaConfigPage />} />
+                <Route path="talento" element={<TalentoPage />} />
                 <Route path="oauth/mercadopago" element={<OAuthCallbackPage />} />
                 <Route path="pago-exitoso" element={<PaymentSuccessPageEmpresa />} />
               </Route>
@@ -125,9 +130,11 @@ function App() {
             <Route element={<RequiresProfile />}>
               <Route path="/portal/veterinario" element={<DashboardVeterinario />}>
                 <Route index element={<VetHomePage />} />
+                <Route path="citas" element={<VetCitasPage />} />
+                <Route path="pacientes" element={<VetPacientesPage />} />
                 <Route path="servicios" element={<VetServiciosPage />} />
                 <Route path="invitaciones" element={<InvitacionesPage />} />
-                <Route path="configuracion" element={<div className="p-8 text-xl text-slate-500 font-medium">Configuración en Construcción...</div>} />
+                <Route path="configuracion" element={<VetConfiguracionPage />} />
               </Route>
             </Route>
           </Route>
