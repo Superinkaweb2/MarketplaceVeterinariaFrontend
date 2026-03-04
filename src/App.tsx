@@ -39,6 +39,7 @@ import { FacturacionPage } from "./features/dashboard/empresa/pages/FacturacionP
 import { MySubscriptionPage } from "./features/dashboard/empresa/pages/MySubscriptionPage";
 import { PaymentSuccessPage as PaymentSuccessPageEmpresa } from "./features/dashboard/empresa/pages/PaymentSuccessPage";
 import { TalentoPage } from "./features/dashboard/empresa/pages/TalentoPage";
+import { PacientesPage as EmpresaPacientesPage } from "./features/dashboard/empresa/pages/PacientesPage";
 
 // Portal Admin
 import { EmpresasPage } from "./features/dashboard/admin/pages/EmpresasPage";
@@ -118,6 +119,7 @@ function App() {
                 <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
                 <Route path="configuracion" element={<EmpresaConfigPage />} />
                 <Route path="talento" element={<TalentoPage />} />
+                <Route path="pacientes" element={<EmpresaPacientesPage />} />
                 <Route path="oauth/mercadopago" element={<OAuthCallbackPage />} />
                 <Route path="pago-exitoso" element={<PaymentSuccessPageEmpresa />} />
               </Route>

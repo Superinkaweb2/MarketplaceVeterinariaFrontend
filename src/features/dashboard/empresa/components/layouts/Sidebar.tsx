@@ -13,6 +13,7 @@ import {
   Inbox,
   Zap,
   Search,
+  PawPrint,
 } from "lucide-react";
 
 
@@ -88,6 +89,11 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 icon={<Stethoscope size={20} />}
                 label="Servicios"
                 to="/portal/empresa/servicios"
+              />
+              <NavItem
+                icon={<PawPrint size={20} />}
+                label="Pacientes"
+                to="/portal/empresa/pacientes"
               />
               <NavItem
                 icon={<Heart size={20} />}
