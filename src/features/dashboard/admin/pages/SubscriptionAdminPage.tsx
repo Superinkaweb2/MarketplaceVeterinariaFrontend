@@ -5,7 +5,6 @@ import {
     Settings2,
     Trash2,
     AlertTriangle,
-    Users2,
     Package,
     CheckCircle2,
     XCircle
@@ -82,8 +81,8 @@ export const SubscriptionAdminPage = () => {
             {/* KPI OverView */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <KpiCard label="Planes Activos" value={plans.filter(p => p.activo).length} icon={<Shield className="text-emerald-500" />} />
-                <KpiCard label="Empresas con Plan" value="42" icon={<Users2 className="text-blue-500" />} />
-                <KpiCard label="Ingreso Proyectado" value="S/ 2,450" icon={<Package className="text-amber-500" />} />
+                <KpiCard label="Total Planes" value={plans.length} icon={<Package className="text-blue-500" />} />
+                <KpiCard label="Planes Inactivos" value={plans.filter(p => !p.activo).length} icon={<XCircle className="text-rose-500" />} />
                 <KpiCard label="Alertas" value="0" icon={<AlertTriangle className="text-primary" />} />
             </div>
 

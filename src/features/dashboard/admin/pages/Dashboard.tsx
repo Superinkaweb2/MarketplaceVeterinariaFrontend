@@ -1,19 +1,30 @@
+import { useEffect, useState } from "react";
 import { StatsGrid } from "../components/StatsGrid";
 import { ActivityTable } from "../components/ActivityTable";
 import { FileDown, UserPlus, BarChart3, LineChart } from "lucide-react";
+import { adminService } from "../services/adminService";
+import type { AdminStats } from "../types/admin.types";
 
 export default function Dashboard() {
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    adminService.getStats()
+      .then(setStats)
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="space-y-8">
       {/* 1. Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            Dashboard Overview
+            Panel de Administración
           </h1>
           <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
-            Bienvenido de nuevo. Esto es lo que sucede hoy en{" "}
-            <span className="text-primary font-medium">VetSaaS</span>.
+            Vista global de la plataforma <span className="text-primary font-medium">VetSaaS</span>.
           </p>
         </div>
 
@@ -30,7 +41,7 @@ export default function Dashboard() {
       </div>
 
       {/* 2. Stats Grid */}
-      <StatsGrid />
+      <StatsGrid stats={stats} loading={loading} />
 
       {/* 3. Charts Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

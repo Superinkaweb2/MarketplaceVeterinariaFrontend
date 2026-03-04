@@ -16,7 +16,7 @@ export const adminService = {
   },
 
   getUsers: async (page = 0, size = 10): Promise<PageResponse<AdminUser>> => {
-    const { data } = await api.get<ApiResponse<PageResponse<AdminUser>>>("/clients", {
+    const { data } = await api.get<ApiResponse<PageResponse<AdminUser>>>("/admin/users", {
       params: { page, size }
     });
     return data.data;

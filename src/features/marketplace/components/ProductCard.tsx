@@ -11,13 +11,13 @@ export const ProductCard = ({ product }: { product: Product }) => {
     approved: "bg-green-100 text-green-700 border-green-200",
     adoption: "bg-orange-100 text-orange-700 border-orange-200"
   };
-
   const imageUrl = product.imagenes && product.imagenes.length > 0
     ? product.imagenes[0]
-    : "https://via.placeholder.com/300?text=Sin+Imagen";
+    : null;
 
   const isService = product.categoriaId === -2;
   const isAdoption = product.categoriaId === -1;
+
 
   const cardContent = (
     <>
@@ -28,8 +28,16 @@ export const ProductCard = ({ product }: { product: Product }) => {
           </span>
         </div>
       )}
-      <div className="h-48 bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6 bg-cover bg-center transition-transform group-hover:scale-105" style={{ backgroundImage: `url(${imageUrl})` }}>
-        {!imageUrl && <span className="material-symbols-outlined text-4xl text-slate-300">image</span>}
+      <div
+        className="h-48 bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6 bg-cover bg-center transition-transform group-hover:scale-105"
+        style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : {}}
+      >
+        {!imageUrl && (
+          <div className="flex flex-col items-center text-slate-300">
+            <span className="material-symbols-outlined text-4xl mb-2">image</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider">Sin Imagen</span>
+          </div>
+        )}
       </div>
       <div className="p-4 flex flex-col flex-1">
         <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-1 line-clamp-2 hover:text-blue-600 transition-colors">{product.nombre}</h3>

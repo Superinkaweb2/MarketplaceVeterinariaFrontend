@@ -28,12 +28,12 @@ export const UsuariosPage = () => {
 
   const handleToggleStatus = async (user: AdminUser) => {
     const result = await Swal.fire({
-      title: user.activo ? '¿Desactivar usuario?' : '¿Activar usuario?',
-      text: `El usuario ${user.email} cambiará su estado.`,
+      title: user.estado ? '¿Desactivar usuario?' : '¿Activar usuario?',
+      text: `El usuario ${user.correo} cambiará su estado.`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: user.activo ? '#ef4444' : '#10b981',
-      confirmButtonText: user.activo ? 'Sí, desactivar' : 'Sí, activar',
+      confirmButtonColor: user.estado ? '#ef4444' : '#10b981',
+      confirmButtonText: user.estado ? 'Sí, desactivar' : 'Sí, activar',
       cancelButtonText: 'Cancelar',
       customClass: {
         popup: 'rounded-2xl',
@@ -45,8 +45,8 @@ export const UsuariosPage = () => {
     if (result.isConfirmed) {
       try {
         await adminService.toggleUserStatus(user.id);
-        setUsers(users.map(u => 
-          u.id === user.id ? { ...u, activo: !u.activo } : u
+        setUsers(users.map(u =>
+          u.id === user.id ? { ...u, estado: !u.estado } : u
         ));
         Swal.fire({
           title: '¡Éxito!',
@@ -66,12 +66,12 @@ export const UsuariosPage = () => {
   };
 
   const filteredUsers = users.filter(u => {
-  const name = u.nombre?.toLowerCase() ?? "";
-  const email = u.email?.toLowerCase() ?? "";
-  const term = searchTerm.toLowerCase();
+    const name = u.nombre?.toLowerCase() ?? "";
+    const correo = u.correo?.toLowerCase() ?? "";
+    const term = searchTerm.toLowerCase();
 
-  return name.includes(term) || email.includes(term);
-});
+    return name.includes(term) || correo.includes(term);
+  });
 
   return (
     <div className="h-full flex flex-col gap-6 overflow-hidden">
@@ -143,11 +143,11 @@ export const UsuariosPage = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="h-9 w-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 shrink-0 border border-slate-200 dark:border-slate-700">
-                             <Mail size={16} />
+                            <Mail size={16} />
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{user.nombre}</p>
-                            <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                            <p className="text-xs text-slate-500 truncate">{user.correo}</p>
                           </div>
                         </div>
                       </td>
@@ -161,26 +161,24 @@ export const UsuariosPage = () => {
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${
-                          user.activo 
-                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400'
-                            : 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/10 dark:text-red-400'
-                        }`}>
-                          {user.activo ? 'ACTIVO' : 'INACTIVO'}
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${user.estado
+                          ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400'
+                          : 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/10 dark:text-red-400'
+                          }`}>
+                          {user.estado ? 'ACTIVO' : 'INACTIVO'}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button 
-                            title={user.activo ? "Desactivar" : "Activar"} 
+                          <button
+                            title={user.estado ? "Desactivar" : "Activar"}
                             onClick={() => handleToggleStatus(user)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              user.activo 
-                                ? 'text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10' 
-                                : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
-                            }`}
+                            className={`p-2 rounded-lg transition-colors ${user.estado
+                              ? 'text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10'
+                              : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
+                              }`}
                           >
-                            {user.activo ? <Ban size={18} /> : <CheckCircle size={18} />}
+                            {user.estado ? <Ban size={18} /> : <CheckCircle size={18} />}
                           </button>
                         </div>
                       </td>
@@ -196,32 +194,31 @@ export const UsuariosPage = () => {
             {filteredUsers.map((user) => (
               <div key={user.id} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 space-y-4">
                 <div className="flex items-center gap-3">
-                   <div className="h-10 w-10 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-primary">
+                  <div className="h-10 w-10 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-primary">
                     <Mail size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">{user.nombre}</h3>
-                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                    <p className="text-xs text-slate-500 truncate">{user.correo}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
                     <Shield size={10} />
                     {user.rol}
                   </span>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
-                    user.activo ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {user.activo ? 'ACTIVO' : 'INACTIVO'}
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${user.estado ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                    {user.estado ? 'ACTIVO' : 'INACTIVO'}
                   </span>
                 </div>
                 <div className="pt-3 border-t border-slate-200/60 dark:border-slate-700">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => handleToggleStatus(user)}
-                    className={`w-full text-xs py-2 h-auto rounded-lg ${user.activo ? 'text-red-600 hover:bg-red-50' : 'text-emerald-600 hover:bg-emerald-50'}`}
+                    className={`w-full text-xs py-2 h-auto rounded-lg ${user.estado ? 'text-red-600 hover:bg-red-50' : 'text-emerald-600 hover:bg-emerald-50'}`}
                   >
-                    {user.activo ? 'Desactivar Usuario' : 'Activar Usuario'}
+                    {user.estado ? 'Desactivar Usuario' : 'Activar Usuario'}
                   </Button>
                 </div>
               </div>
