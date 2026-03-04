@@ -12,15 +12,17 @@ import {
     Mail,
     Phone,
     MapPin,
-    AlertCircle
+    AlertCircle,
+    Camera,
+    Image as ImageIcon
 } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { api } from "../../../../shared/http/api";
 import Swal from "sweetalert2";
 
 const generalDataSchema = z.object({
-    nombre: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
-    email: z.string().email("Email inválido"),
+    nombreComercial: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
+    emailContacto: z.string().email("Email inválido"),
     telefono: z.string().min(7, "Teléfono inválido"),
     direccion: z.string().min(5, "La dirección es muy corta"),
     descripcion: z.string().optional(),
@@ -38,12 +40,19 @@ type MercadoPagoValues = z.infer<typeof mercadopagoSchema>;
 export const EmpresaConfigPage = () => {
     const [activeTab, setActiveTab] = useState<"general" | "pago">("general");
     const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Image states
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [bannerFile, setBannerFile] = useState<File | null>(null);
 
     const {
         register: registerGeneral,
         handleSubmit: handleSubmitGeneral,
         reset: resetGeneral,
-        formState: { errors: errorsGeneral, isSubmitting: isSubmittingGeneral },
+        formState: { errors: errorsGeneral },
     } = useForm<GeneralDataValues>({
         resolver: zodResolver(generalDataSchema),
     });
@@ -65,13 +74,18 @@ export const EmpresaConfigPage = () => {
             setIsLoading(true);
             const response = await api.get("/companies/me");
             const data = response.data.data;
+
             resetGeneral({
-                nombre: data.nombre,
-                email: data.email,
+                nombreComercial: data.nombreComercial,
+                emailContacto: data.emailContacto,
                 telefono: data.telefono,
                 direccion: data.direccion,
                 descripcion: data.descripcion || "",
             });
+
+            if (data.logoUrl) setLogoPreview(data.logoUrl);
+            if (data.bannerUrl) setBannerPreview(data.bannerUrl);
+
         } catch (error) {
             console.error("Error al cargar datos de empresa:", error);
         } finally {
@@ -80,10 +94,18 @@ export const EmpresaConfigPage = () => {
     };
 
     const onUpdateGeneral = async (data: GeneralDataValues) => {
+        setIsSaving(true);
         try {
             const formData = new FormData();
             // El backend espera el objeto DTO en una parte llamada "data" como JSON
             formData.append("data", new Blob([JSON.stringify(data)], { type: "application/json" }));
+
+            if (logoFile) {
+                formData.append("logo", logoFile);
+            }
+            if (bannerFile) {
+                formData.append("banner", bannerFile);
+            }
 
             await api.put("/companies", formData, {
                 headers: {
@@ -98,9 +120,17 @@ export const EmpresaConfigPage = () => {
                 timer: 2000,
                 showConfirmButton: false,
             });
+
+            // Refresh to get new signed URLs if any
+            fetchCompanyData();
+            setLogoFile(null);
+            setBannerFile(null);
+
         } catch (error) {
             console.error("Error al actualizar empresa:", error);
             Swal.fire("Error", "No se pudieron guardar los cambios.", "error");
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -175,8 +205,83 @@ export const EmpresaConfigPage = () => {
                                 </div>
                             </div>
 
-                            <form onSubmit={handleSubmitGeneral(onUpdateGeneral)} className="space-y-6">
+                            <form onSubmit={handleSubmitGeneral(onUpdateGeneral)} className="space-y-8">
+                                {/* Visual Identity Section */}
+                                <div className="space-y-6">
+                                    <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+                                        Identidad Visual
+                                    </div>
+
+                                    {/* Banner Upload */}
+                                    <div className="relative group rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 h-48">
+                                        {bannerPreview ? (
+                                            <img src={bannerPreview} alt="Banner" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                                                <ImageIcon size={48} strokeWidth={1} />
+                                                <span className="text-sm mt-2">Banner de la veterinaria</span>
+                                            </div>
+                                        )}
+                                        <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                accept="image/*"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (file) {
+                                                        setBannerFile(file);
+                                                        setBannerPreview(URL.createObjectURL(file));
+                                                    }
+                                                }}
+                                            />
+                                            <div className="flex flex-col items-center text-white">
+                                                <Camera size={24} className="mb-1" />
+                                                <span className="text-sm font-bold">Cambiar Banner</span>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    {/* Logo Upload */}
+                                    <div className="flex flex-col sm:flex-row items-center gap-6">
+                                        <div className="relative group w-32 h-32 rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 shrink-0">
+                                            {logoPreview ? (
+                                                <img src={logoPreview} alt="Logo" className="w-full h-full object-contain p-2" />
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                                                    <Building2 size={32} strokeWidth={1} />
+                                                </div>
+                                            )}
+                                            <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) {
+                                                            setLogoFile(file);
+                                                            setLogoPreview(URL.createObjectURL(file));
+                                                        }
+                                                    }}
+                                                />
+                                                <Camera size={20} className="text-white" />
+                                            </label>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <h4 className="font-bold text-slate-900 dark:text-white">Logo de la Veterinaria</h4>
+                                            <p className="text-sm text-slate-500">Se recomienda una imagen cuadrada de al menos 400x400px.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="h-px bg-slate-100 dark:bg-slate-800" />
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="md:col-span-2 text-sm font-bold text-slate-400 uppercase tracking-widest">
+                                        Información de Contacto
+                                    </div>
+
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                                             Nombre de la Veterinaria
@@ -184,11 +289,11 @@ export const EmpresaConfigPage = () => {
                                         <div className="relative group">
                                             <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
                                             <input
-                                                {...registerGeneral("nombre")}
-                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                                {...registerGeneral("nombreComercial")}
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white"
                                             />
                                         </div>
-                                        {errorsGeneral.nombre && <p className="text-xs text-red-500">{errorsGeneral.nombre.message}</p>}
+                                        {errorsGeneral.nombreComercial && <p className="text-xs text-red-500">{errorsGeneral.nombreComercial.message}</p>}
                                     </div>
 
                                     <div className="space-y-2">
@@ -196,11 +301,11 @@ export const EmpresaConfigPage = () => {
                                         <div className="relative group">
                                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
                                             <input
-                                                {...registerGeneral("email")}
-                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                                {...registerGeneral("emailContacto")}
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white"
                                             />
                                         </div>
-                                        {errorsGeneral.email && <p className="text-xs text-red-500">{errorsGeneral.email.message}</p>}
+                                        {errorsGeneral.emailContacto && <p className="text-xs text-red-500">{errorsGeneral.emailContacto.message}</p>}
                                     </div>
 
                                     <div className="space-y-2">
@@ -209,7 +314,7 @@ export const EmpresaConfigPage = () => {
                                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
                                             <input
                                                 {...registerGeneral("telefono")}
-                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white"
                                             />
                                         </div>
                                         {errorsGeneral.telefono && <p className="text-xs text-red-500">{errorsGeneral.telefono.message}</p>}
@@ -221,7 +326,7 @@ export const EmpresaConfigPage = () => {
                                             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
                                             <input
                                                 {...registerGeneral("direccion")}
-                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white"
                                             />
                                         </div>
                                         {errorsGeneral.direccion && <p className="text-xs text-red-500">{errorsGeneral.direccion.message}</p>}
@@ -232,15 +337,15 @@ export const EmpresaConfigPage = () => {
                                     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Descripción / Historia</label>
                                     <textarea
                                         {...registerGeneral("descripcion")}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none resize-none h-32"
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none resize-none h-32 dark:text-white"
                                         placeholder="Cuéntanos un poco sobre tu centro..."
                                     />
                                 </div>
 
                                 <div className="flex justify-end pt-4">
-                                    <Button disabled={isSubmittingGeneral} className="gap-2 px-8">
-                                        {isSubmittingGeneral ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                                        Guardar Cambios
+                                    <Button disabled={isSaving} className="gap-2 px-10 h-12 rounded-2xl shadow-xl shadow-primary/20 font-bold transition-all active:scale-95">
+                                        {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                                        {isSaving ? "Guardando..." : "Guardar Cambios"}
                                     </Button>
                                 </div>
                             </form>
@@ -291,8 +396,10 @@ export const EmpresaConfigPage = () => {
                                     onClick={() => {
                                         const clientId = import.meta.env.VITE_MP_CLIENT_ID || "TU_CLIENT_ID_AQUI";
                                         const redirectUri = window.location.origin + "/portal/empresa/oauth/mercadopago";
-                                        // Usamos el dominio global .com para mayor compatibilidad
-                                        const mpUrl = `https://auth.mercadopago.com/authorization?client_id=${clientId}&response_type=code&platform_id=mp&redirect_uri=${encodeURIComponent(redirectUri)}`;
+
+                                        // Usamos el dominio de Perú .com.pe y quitamos platform_id si está dando problemas
+                                        const mpUrl = `https://auth.mercadopago.com.pe/authorization?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}`;
+
                                         window.location.href = mpUrl;
                                     }}
                                     className="w-full sm:w-auto px-8 py-3 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"

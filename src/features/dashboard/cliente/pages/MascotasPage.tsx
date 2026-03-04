@@ -117,10 +117,6 @@ export const MascotasPage = () => {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <button className="inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-xl shadow-sm text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-surface-darker transition-all">
-            <Search size={18} className="mr-2 opacity-70" />
-            Reportes
-          </button>
           <button
             onClick={() => {
               setSelectedPet(null);

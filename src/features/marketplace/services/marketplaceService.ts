@@ -30,8 +30,8 @@ export const marketplaceService = {
         return data.data;
     },
 
-    getPaymentLink: async (orderId: number): Promise<{ preferenceId: string; initPoint: string }> => {
-        const { data } = await api.post<ApiResponse<{ preferenceId: string; initPoint: string }>>(`/payments/checkout/${orderId}`);
+    getPaymentLink: async (orderId: number): Promise<{ preferenceId: string; initPoint: string; sandboxInitPoint: string }> => {
+        const { data } = await api.post<ApiResponse<{ preferenceId: string; initPoint: string; sandboxInitPoint: string }>>(`/payments/checkout/${orderId}`);
         return data.data;
     },
 
@@ -44,6 +44,13 @@ export const marketplaceService = {
 
     getAdoptionById: async (id: number): Promise<any> => {
         const { data } = await api.get<ApiResponse<any>>(`/adoptions/${id}`);
+        return data.data;
+    },
+
+    searchServices: async (page = 0, size = 12) => {
+        const { data } = await api.get<ApiResponse<{ content: any[] }>>("/services", {
+            params: { page, size }
+        });
         return data.data;
     }
 };

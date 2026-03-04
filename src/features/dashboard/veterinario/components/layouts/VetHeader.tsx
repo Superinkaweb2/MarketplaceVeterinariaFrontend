@@ -1,11 +1,35 @@
-import { Menu } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, User as UserIcon } from "lucide-react";
 import { ThemeToggle } from "../../../../../components/ui/ThemeToggle";
+import { useAuth } from "../../../../auth/context/useAuth";
+import { vetService } from "../../services/vetService";
+import type { VetProfile } from "../../types/vet.types";
 
 interface VetHeaderProps {
     onMenuClick: () => void;
 }
 
 export const VetHeader = ({ onMenuClick }: VetHeaderProps) => {
+    const { role } = useAuth();
+    const [profile, setProfile] = useState<VetProfile | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const data = await vetService.getMyProfile();
+                setProfile(data);
+            } catch (error) {
+                console.error("Error fetching vet profile:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchProfile();
+    }, []);
+
+    const displayName = profile ? `${profile.nombres} ${profile.apellidos}` : "Veterinario";
+
     return (
         <header className="h-14 shrink-0 bg-white dark:bg-surface-dark border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 md:px-6">
             {/* Left: Mobile menu button */}
@@ -20,7 +44,24 @@ export const VetHeader = ({ onMenuClick }: VetHeaderProps) => {
             <div className="hidden lg:block" />
 
             {/* Right: actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 pl-4 border-l border-gray-100 dark:border-gray-800">
+                    <div className="text-right hidden sm:block">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[150px]">
+                            {isLoading ? "Cargando..." : displayName}
+                        </p>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            {role || "Especialista"}
+                        </p>
+                    </div>
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary ring-2 ring-white dark:ring-surface-dark shrink-0 overflow-hidden transition-all hover:bg-primary hover:text-white">
+                        {profile?.fotoPerfilUrl ? (
+                            <img src={profile.fotoPerfilUrl} alt={displayName} className="h-full w-full object-cover" />
+                        ) : (
+                            <UserIcon size={18} />
+                        )}
+                    </div>
+                </div>
                 <ThemeToggle />
             </div>
         </header>

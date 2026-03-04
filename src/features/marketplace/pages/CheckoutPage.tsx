@@ -4,14 +4,8 @@ import { marketplaceService } from "../services/marketplaceService";
 import { useState } from "react";
 import { useAuth } from "../../auth/context/useAuth";
 
-declare global {
-    interface Window {
-        MercadoPago: any;
-    }
-}
-
 export const CheckoutPage = () => {
-    const { items, cartTotal, clearCart } = useCart();
+    const { items, cartTotal } = useCart();
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -29,19 +23,6 @@ export const CheckoutPage = () => {
         acc[empresaId].items.push(item);
         return acc;
     }, {} as Record<number, { empresaNombre: string; items: any[] }>);
-
-    const loadMercadoPago = () => {
-        return new Promise<any>((resolve) => {
-            if (window.MercadoPago) {
-                resolve(window.MercadoPago);
-                return;
-            }
-            const script = document.createElement("script");
-            script.src = "https://sdk.mercadopago.com/js/v2";
-            script.onload = () => resolve(window.MercadoPago);
-            document.body.appendChild(script);
-        });
-    };
 
     const handleCheckout = async () => {
         if (!isAuthenticated) {
@@ -85,25 +66,16 @@ export const CheckoutPage = () => {
             });
 
             // 2. Get Payment Preference
-            const { preferenceId } = await marketplaceService.getPaymentLink(orderId);
+            const { initPoint, sandboxInitPoint } = await marketplaceService.getPaymentLink(orderId);
 
-            // 3. Load & Initialize Mercado Pago
-            await loadMercadoPago();
-            const mp = new window.MercadoPago(mpPublicKey, {
-                locale: 'es-PE'
-            });
+            // 3. Redirect to Mercado Pago.
+            // IMPORTANT: sandboxInitPoint only works when the seller has TEST-type credentials.
+            // If the seller used real OAuth (APP_USR- token), we must use initPoint always.
+            // We detect TEST credentials by the public key prefix.
+            const isSandboxCredentials = mpPublicKey.startsWith("TEST-");
+            window.location.href = isSandboxCredentials ? sandboxInitPoint : initPoint;
 
-            // 4. Open Modal
-            mp.checkout({
-                preference: {
-                    id: preferenceId
-                },
-                autoOpen: true
-            });
-
-            // Clear cart after opening modal
-            clearCart();
-            setLoading(false);
+            // Note: Cart will be cleared when the user returns to the success page.
 
         } catch (err: any) {
             console.error("Checkout error:", err);

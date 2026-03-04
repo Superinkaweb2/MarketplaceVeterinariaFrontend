@@ -1,6 +1,6 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { Bell, ChevronRight, Home } from "lucide-react";
+import { ChevronRight, Home } from "lucide-react";
 import { ThemeToggle } from "../../../../../components/ui/ThemeToggle";
 
 export const DashboardLayout = () => {
@@ -12,12 +12,12 @@ export const DashboardLayout = () => {
           <nav aria-label="Breadcrumb" className="flex">
             <ol className="flex items-center space-x-2">
               <li>
-                <a
+                <Link
                   className="text-gray-400 hover:text-primary transition-colors"
-                  href="#"
+                  to="/portal/admin"
                 >
                   <Home size={20} />
-                </a>
+                </Link>
               </li>
               <li className="text-gray-400">
                 <ChevronRight size={14} />
@@ -30,10 +30,6 @@ export const DashboardLayout = () => {
             </ol>
           </nav>
           <div className="flex items-center gap-4">
-            <button className="relative p-2 text-gray-400 hover:text-primary transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-surface-dark"></span>
-            </button>
             <ThemeToggle />
           </div>
         </header>

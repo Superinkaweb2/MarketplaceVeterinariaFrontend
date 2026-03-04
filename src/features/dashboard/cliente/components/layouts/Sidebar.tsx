@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   PawPrint,
   ShoppingBag,
-  User,
   Settings,
   LogOut,
   ChevronLeft,
@@ -19,7 +18,6 @@ const MENU_ITEMS = [
   { label: "Adopciones", icon: Heart, href: "/portal/cliente/adopciones" },
   { label: "Mis Solicitudes", icon: Heart, href: "/portal/cliente/mis-adopciones" },
   { label: "Marketplace", icon: ShoppingBag, href: "/marketplace" },
-  { label: "Mi Perfil", icon: User, href: "/portal/cliente/perfil" },
 ];
 
 interface SidebarProps {
@@ -54,9 +52,9 @@ export const Sidebar = ({ isMobileOpen, setMobileOpen }: SidebarProps) => {
         <div className="h-16 flex items-center justify-between px-6 shrink-0 border-b border-gray-100 dark:border-gray-800">
           {!isCollapsed && (
             <Link to="/" className="flex items-center gap-3">
-              <img 
-                src="/LOGO HUELLA360_logo primario.png" 
-                alt="Logo Huella360" 
+              <img
+                src="/LOGO HUELLA360_logo primario.png"
+                alt="Logo Huella360"
                 className="h-8 w-auto object-contain"
               />
               <span className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">
@@ -73,9 +71,9 @@ export const Sidebar = ({ isMobileOpen, setMobileOpen }: SidebarProps) => {
           </button>
           {isCollapsed && (
             <div className="flex items-center justify-center mx-auto">
-              <img 
-                src="/LOGO HUELLA360_logo primario.png" 
-                alt="Logo Huella360" 
+              <img
+                src="/LOGO HUELLA360_logo primario.png"
+                alt="Logo Huella360"
                 className="h-8 w-auto object-contain"
               />
             </div>

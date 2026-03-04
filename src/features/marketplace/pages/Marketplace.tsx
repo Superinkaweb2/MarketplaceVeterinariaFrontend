@@ -33,8 +33,24 @@ export const Marketplace = () => {
           badge: { text: "Adopción", style: "adoption" }
         }));
         setProducts(mappedAdoptions);
+      } else if (filters.category === -2) {
+        const data = await marketplaceService.searchServices(filters.page, filters.size);
+        const mappedServices: Product[] = data.content.map((s: any) => ({
+          id: `service_${s.id}` as any,
+          nombre: s.nombre,
+          descripcion: s.descripcion,
+          precio: s.precio,
+          precioActual: s.precio,
+          stock: 1,
+          imagenes: s.fotoUrl ? [s.fotoUrl] : [],
+          categoriaId: -2,
+          categoriaNombre: "Cita Médica",
+          empresaId: s.veterinarioId || s.empresaId,
+          empresaNombre: s.nombreEmpresa || "Veterinario",
+          badge: { text: s.modalidad || "Servicio", style: "service" }
+        }));
+        setProducts(mappedServices);
       } else {
-
         const data = await marketplaceService.searchProducts(filters);
         setProducts(data.content);
       }

@@ -47,7 +47,6 @@ import { CategoriasPage } from "./features/dashboard/admin/pages/CategoriasPage"
 import { SubscriptionAdminPage } from "./features/dashboard/admin/pages/SubscriptionAdminPage";
 import { DashboardCliente } from "./features/dashboard/cliente/components/layouts/DashboardCliente";
 import { MascotasPage } from "./features/dashboard/cliente/pages/MascotasPage";
-import { MiPerfilPage } from "./features/dashboard/cliente/pages/MiPerfilPage";
 import { AdopcionesPage } from "./features/dashboard/shared/adopciones/pages/AdopcionesPage";
 import { MisAdopcionesPage } from "./features/dashboard/shared/adopciones/pages/MisAdopcionesPage";
 import { EmpresaConfigPage } from "./features/dashboard/empresa/pages/EmpresaConfigPage";
@@ -147,7 +146,6 @@ function App() {
                 <Route path="mascotas" element={<MascotasPage />} />
                 <Route path="adopciones" element={<AdopcionesPage />} />
                 <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
-                <Route path="perfil" element={<MiPerfilPage />} />
                 <Route path="configuracion" element={<ClienteConfigPage />} />
               </Route>
             </Route>

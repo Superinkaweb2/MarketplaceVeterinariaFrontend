@@ -1,12 +1,35 @@
-import { Search, Menu } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Menu, User as UserIcon } from "lucide-react";
 import { useAuth } from "../../../../auth/context/useAuth";
+import { clienteService } from "../../services/clienteService";
+import type { ClienteProfile } from "../../types/cliente.types";
 
 interface TopHeaderProps {
     onMenuClick: () => void;
 }
 
 export const TopHeader = ({ onMenuClick }: TopHeaderProps) => {
-    const { nombre } = useAuth();
+    const { role } = useAuth();
+    const [profile, setProfile] = useState<ClienteProfile | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const data = await clienteService.getMyProfile();
+                setProfile(data);
+            } catch (error) {
+                console.error("Error fetching cliente profile:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchProfile();
+    }, []);
+
+    const displayName = profile
+        ? `${profile.nombres} ${profile.apellidos}`.trim()
+        : "Usuario";
 
     return (
         <header className="h-16 flex items-center justify-between px-6 bg-white dark:bg-surface-dark border-b border-gray-200 dark:border-gray-800 flex-shrink-0 z-20">
@@ -36,11 +59,23 @@ export const TopHeader = ({ onMenuClick }: TopHeaderProps) => {
             <div className="flex items-center gap-4 ml-4">
                 <div className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-800">
                     <div className="text-right hidden lg:block">
-                        <p className="text-sm font-bold text-gray-900 dark:text-white">{nombre}</p>
-                        <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Cliente</p>
+                        <p className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[150px]">
+                            {isLoading ? "Cargando..." : displayName}
+                        </p>
+                        <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                            {role || "Cliente"}
+                        </p>
                     </div>
-                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20 transition-colors hover:bg-primary hover:text-white">
-                        {nombre?.charAt(0)}
+                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20 transition-all hover:bg-primary hover:text-white overflow-hidden shrink-0 ring-2 ring-white dark:ring-slate-800">
+                        {profile?.fotoPerfilUrl ? (
+                            <img
+                                src={profile.fotoPerfilUrl}
+                                alt={displayName}
+                                className="h-full w-full object-cover"
+                            />
+                        ) : (
+                            <UserIcon size={20} />
+                        )}
                     </div>
                 </div>
             </div>

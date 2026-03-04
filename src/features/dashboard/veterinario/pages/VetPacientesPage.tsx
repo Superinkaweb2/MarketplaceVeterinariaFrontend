@@ -2,16 +2,20 @@ import { useState, useEffect } from "react";
 import { PawPrint, User, Search, Filter, Eye, Calendar } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { vetService } from "../services/vetService";
+import { MedicalRecordModal } from "../components/MedicalRecordModal";
 
 interface Patient {
-    idMascota: number;
+    id: number;
     nombre: string;
     especie: string;
     raza: string;
-    edad: number;
-    nombreDueño: string;
-    ultimaConsulta?: string;
+    sexo?: string;
+    fechaNacimiento: string;
+    pesoKg: number;
     fotoUrl?: string;
+    esterilizado: boolean;
+    observacionesMedicas?: string;
+    createdAt: string;
 }
 
 export const VetPacientesPage = () => {
@@ -19,22 +23,14 @@ export const VetPacientesPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
 
+    const [selectedPatient, setSelectedPatient] = useState<{ id: number; nombre: string } | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const fetchPatients = async () => {
+        setIsLoading(true);
         try {
-            // Since there's no specific "patients" endpoint yet, we'll fetch from a generic one or mock for now
-            // In a real scenario, we'd have /veterinarians/me/patients
-            await vetService.getMyProfile();
-            // Mocking for demonstration if endpoint doesn't exist yet
-            // const { data } = await api.get<ApiResponse<Patient[]>>(`/veterinarians/${profile.idVeterinario}/patients`);
-
-            // Temporary mock data to show UI
-            const mockPatients: Patient[] = [
-                { idMascota: 1, nombre: "Chester", especie: "Canino", raza: "Golden Retriever", edad: 4, nombreDueño: "Gabriel Rojas", ultimaConsulta: "2026-02-15" },
-                { idMascota: 2, nombre: "Luna", especie: "Felino", raza: "Siamés", edad: 2, nombreDueño: "Ana Lopez", ultimaConsulta: "2026-03-01" },
-                { idMascota: 3, nombre: "Max", especie: "Canino", raza: "Pastor Alemán", edad: 6, nombreDueño: "Carlos Ruiz", ultimaConsulta: "2026-01-20" },
-            ];
-
-            setPatients(mockPatients);
+            const data = await vetService.getMyPatients();
+            setPatients(data);
         } catch (error) {
             console.error("Error fetching patients:", error);
         } finally {
@@ -46,10 +42,27 @@ export const VetPacientesPage = () => {
         fetchPatients();
     }, []);
 
+    const handleOpenMedicalRecord = (patient: Patient) => {
+        setSelectedPatient({ id: patient.id, nombre: patient.nombre });
+        setIsModalOpen(true);
+    };
+
     const filteredPatients = patients.filter((p: Patient) =>
         p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.nombreDueño.toLowerCase().includes(searchTerm.toLowerCase())
+        (p.especie && p.especie.toLowerCase().includes(searchTerm.toLowerCase()))
     );
+
+    const calculateAge = (dob: string) => {
+        if (!dob) return "N/A";
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
 
     return (
         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar text-slate-900 dark:text-white">
@@ -65,7 +78,7 @@ export const VetPacientesPage = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                         <input
                             type="text"
-                            placeholder="Buscar paciente o dueño..."
+                            placeholder="Buscar paciente, mascota..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-teal-500 outline-none w-full md:w-64"
@@ -95,7 +108,7 @@ export const VetPacientesPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredPatients.map((patient: Patient) => (
                         <div
-                            key={patient.idMascota}
+                            key={patient.id}
                             className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm hover:border-teal-500/30 transition-all group"
                         >
                             <div className="flex items-start justify-between mb-4">
@@ -103,7 +116,7 @@ export const VetPacientesPage = () => {
                                     <PawPrint size={28} />
                                 </div>
                                 <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-wider">
-                                    ID: {patient.idMascota}
+                                    ID: {patient.id}
                                 </span>
                             </div>
 
@@ -111,28 +124,40 @@ export const VetPacientesPage = () => {
                                 {patient.nombre}
                             </h3>
                             <div className="mt-1 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                <span className="font-medium text-slate-700 dark:text-slate-300">{patient.especie}</span>
+                                <span className="font-medium text-slate-700 dark:text-slate-300">{patient.especie || "Desconocido"}</span>
                                 <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                                <span>{patient.raza}</span>
+                                <span>{patient.raza || "Mestizo"}</span>
                             </div>
 
                             <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 space-y-2">
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <User size={14} className="text-teal-500" />
-                                    <span className="font-medium text-slate-700 dark:text-slate-300">Dueño:</span> {patient.nombreDueño}
+                                    <span className="font-medium text-slate-700 dark:text-slate-300">Edad:</span> {calculateAge(patient.fechaNacimiento)} años
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <Calendar size={14} className="text-teal-500" />
-                                    <span className="font-medium text-slate-700 dark:text-slate-300">Última cita:</span> {patient.ultimaConsulta || "N/A"}
+                                    <span className="font-medium text-slate-700 dark:text-slate-300">Registrado el:</span> {new Date(patient.createdAt).toLocaleDateString()}
                                 </div>
                             </div>
 
-                            <button className="mt-5 w-full h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-teal-500 hover:text-white text-slate-600 dark:text-slate-300 text-xs font-bold transition-all flex items-center justify-center gap-2">
+                            <button
+                                onClick={() => handleOpenMedicalRecord(patient)}
+                                className="mt-5 w-full h-10 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-teal-500 hover:text-white text-slate-600 dark:text-slate-300 text-xs font-bold transition-all flex items-center justify-center gap-2"
+                            >
                                 <Eye size={14} /> Ver Historia Clínica
                             </button>
                         </div>
                     ))}
                 </div>
+            )}
+
+            {selectedPatient && (
+                <MedicalRecordModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    patientId={selectedPatient.id}
+                    patientName={selectedPatient.nombre}
+                />
             )}
         </div>
     );

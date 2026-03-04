@@ -24,6 +24,7 @@ export const MiPerfilPage = () => {
     const { nombre } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const {
         register,
@@ -65,7 +66,9 @@ export const MiPerfilPage = () => {
     const onSubmit = async (data: FormData) => {
         setIsSaving(true);
         try {
-            await clienteService.updateMyProfile(data);
+            // Enviamos el objeto de datos y el archivo seleccionado (si hay uno)
+            await clienteService.updateMyProfile(data, selectedFile || undefined);
+
             Swal.fire({
                 icon: "success",
                 title: "¡Perfil Actualizado!",
@@ -73,6 +76,8 @@ export const MiPerfilPage = () => {
                 timer: 2000,
                 showConfirmButton: false,
             });
+            // Reset selected file after upload
+            setSelectedFile(null);
         } catch (error: any) {
             Swal.fire("Error", error.response?.data?.message || "Hubo un problema al actualizar tu perfil.", "error");
         } finally {
@@ -107,6 +112,7 @@ export const MiPerfilPage = () => {
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if (file) {
+                                        setSelectedFile(file);
                                         const objectUrl = URL.createObjectURL(file);
                                         setValue("fotoPerfilUrl", objectUrl, { shouldDirty: true });
                                     }
