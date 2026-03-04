@@ -8,17 +8,19 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
 
-    const publicEndpoints = [
-        "/auth/login",
-        "/auth/register",
-        "/public/products",
-        "/categories",
-        "/subscriptions/plans"
-    ];
+    const url = config.url || "";
+    const method = config.method?.toLowerCase() || "";
 
-    const isPublic = publicEndpoints.some(endpoint =>
-        config.url?.includes(endpoint)
-    ) || (config.method === 'get' && config.url?.includes('/categories'));
+    // endpoints that are always public regardless of method (usually POST)
+    const alwaysPublic = ["/auth/login", "/auth/register", "/public/", "/payments/webhook"].some(e => url.includes(e));
+
+    // GET requests that are public (catalog, plans, categories)
+    const publicGet = method === 'get' && ["/services", "/adoptions", "/categories", "/subscriptions/plans"].some(e => url.includes(e));
+
+    // Protected routes that might contain public substrings (must override publicGet)
+    const isProtected = url.includes("/me") || url.includes("/applications");
+
+    const isPublic = (alwaysPublic || (publicGet && !isProtected));
 
     if (token && !isPublic) {
         config.headers.Authorization = `Bearer ${token}`;

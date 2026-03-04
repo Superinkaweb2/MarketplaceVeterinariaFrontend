@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +27,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export const Login = () => {
   const { login: loginUser } = useLogin();
   const { isAuthenticated, role, perfilCompleto } = useAuth();
+  const [searchParams] = useSearchParams();
+  const nextUrl = searchParams.get("next") || undefined;
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -37,17 +39,17 @@ export const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  // Si ya está autenticado, redirigir a su portal o a completar perfil
+  // Si ya está autenticado, redirigir al ?next si existe, o al portal por rol
   if (isAuthenticated && role) {
     if (perfilCompleto) {
-      return <Navigate to={getRedirectByRole(role)} replace />;
+      return <Navigate to={nextUrl || getRedirectByRole(role)} replace />;
     } else {
       return <Navigate to={`/register/perfil/${role.toLowerCase()}`} replace />;
     }
   }
 
   const onSubmit = (data: LoginFormData) => {
-    loginUser(data.correo, data.password);
+    loginUser(data.correo, data.password, nextUrl);
   };
 
   return (
@@ -66,9 +68,9 @@ export const Login = () => {
         <div className="relative z-10 flex flex-col justify-end p-16 h-full w-full">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6 text-white">
-              <img 
-                src="/LOGO HUELLA360_logo primario.png" 
-                alt="Logo Huella360" 
+              <img
+                src="/LOGO HUELLA360_logo primario.png"
+                alt="Logo Huella360"
                 className="h-12 w-auto object-contain"
               />
               <span className="text-4xl font-bold tracking-tight">Huella360</span>
@@ -96,9 +98,9 @@ export const Login = () => {
         {/* Logo móvil */}
         <div className="lg:hidden mb-12">
           <div className="flex items-center gap-2 text-slate-900 dark:text-white">
-            <img 
-              src="/LOGO HUELLA360_logo primario.png" 
-              alt="Logo Huella360" 
+            <img
+              src="/LOGO HUELLA360_logo primario.png"
+              alt="Logo Huella360"
               className="h-8 w-auto object-contain"
             />
             <span className="text-2xl font-bold">Huella360</span>
@@ -136,11 +138,10 @@ export const Login = () => {
                     placeholder="doctor@clinica.com"
                     {...register("correo")}
                     aria-invalid={!!errors.correo}
-                    className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${
-                      errors.correo
+                    className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${errors.correo
                         ? "border-red-400 dark:border-red-500"
                         : "border-slate-200 dark:border-slate-700"
-                    }`}
+                      }`}
                   />
                 </div>
                 {errors.correo && (
@@ -159,12 +160,6 @@ export const Login = () => {
                   >
                     Contraseña
                   </label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm font-medium text-primary hover:underline"
-                  >
-                    ¿Olvidaste tu contraseña?
-                  </Link>
                 </div>
                 <div className="relative mt-2">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 pointer-events-none">
@@ -177,11 +172,10 @@ export const Login = () => {
                     placeholder="••••••••"
                     {...register("password")}
                     aria-invalid={!!errors.password}
-                    className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${
-                      errors.password
+                    className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${errors.password
                         ? "border-red-400 dark:border-red-500"
                         : "border-slate-200 dark:border-slate-700"
-                    }`}
+                      }`}
                   />
                   <button
                     type="button"
@@ -221,20 +215,6 @@ export const Login = () => {
               </span>
             </div>
           </div>
-
-          {/* Google Button */}
-          <button
-            type="button"
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-white dark:bg-slate-800 px-4 py-3 text-sm font-bold text-slate-700 dark:text-white shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-          >
-            <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                fill="currentColor"
-              />
-            </svg>
-            Google
-          </button>
 
           <p className="mt-10 text-center text-sm text-slate-500">
             ¿No tienes una cuenta?{" "}

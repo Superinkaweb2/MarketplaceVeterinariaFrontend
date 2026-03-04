@@ -5,6 +5,7 @@ import * as z from "zod";
 import { X, Save, Camera, PawPrint, Info } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { Sexo, type Pet, type CreatePetRequest } from "../types/pet.types";
+import Swal from "sweetalert2";
 
 const petSchema = z.object({
     nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -97,6 +98,11 @@ export const PetFormModal = ({
     };
 
     const onFormSubmit = (data: PetFormValues) => {
+        if (!pet && !fotoFile) {
+            Swal.fire("Imagen obligatoria", "Debes subir una foto de tu mascota", "warning");
+            return;
+        }
+
         const formattedData = {
             ...data,
             sexo: data.sexo || null, // Asegura null si está vacío

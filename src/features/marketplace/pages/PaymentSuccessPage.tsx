@@ -1,6 +1,14 @@
 import { Link } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+import { useEffect } from "react";
 
 export const PaymentSuccessPage = () => {
+    const { clearCart } = useCart();
+
+    useEffect(() => {
+        clearCart();
+    }, [clearCart]);
+
     return (
         <div className="w-full bg-slate-50 dark:bg-slate-950 min-h-screen flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-3xl p-10 shadow-xl text-center border border-slate-100 dark:border-slate-800">

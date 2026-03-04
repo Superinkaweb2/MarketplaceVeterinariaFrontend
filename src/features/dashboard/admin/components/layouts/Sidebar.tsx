@@ -58,9 +58,9 @@ export const Sidebar = () => {
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-3">
-            <img 
-              src="/LOGO HUELLA60_logo primario.png" 
-              alt="Logo Huella360" 
+            <img
+              src="/LOGO HUELLA360_logo primario.png"
+              alt="Logo Huella360"
               className="h-8 w-auto object-contain"
             />
             <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white">

@@ -1,20 +1,106 @@
-import { User, Settings, Save, ShieldCheck, Bell, Lock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+    User,
+    Settings,
+    Save,
+    ShieldCheck,
+    Lock,
+    Loader2,
+    Camera,
+    UserCircle,
+    MapPin,
+    Phone
+} from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { useAuth } from "../../../auth/context/useAuth";
+import { clienteService } from "../services/clienteService";
 import Swal from "sweetalert2";
 
-export const ClienteConfigPage = () => {
-    const auth = useAuth();
+/* ── Schema ─────────────────────────────────────────────────── */
+const profileSchema = z.object({
+    nombres: z.string().min(2, "Los nombres deben tener al menos 2 caracteres"),
+    apellidos: z.string().min(2, "Los apellidos deben tener al menos 2 caracteres"),
+    telefono: z.string().min(6, "El teléfono debe tener un formato válido").max(15, "Teléfono demasiado largo"),
+    direccion: z.string().min(5, "La dirección debe ser más descriptiva").optional().or(z.literal("")),
+    fotoPerfilUrl: z.string().optional().or(z.literal("")),
+});
 
-    const handleSave = () => {
-        Swal.fire({
-            icon: "info",
-            title: "Configuración",
-            text: "Los ajustes del cliente se guardarán próximamente.",
-            timer: 2000,
-            showConfirmButton: false,
-        });
+type ProfileFormData = z.infer<typeof profileSchema>;
+
+export const ClienteConfigPage = () => {
+    const { nombre } = useAuth();
+    const [activeTab, setActiveTab] = useState<"perfil" | "seguridad">("perfil");
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        watch,
+        formState: { errors, isDirty },
+    } = useForm<ProfileFormData>({
+        resolver: zodResolver(profileSchema),
+        defaultValues: {
+            nombres: "",
+            apellidos: "",
+            telefono: "",
+            direccion: "",
+            fotoPerfilUrl: "",
+        },
+    });
+
+    const photoUrl = watch("fotoPerfilUrl");
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                setIsLoading(true);
+                const data = await clienteService.getMyProfile();
+                setValue("nombres", data.nombres);
+                setValue("apellidos", data.apellidos);
+                setValue("telefono", data.telefono || "");
+                setValue("direccion", data.direccion || "");
+                setValue("fotoPerfilUrl", data.fotoPerfilUrl || "");
+            } catch (error) {
+                console.error("Error fetching client profile:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchProfile();
+    }, [setValue]);
+
+    const onSubmitProfile = async (data: ProfileFormData) => {
+        setIsSaving(true);
+        try {
+            await clienteService.updateMyProfile(data, selectedFile || undefined);
+            Swal.fire({
+                icon: "success",
+                title: "¡Perfil Actualizado!",
+                text: "Tus datos han sido guardados exitosamente.",
+                timer: 2000,
+                showConfirmButton: false,
+            });
+            setSelectedFile(null);
+        } catch (error: any) {
+            Swal.fire("Error", error.response?.data?.message || "Hubo un problema al actualizar tu perfil.", "error");
+        } finally {
+            setIsSaving(false);
+        }
     };
+
+    if (isLoading) {
+        return (
+            <div className="h-full flex items-center justify-center min-h-[400px]">
+                <Loader2 className="animate-spin text-primary" size={32} />
+            </div>
+        );
+    }
 
     return (
         <div className="h-full flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto custom-scrollbar">
@@ -23,95 +109,185 @@ export const ClienteConfigPage = () => {
                     <Settings className="text-primary" /> Mi Configuración
                 </h1>
                 <p className="text-sm text-slate-500 mt-1">
-                    Administra tus preferencias de cuenta y notificaciones.
+                    Administra tus datos personales y preferencias de seguridad.
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm text-center">
-                        <div className="relative inline-block mb-4">
-                            <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                <User size={48} />
+            {/* Tabs Navigation */}
+            <div className="flex gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-2xl w-fit mb-8 shadow-inner">
+                <button
+                    onClick={() => setActiveTab("perfil")}
+                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "perfil"
+                        ? "bg-white dark:bg-slate-700 text-primary shadow-sm"
+                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                        }`}
+                >
+                    <User size={18} />
+                    Mi Perfil
+                </button>
+                <button
+                    onClick={() => setActiveTab("seguridad")}
+                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "seguridad"
+                        ? "bg-white dark:bg-slate-700 text-primary shadow-sm"
+                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                        }`}
+                >
+                    <Lock size={18} />
+                    Seguridad
+                </button>
+            </div>
+
+            <div className="max-w-4xl">
+                {activeTab === "perfil" && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        {/* Sidebar Info */}
+                        <div className="lg:col-span-1 space-y-6">
+                            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm text-center">
+                                <div className="relative inline-block mb-4 group">
+                                    <div className="h-32 w-32 rounded-full overflow-hidden ring-4 ring-primary/10 shadow-lg relative mx-auto">
+                                        {photoUrl ? (
+                                            <img src={photoUrl} alt="Perfil" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800">
+                                                <UserCircle size={80} className="text-slate-300" />
+                                            </div>
+                                        )}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            id="avatar-upload-config"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    setSelectedFile(file);
+                                                    const objectUrl = URL.createObjectURL(file);
+                                                    setValue("fotoPerfilUrl", objectUrl, { shouldDirty: true });
+                                                }
+                                            }}
+                                        />
+                                        <label
+                                            htmlFor="avatar-upload-config"
+                                            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer"
+                                        >
+                                            <Camera size={24} />
+                                        </label>
+                                    </div>
+                                </div>
+                                <h2 className="text-xl font-bold text-slate-900 dark:text-white capitalize">
+                                    {nombre || "Usuario"}
+                                </h2>
+                                <p className="text-sm text-slate-500 mb-6">Dueño de Mascota</p>
+
+                                <div className="pt-6 border-t border-slate-50 dark:border-slate-800 flex justify-center gap-4">
+                                    <div className="text-center">
+                                        <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">Estado</p>
+                                        <p className="text-xs font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 rounded-full mt-1">Activo</p>
+                                    </div>
+                                </div>
                             </div>
-                            <button className="absolute bottom-0 right-0 p-2 bg-white dark:bg-slate-800 rounded-full shadow-md border border-slate-100 dark:border-slate-700 text-slate-500 hover:text-primary transition-colors">
-                                <Settings size={16} />
-                            </button>
+
+                            <div className="bg-blue-50 dark:bg-blue-500/10 rounded-2xl p-6 border border-blue-100 dark:border-blue-500/20">
+                                <div className="flex items-center gap-3 text-blue-700 dark:text-blue-400 mb-2">
+                                    <ShieldCheck size={20} />
+                                    <h3 className="font-bold">Privacidad</h3>
+                                </div>
+                                <p className="text-xs text-blue-600/80 dark:text-blue-400/80 leading-relaxed">
+                                    Tu información personal está protegida. Nunca compartimos tus datos con terceros sin tu consentimiento.
+                                </p>
+                            </div>
                         </div>
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">{auth?.nombre || "Usuario"}</h2>
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-white"></h2>
-                        <div className="mt-6 pt-6 border-t border-slate-50 dark:border-slate-800 flex justify-center gap-4">
-                            <div className="text-center">
-                                <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">Rol</p>
-                                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Cliente</p>
-                            </div>
-                            <div className="w-px h-8 bg-slate-100 dark:bg-slate-800"></div>
-                            <div className="text-center">
-                                <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">Estado</p>
-                                <p className="text-sm font-semibold text-emerald-500">Activo</p>
-                            </div>
+
+                        {/* Profile Form */}
+                        <div className="lg:col-span-2">
+                            <form onSubmit={handleSubmit(onSubmitProfile)} className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                                <div className="p-6 md:p-8 space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                                <User size={16} className="text-slate-400" /> Nombres
+                                            </label>
+                                            <input
+                                                {...register("nombres")}
+                                                className={`w-full px-4 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-primary/20 transition-all ${errors.nombres ? "border-red-500" : "border-slate-200 dark:border-slate-700"}`}
+                                            />
+                                            {errors.nombres && <p className="text-red-500 text-xs">{errors.nombres.message}</p>}
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                                <User size={16} className="text-slate-400" /> Apellidos
+                                            </label>
+                                            <input
+                                                {...register("apellidos")}
+                                                className={`w-full px-4 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-primary/20 transition-all ${errors.apellidos ? "border-red-500" : "border-slate-200 dark:border-slate-700"}`}
+                                            />
+                                            {errors.apellidos && <p className="text-red-500 text-xs">{errors.apellidos.message}</p>}
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                                <Phone size={16} className="text-slate-400" /> Teléfono
+                                            </label>
+                                            <input
+                                                {...register("telefono")}
+                                                className={`w-full px-4 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-primary/20 transition-all ${errors.telefono ? "border-red-500" : "border-slate-200 dark:border-slate-700"}`}
+                                            />
+                                            {errors.telefono && <p className="text-red-500 text-xs">{errors.telefono.message}</p>}
+                                        </div>
+
+                                        <div className="space-y-2 md:col-span-2">
+                                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                                <MapPin size={16} className="text-slate-400" /> Dirección
+                                            </label>
+                                            <input
+                                                {...register("direccion")}
+                                                className={`w-full px-4 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-primary/20 transition-all ${errors.direccion ? "border-red-500" : "border-slate-200 dark:border-slate-700"}`}
+                                            />
+                                            {errors.direccion && <p className="text-red-500 text-xs">{errors.direccion.message}</p>}
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-6 border-t border-slate-50 dark:border-slate-800 flex justify-end">
+                                        <Button type="submit" disabled={isSaving || !isDirty} className="gap-2 px-8">
+                                            {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                            {isSaving ? "Guardando..." : "Guardar Cambios"}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
+                )}
 
-                    <div className="bg-blue-50 dark:bg-blue-500/10 rounded-2xl p-6 border border-blue-100 dark:border-blue-500/20">
-                        <div className="flex items-center gap-3 text-blue-700 dark:text-blue-400 mb-2">
-                            <ShieldCheck size={20} />
-                            <h3 className="font-bold">Tu Privacidad</h3>
-                        </div>
-                        <p className="text-xs text-blue-600/80 dark:text-blue-400/80 leading-relaxed">
-                            Tu información personal está protegida. Nunca compartimos tus datos con terceros sin tu consentimiento explícito.
-                        </p>
-                    </div>
-                </div>
-
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center gap-3">
-                            <Bell size={18} className="text-primary" />
-                            <h3 className="font-bold text-slate-900 dark:text-white">Notificaciones</h3>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <div className="flex items-center justify-between py-2">
+                {activeTab === "seguridad" && (
+                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-2xl">
+                        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                            <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center gap-3">
+                                <Lock size={18} className="text-primary" />
+                                <h3 className="font-bold text-slate-900 dark:text-white">Seguridad de la Cuenta</h3>
+                            </div>
+                            <div className="p-8 space-y-6">
                                 <div>
-                                    <p className="font-semibold text-slate-700 dark:text-slate-300">Alertas de Adopción</p>
-                                    <p className="text-xs text-slate-500">Recibe avisos cuando Pets similares a tus intereses se publiquen.</p>
+                                    <h4 className="font-bold text-slate-700 dark:text-slate-300 mb-2">Contraseña</h4>
+                                    <p className="text-sm text-slate-500 mb-4">Te recomendamos cambiar tu contraseña periódicamente para mantener tu cuenta segura.</p>
+                                    <Button variant="outline" className="w-full sm:w-auto justify-between items-center group font-medium text-slate-700 dark:text-slate-300 rounded-xl px-6">
+                                        <span>Cambiar mi contraseña</span>
+                                        <Settings size={16} className="text-slate-400 group-hover:text-primary transition-colors ml-4" />
+                                    </Button>
                                 </div>
-                                <div className="h-6 w-11 bg-primary rounded-full relative">
-                                    <div className="absolute right-1 top-1 h-4 w-4 bg-white rounded-full"></div>
+
+                                <div className="pt-6 border-t border-slate-50 dark:border-slate-800">
+                                    <h4 className="font-bold text-slate-700 dark:text-slate-300 mb-2">Sesión</h4>
+                                    <p className="text-sm text-slate-500 mb-4">Si crees que alguien más ha accedido a tu cuenta, puedes cerrar sesión en todos los dispositivos.</p>
+                                    <Button variant="outline" className="w-full sm:w-auto text-red-500 border-red-100 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/20 rounded-xl">
+                                        Cerrar todas las sesiones
+                                    </Button>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-between py-2">
-                                <div>
-                                    <p className="font-semibold text-slate-700 dark:text-slate-300">Resumen Semanal</p>
-                                    <p className="text-xs text-slate-500">Un resumen de la actividad de tus mascotas y novedades.</p>
-                                </div>
-                                <div className="h-6 w-11 bg-slate-200 dark:bg-slate-700 rounded-full relative">
-                                    <div className="absolute left-1 top-1 h-4 w-4 bg-white rounded-full"></div>
-                                </div>
-                            </div>
                         </div>
                     </div>
-
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center gap-3">
-                            <Lock size={18} className="text-primary" />
-                            <h3 className="font-bold text-slate-900 dark:text-white">Seguridad</h3>
-                        </div>
-                        <div className="p-6">
-                            <Button variant="outline" className="w-full justify-between items-center group font-medium text-slate-700 dark:text-slate-300">
-                                <span>Cambiar mi contraseña</span>
-                                <Settings size={16} className="text-slate-400 group-hover:text-primary transition-colors" />
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-end pt-4">
-                        <Button onClick={handleSave} className="gap-2 px-8">
-                            <Save size={18} />
-                            Guardar Preferencias
-                        </Button>
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     );

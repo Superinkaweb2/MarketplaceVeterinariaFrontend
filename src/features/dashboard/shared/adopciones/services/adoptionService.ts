@@ -50,6 +50,14 @@ export const adoptionService = {
   },
 
   /**
+   * Obtener las solicitudes de adopción enviadas por el usuario actual.
+   */
+  async getMySentApplications(): Promise<ApplicationResponse[]> {
+    const response = await api.get<{ data: ApplicationResponse[] }>(`${BASE_URL}/applications/me`);
+    return response.data.data;
+  },
+
+  /**
    * Postular a una adopción.
    */
   async applyForAdoption(adopcionId: number, dto: ApplyAdoptionDto): Promise<void> {

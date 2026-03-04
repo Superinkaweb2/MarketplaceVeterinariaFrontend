@@ -14,10 +14,28 @@ export const clienteService = {
 
   /**
    * Actualiza el perfil personal del cliente autenticado.
-   * Endpoint: PATCH /clients/me
+   * Endpoint: PUT /clients/me (Multipart)
    */
-  updateMyProfile: async (payload: UpdateClienteRequest): Promise<ClienteProfile> => {
-    const { data } = await api.patch<ApiResponse<ClienteProfile>>("/clients/me", payload);
+  updateMyProfile: async (payload: UpdateClienteRequest, foto?: File): Promise<ClienteProfile> => {
+    const formData = new FormData();
+
+    // Empaquetar el JSON en un Blob como 'data'
+    formData.append(
+      "data",
+      new Blob([JSON.stringify(payload)], { type: "application/json" }),
+      "profile.json",
+    );
+
+    // Añadir la foto si existe
+    if (foto) {
+      formData.append("foto", foto);
+    }
+
+    const { data } = await api.put<ApiResponse<ClienteProfile>>("/clients/me", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return data.data;
   },
 };

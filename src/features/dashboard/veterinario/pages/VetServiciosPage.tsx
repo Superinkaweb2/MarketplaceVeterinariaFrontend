@@ -7,9 +7,15 @@ import {
     Monitor,
     Home,
     RefreshCw,
+    Plus,
+    Edit2,
+    Trash2
 } from "lucide-react";
 import { vetService } from "../services/vetService";
 import type { Service, ModalidadServicio } from "../../../catalog/types/service.types";
+import { VetServiceModal } from "../components/VetServiceModal";
+import Swal from "sweetalert2";
+import { Button } from "../../../../components/ui/Button";
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
@@ -37,20 +43,47 @@ export const VetServiciosPage = () => {
     const [services, setServices] = useState<Service[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
+
+    const fetchServices = async () => {
+        setIsLoading(true);
+        try {
+            const data = await vetService.getMyServices(0, 50);
+            setServices(data.content);
+        } catch (error) {
+            console.error("Error fetching vet services:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchServices = async () => {
-            try {
-                const data = await vetService.getMyServices(0, 50);
-                setServices(data.content);
-            } catch (error) {
-                console.error("Error fetching vet services:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
         fetchServices();
     }, []);
+
+    const handleDelete = async (id: number) => {
+        const result = await Swal.fire({
+            title: "¿Eliminar servicio?",
+            text: "El servicio se desactivará en tu catálogo.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar"
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await vetService.deleteService(id);
+                Swal.fire("Eliminado", "Servicio eliminado correctamente", "success");
+                fetchServices();
+            } catch (error) {
+                console.error("Error deleting service:", error);
+                Swal.fire("Error", "No se pudo eliminar el servicio", "error");
+            }
+        }
+    };
 
     const filteredServices = useMemo(
         () => services.filter((s) => s.nombre.toLowerCase().includes(searchTerm.toLowerCase())),
@@ -69,6 +102,13 @@ export const VetServiciosPage = () => {
                         Servicios que ofreces a través de las empresas donde colaboras.
                     </p>
                 </div>
+                <Button
+                    onClick={() => { setServiceToEdit(null); setIsModalOpen(true); }}
+                    className="bg-teal-500 hover:bg-teal-600 text-white min-w-[150px] whitespace-nowrap"
+                >
+                    <Plus size={18} className="mr-2" />
+                    Nuevo Servicio
+                </Button>
             </div>
 
             {/* Search */}
@@ -98,19 +138,20 @@ export const VetServiciosPage = () => {
                                     <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Duración</th>
                                     <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Modalidad</th>
                                     <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Estado</th>
+                                    <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 text-right">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                                 {isLoading
                                     ? Array.from({ length: 4 }).map((_, i) => (
                                         <tr key={i} className="animate-pulse">
-                                            <td colSpan={5} className="px-6 py-4 h-16 bg-slate-50/30 dark:bg-slate-800/10" />
+                                            <td colSpan={6} className="px-6 py-4 h-16 bg-slate-50/30 dark:bg-slate-800/10" />
                                         </tr>
                                     ))
                                     : filteredServices.length === 0
                                         ? (
                                             <tr>
-                                                <td colSpan={5} className="px-6 py-16 text-center">
+                                                <td colSpan={6} className="px-6 py-16 text-center">
                                                     <div className="flex flex-col items-center max-w-sm mx-auto">
                                                         <div className="h-16 w-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
                                                             <Stethoscope size={32} className="text-slate-400" />
@@ -147,6 +188,24 @@ export const VetServiciosPage = () => {
                                                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${s.activo ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20" : "bg-slate-50 text-slate-600 ring-slate-600/20 dark:bg-slate-500/10 dark:text-slate-400 dark:ring-slate-500/20"}`}>
                                                         {s.activo ? "Activo" : "Inactivo"}
                                                     </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button
+                                                            onClick={() => { setServiceToEdit(s); setIsModalOpen(true); }}
+                                                            className="p-2 text-slate-400 hover:text-teal-500 transition-colors bg-slate-50 hover:bg-teal-50 rounded-lg dark:bg-slate-800/50 dark:hover:bg-teal-500/10"
+                                                            title="Editar"
+                                                        >
+                                                            <Edit2 size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(s.id)}
+                                                            className="p-2 text-slate-400 hover:text-red-500 transition-colors bg-slate-50 hover:bg-red-50 rounded-lg dark:bg-slate-800/50 dark:hover:bg-red-500/10"
+                                                            title="Eliminar"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -190,6 +249,20 @@ export const VetServiciosPage = () => {
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${s.activo ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400"}`}>
                                                 {s.activo ? "Activo" : "Inactivo"}
                                             </span>
+                                            <div className="ml-auto flex gap-1">
+                                                <button
+                                                    onClick={() => { setServiceToEdit(s); setIsModalOpen(true); }}
+                                                    className="p-1.5 text-slate-400 hover:text-teal-500 bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-200 dark:border-slate-700"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(s.id)}
+                                                    className="p-1.5 text-slate-400 hover:text-red-500 bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-200 dark:border-slate-700"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -203,6 +276,13 @@ export const VetServiciosPage = () => {
                     </span>
                 </div>
             </div>
+
+            <VetServiceModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={fetchServices}
+                serviceToEdit={serviceToEdit}
+            />
         </div>
     );
 };

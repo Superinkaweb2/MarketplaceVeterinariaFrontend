@@ -27,13 +27,14 @@ export const EmpresasPage = () => {
   }, []);
 
   const handleToggleStatus = async (company: Company) => {
+    const isVerified = company.estadoValidacion === 'VERIFICADO';
     const result = await Swal.fire({
-      title: company.activo ? '¿Desactivar empresa?' : '¿Activar empresa?',
-      text: `La empresa ${company.nombre} cambiará su estado.`,
+      title: isVerified ? '¿Desactivar empresa?' : '¿Activar empresa?',
+      text: `La empresa ${company.nombreComercial} cambiará su estado de validación.`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: company.activo ? '#ef4444' : '#10b981',
-      confirmButtonText: company.activo ? 'Sí, desactivar' : 'Sí, activar',
+      confirmButtonColor: isVerified ? '#ef4444' : '#10b981',
+      confirmButtonText: isVerified ? 'Sí, desactivar' : 'Sí, activar',
       cancelButtonText: 'Cancelar',
       customClass: {
         popup: 'rounded-2xl',
@@ -45,8 +46,9 @@ export const EmpresasPage = () => {
     if (result.isConfirmed) {
       try {
         await adminService.toggleCompanyStatus(company.id);
-        setCompanies(companies.map(c => 
-          c.id === company.id ? { ...c, activo: !c.activo } : c
+        const nextStatus = isVerified ? 'RECHAZADO' : 'VERIFICADO';
+        setCompanies(companies.map(c =>
+          c.id === company.id ? { ...c, estadoValidacion: nextStatus as any } : c
         ));
         Swal.fire({
           title: '¡Éxito!',
@@ -65,8 +67,8 @@ export const EmpresasPage = () => {
     }
   };
 
-  const filteredCompanies = companies.filter(c => 
-    c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredCompanies = companies.filter(c =>
+    c.nombreComercial.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.ruc.includes(searchTerm)
   );
 
@@ -140,11 +142,11 @@ export const EmpresasPage = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0 font-bold">
-                            {company.nombre.charAt(0)}
+                            {company.nombreComercial.charAt(0)}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{company.nombre}</p>
-                            <p className="text-xs text-slate-500 truncate">{company.email}</p>
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{company.nombreComercial}</p>
+                            <p className="text-xs text-slate-500 truncate">{company.emailContacto}</p>
                           </div>
                         </div>
                       </td>
@@ -153,17 +155,18 @@ export const EmpresasPage = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="text-sm text-slate-700 dark:text-slate-300">{company.telefono}</span>
+                          <span className="text-sm text-slate-700 dark:text-slate-300">{company.telefonoContacto}</span>
                           <span className="text-xs text-slate-500 truncate max-w-[200px]">{company.direccion}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${
-                          company.activo 
-                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400'
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${company.estadoValidacion === 'VERIFICADO'
+                          ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400'
+                          : company.estadoValidacion === 'PENDIENTE'
+                            ? 'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/10 dark:text-amber-400'
                             : 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/10 dark:text-red-400'
-                        }`}>
-                          {company.activo ? 'ACTIVO' : 'INACTIVO'}
+                          }`}>
+                          {company.estadoValidacion}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -171,16 +174,15 @@ export const EmpresasPage = () => {
                           <button title="Ver detalles" className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
                             <Eye size={18} />
                           </button>
-                          <button 
-                            title={company.activo ? "Desactivar" : "Activar"} 
+                          <button
+                            title={company.estadoValidacion === 'VERIFICADO' ? "Desactivar" : "Activar"}
                             onClick={() => handleToggleStatus(company)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              company.activo 
-                                ? 'text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10' 
-                                : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
-                            }`}
+                            className={`p-2 rounded-lg transition-colors ${company.estadoValidacion === 'VERIFICADO'
+                              ? 'text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10'
+                              : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
+                              }`}
                           >
-                            {company.activo ? <Ban size={18} /> : <CheckCircle size={18} />}
+                            {company.estadoValidacion === 'VERIFICADO' ? <Ban size={18} /> : <CheckCircle size={18} />}
                           </button>
                         </div>
                       </td>
@@ -197,16 +199,15 @@ export const EmpresasPage = () => {
               <div key={company.id} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 font-bold text-xl">
-                    {company.nombre.charAt(0)}
+                    {company.nombreComercial.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">{company.nombre}</h3>
-                    <p className="text-xs text-slate-500 truncate">{company.email}</p>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">{company.nombreComercial}</h3>
+                    <p className="text-xs text-slate-500 truncate">{company.emailContacto}</p>
                   </div>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
-                    company.activo ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {company.activo ? 'ACTIVO' : 'INACTIVO'}
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${company.estadoValidacion === 'VERIFICADO' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                    {company.estadoValidacion}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -216,17 +217,17 @@ export const EmpresasPage = () => {
                   </div>
                   <div>
                     <p className="text-slate-400 uppercase font-semibold text-[10px]">Teléfono</p>
-                    <p className="dark:text-white">{company.telefono}</p>
+                    <p className="dark:text-white">{company.telefonoContacto}</p>
                   </div>
                 </div>
                 <div className="flex gap-2 pt-3 border-t border-slate-200/60 dark:border-slate-700">
                   <Button variant="outline" className="flex-1 text-xs py-2 h-auto rounded-lg">Detalles</Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => handleToggleStatus(company)}
-                    className={`flex-1 text-xs py-2 h-auto rounded-lg ${company.activo ? 'text-red-600 hover:bg-red-50' : 'text-emerald-600 hover:bg-emerald-50'}`}
+                    className={`flex-1 text-xs py-2 h-auto rounded-lg ${company.estadoValidacion === 'VERIFICADO' ? 'text-red-600 hover:bg-red-50' : 'text-emerald-600 hover:bg-emerald-50'}`}
                   >
-                    {company.activo ? 'Desactivar' : 'Activar'}
+                    {company.estadoValidacion === 'VERIFICADO' ? 'Desactivar' : 'Activar'}
                   </Button>
                 </div>
               </div>

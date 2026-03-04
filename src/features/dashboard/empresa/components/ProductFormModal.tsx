@@ -116,6 +116,14 @@ export const ProductFormModal = ({
   };
 
   const onSubmit = async (data: ProductFormData) => {
+    if (previews.length === 0) {
+      Swal.fire(
+        "Imagen obligatoria",
+        "Debes subir al menos una imagen del producto",
+        "warning"
+      );
+      return;
+    }
     setIsSubmitting(true);
     try {
       // 🛠️ 1. LIMPIEZA DE DATOS ANTES DE ENVIAR AL BACKEND
@@ -377,24 +385,6 @@ export const ProductFormModal = ({
               </div>
             </div>
 
-            {/* Visible */}
-            <div className="md:col-span-2 flex items-center gap-3 p-1">
-              <div className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  id="visible"
-                  {...register("visible")}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary"></div>
-                <label
-                  htmlFor="visible"
-                  className="ml-3 text-sm font-medium text-slate-700 dark:text-slate-300"
-                >
-                  Visible en el Marketplace
-                </label>
-              </div>
-            </div>
           </div>
         </form>
 

@@ -1,10 +1,31 @@
-import { Menu, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, Search, User as UserIcon } from "lucide-react";
+import { useAuth } from "../../../../auth/context/useAuth";
+import { api } from "../../../../../shared/http/api";
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 export const Header = ({ onMenuClick }: HeaderProps) => {
+  const { role, nombre } = useAuth();
+  const [companyData, setCompanyData] = useState<{ nombreComercial: string; logoUrl?: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCompany = async () => {
+      try {
+        const response = await api.get("/companies/me");
+        setCompanyData(response.data.data);
+      } catch (error) {
+        console.error("Error fetching company data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCompany();
+  }, []);
+
   return (
     <header className="h-16 flex items-center justify-between px-4 md:px-6 bg-white dark:bg-surface-dark border-b border-slate-200 dark:border-slate-800 shrink-0 z-10">
       {/* Mobile Toggle Button (Ahora funcional) */}
@@ -38,17 +59,17 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
 
         <div className="flex items-center gap-3 pl-2 md:pl-4 md:border-l border-slate-200 dark:border-slate-700">
           <div className="text-right hidden md:block">
-            <p className="text-sm font-semibold text-slate-900 dark:text-white">
-              Paws & Claws
+            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[150px]">
+              {isLoading ? "Cargando..." : (companyData?.nombreComercial || nombre || "Mi Empresa")}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Admin</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">{role?.toLowerCase() || "Admin"}</p>
           </div>
-          <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-slate-200 overflow-hidden ring-2 ring-white dark:ring-slate-800">
-            <img
-              src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=100&h=100"
-              alt="Admin"
-              className="h-full w-full object-cover"
-            />
+          <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary ring-2 ring-white dark:ring-slate-800 shrink-0 overflow-hidden transition-all hover:bg-primary hover:text-white">
+            {companyData?.logoUrl ? (
+              <img src={companyData.logoUrl} alt="Logo" className="h-full w-full object-contain p-1" />
+            ) : (
+              <UserIcon size={20} />
+            )}
           </div>
         </div>
       </div>

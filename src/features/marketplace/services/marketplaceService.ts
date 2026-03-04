@@ -25,13 +25,20 @@ export const marketplaceService = {
         return data.data;
     },
 
-    createOrder: async (orderData: { empresaId: number; items: { productoId: number; cantidad: number }[] }): Promise<number> => {
+    createOrder: async (orderData: { empresaId: number; items: { productoId: number | null; servicioId: number | null; cantidad: number }[] }): Promise<number> => {
         const { data } = await api.post<ApiResponse<number>>("/orders", orderData);
         return data.data;
     },
 
-    getPaymentLink: async (orderId: number): Promise<{ preferenceId: string; initPoint: string }> => {
-        const { data } = await api.post<ApiResponse<{ preferenceId: string; initPoint: string }>>(`/payments/checkout/${orderId}`);
+    getMyOrders: async (page = 0, size = 10) => {
+        const { data } = await api.get<ApiResponse<{ content: any[] }>>("/orders/me", {
+            params: { page, size }
+        });
+        return data.data;
+    },
+
+    getPaymentLink: async (orderId: number): Promise<{ preferenceId: string; initPoint: string; sandboxInitPoint: string }> => {
+        const { data } = await api.post<ApiResponse<{ preferenceId: string; initPoint: string; sandboxInitPoint: string }>>(`/payments/checkout/${orderId}`);
         return data.data;
     },
 
@@ -44,6 +51,18 @@ export const marketplaceService = {
 
     getAdoptionById: async (id: number): Promise<any> => {
         const { data } = await api.get<ApiResponse<any>>(`/adoptions/${id}`);
+        return data.data;
+    },
+
+    searchServices: async (page = 0, size = 12, q?: string) => {
+        const { data } = await api.get<ApiResponse<{ content: any[] }>>("/services", {
+            params: { page, size, q }
+        });
+        return data.data;
+    },
+
+    getServiceById: async (id: number): Promise<any> => {
+        const { data } = await api.get<ApiResponse<any>>(`/services/${id}`);
         return data.data;
     }
 };

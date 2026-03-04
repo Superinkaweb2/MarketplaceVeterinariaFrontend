@@ -48,4 +48,64 @@ export const vetService = {
   rejectInvitation: async (staffId: number): Promise<void> => {
     await api.put(`/companies/staff/invitations/${staffId}/reject`);
   },
+
+  /**
+   * Actualiza el perfil del veterinario.
+   * Endpoint: PUT /veterinarians/profile
+   */
+  updateProfile: async (profile: Partial<VetProfile>): Promise<VetProfile> => {
+    const { data } = await api.put<ApiResponse<VetProfile>>("/veterinarians/profile", profile);
+    return data.data;
+  },
+
+  /**
+   * Crea un nuevo servicio.
+   * Endpoint: POST /services
+   */
+  createService: async (serviceData: any): Promise<Service> => {
+    const { data } = await api.post<ApiResponse<Service>>("/services", serviceData);
+    return data.data;
+  },
+
+  /**
+   * Actualiza un servicio existente.
+   * Endpoint: PATCH /services/{id}
+   */
+  updateService: async (id: number, serviceData: any): Promise<Service> => {
+    const { data } = await api.patch<ApiResponse<Service>>(`/services/${id}`, serviceData);
+    return data.data;
+  },
+
+  /**
+   * Elimina (soft delete) un servicio.
+   * Endpoint: DELETE /services/{id}
+   */
+  deleteService: async (id: number): Promise<void> => {
+    await api.delete(`/services/${id}`);
+  },
+
+  /**
+   * Obtiene los pacientes (mascotas) que han tenido citas con este veterinario.
+   * Endpoint: GET /veterinarians/me/patients
+   */
+  getMyPatients: async (): Promise<any[]> => {
+    const { data } = await api.get<ApiResponse<any[]>>("/veterinarians/me/patients");
+    return data.data;
+  },
+
+  /**
+   * Obtiene el historial médico de una mascota.
+   */
+  getMedicalHistory: async (mascotaId: number): Promise<any[]> => {
+    const { data } = await api.get<ApiResponse<any[]>>(`/medical-records/pet/${mascotaId}`);
+    return data.data;
+  },
+
+  /**
+   * Registra una nueva entrada en la historia clínica.
+   */
+  addMedicalRecord: async (recordData: any): Promise<any> => {
+    const { data } = await api.post<ApiResponse<any>>("/medical-records", recordData);
+    return data.data;
+  },
 };

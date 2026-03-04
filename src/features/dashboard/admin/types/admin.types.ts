@@ -1,29 +1,35 @@
 export interface Company {
   id: number;
-  nombre: string;
+  nombreComercial: string;
   ruc: string;
-  email: string;
-  telefono: string;
+  emailContacto: string;
+  telefonoContacto: string;
   direccion: string;
-  activo: boolean;
-  perfilCompleto: boolean;
+  ciudad: string;
+  pais: string;
+  estadoValidacion: 'PENDIENTE' | 'VERIFICADO' | 'RECHAZADO';
+  ownerEmail: string;
   createdAt: string;
 }
 
 export interface AdminUser {
   id: number;
-  email: string;
+  correo: string;
   nombre: string;
   rol: string;
-  activo: boolean;
+  estado: boolean;
   createdAt: string;
 }
 
 export interface AdminStats {
-  totalEmpresas: number;
   totalUsuarios: number;
+  totalEmpresas: number;
   totalVeterinarios: number;
-  ventasMes: number;
+  totalAdopciones: number;
+  totalServicios: number;
+  totalProductos: number;
+  totalOrdenes: number;
+  ingresosGlobales: number;
 }
 
 export interface Category {

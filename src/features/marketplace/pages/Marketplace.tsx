@@ -30,13 +30,65 @@ export const Marketplace = () => {
           categoriaNombre: "Adopción",
           empresaId: a.publicadoPorId,
           empresaNombre: a.publicadoPorNombre || "Dueño Particular",
-          badge: { text: "Adopción", style: "adoption" }
+          badge: { text: "Adopción", style: "adoption" },
+          itemType: 'adoption' as any
         }));
         setProducts(mappedAdoptions);
+      } else if (filters.category === -2) {
+        const data = await marketplaceService.searchServices(filters.page, filters.size, filters.q);
+        const mappedServices: Product[] = data.content.map((s: any) => ({
+          id: `service_${s.id}`,
+          nombre: s.nombre,
+          descripcion: s.descripcion,
+          precio: s.precio,
+          precioActual: s.precio,
+          stock: 1,
+          imagenes: s.imagenUrl ? [s.imagenUrl] : [],
+          categoriaId: -2,
+          categoriaNombre: "Cita Médica",
+          empresaId: s.veterinarioId || s.empresaId,
+          empresaNombre: s.empresaNombre || "Veterinario",
+          badge: { text: s.modalidad || "Servicio", style: "service" },
+          itemType: 'service'
+        }));
+        setProducts(mappedServices);
       } else {
+        // Fetch products
+        const productData = await marketplaceService.searchProducts(filters);
+        const mappedProducts: Product[] = productData.content.map((p: any) => ({
+          ...p,
+          itemType: 'product'
+        }));
 
-        const data = await marketplaceService.searchProducts(filters);
-        setProducts(data.content);
+        // If no specific category is selected (Marketplace home), ALSO fetch services to show them together
+        if (!filters.category) {
+          try {
+            const serviceData = await marketplaceService.searchServices(0, 8, filters.q);
+            const mappedServices: Product[] = serviceData.content.map((s: any) => ({
+              id: `service_${s.id}`,
+              nombre: s.nombre,
+              descripcion: s.descripcion,
+              precio: s.precio,
+              precioActual: s.precio,
+              stock: 1,
+              imagenes: s.imagenUrl ? [s.imagenUrl] : [],
+              categoriaId: -2,
+              categoriaNombre: "Cita Médica",
+              empresaId: s.veterinarioId || s.empresaId,
+              empresaNombre: s.empresaNombre || "Veterinario",
+              badge: { text: s.modalidad || "Servicio", style: "service" },
+              itemType: 'service'
+            }));
+
+            // Merge results: Products first, then Services
+            setProducts([...mappedProducts, ...mappedServices]);
+          } catch (e) {
+            console.error("Error fetching services for unified view:", e);
+            setProducts(mappedProducts);
+          }
+        } else {
+          setProducts(mappedProducts);
+        }
       }
     } catch (error) {
       console.error("Error fetching marketplace data:", error);
@@ -73,12 +125,14 @@ export const Marketplace = () => {
           <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-                {filters.category === -1 ? "Adopciones" : "Marketplace"}
+                {filters.category === -1 ? "Adopciones" : filters.category === -2 ? "Servicios Médicos" : "Marketplace"}
               </h1>
               <p className="text-slate-500">
                 {filters.category === -1
                   ? "Encuentra a tu nuevo mejor amigo."
-                  : "Productos premium para tu mascota."}
+                  : filters.category === -2
+                    ? "Reserva citas con los mejores especialistas."
+                    : "Productos premium para tu mascota."}
               </p>
             </div>
 

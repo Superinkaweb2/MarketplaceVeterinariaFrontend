@@ -38,6 +38,8 @@ import { EquipoPage } from "./features/dashboard/empresa/pages/EquipoPage";
 import { FacturacionPage } from "./features/dashboard/empresa/pages/FacturacionPage";
 import { MySubscriptionPage } from "./features/dashboard/empresa/pages/MySubscriptionPage";
 import { PaymentSuccessPage as PaymentSuccessPageEmpresa } from "./features/dashboard/empresa/pages/PaymentSuccessPage";
+import { TalentoPage } from "./features/dashboard/empresa/pages/TalentoPage";
+import { PacientesPage as EmpresaPacientesPage } from "./features/dashboard/empresa/pages/PacientesPage";
 
 // Portal Admin
 import { EmpresasPage } from "./features/dashboard/admin/pages/EmpresasPage";
@@ -46,18 +48,24 @@ import { CategoriasPage } from "./features/dashboard/admin/pages/CategoriasPage"
 import { SubscriptionAdminPage } from "./features/dashboard/admin/pages/SubscriptionAdminPage";
 import { DashboardCliente } from "./features/dashboard/cliente/components/layouts/DashboardCliente";
 import { MascotasPage } from "./features/dashboard/cliente/pages/MascotasPage";
-import { MiPerfilPage } from "./features/dashboard/cliente/pages/MiPerfilPage";
 import { AdopcionesPage } from "./features/dashboard/shared/adopciones/pages/AdopcionesPage";
 import { MisAdopcionesPage } from "./features/dashboard/shared/adopciones/pages/MisAdopcionesPage";
 import { EmpresaConfigPage } from "./features/dashboard/empresa/pages/EmpresaConfigPage";
 import { OAuthCallbackPage } from "./features/dashboard/empresa/pages/OAuthCallbackPage";
 import { ClienteConfigPage } from "./features/dashboard/cliente/pages/ClienteConfigPage";
+import { MisServiciosPage as ClienteMisServiciosPage } from "./features/dashboard/cliente/pages/MisServiciosPage";
+import { MisCitasPage } from "./features/dashboard/cliente/pages/MisCitasPage";
+import { MisSolicitudesPage } from "./features/dashboard/cliente/pages/MisSolicitudesPage";
+import { EmpresaCitasPage } from "./features/dashboard/empresa/pages/EmpresaCitasPage";
 
 // Portal Veterinario
 import DashboardVeterinario from "./features/dashboard/veterinario/pages/DashboardVeterinario";
 import { VetHomePage } from "./features/dashboard/veterinario/pages/VetHomePage";
 import { VetServiciosPage } from "./features/dashboard/veterinario/pages/VetServiciosPage";
 import { InvitacionesPage } from "./features/dashboard/veterinario/pages/InvitacionesPage";
+import { VetConfiguracionPage } from "./features/dashboard/veterinario/pages/VetConfiguracionPage";
+import { VetCitasPage } from "./features/dashboard/veterinario/pages/VetCitasPage";
+import { VetPacientesPage } from "./features/dashboard/veterinario/pages/VetPacientesPage";
 
 
 function App() {
@@ -114,6 +122,9 @@ function App() {
                 <Route path="adopciones" element={<AdopcionesPage />} />
                 <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
                 <Route path="configuracion" element={<EmpresaConfigPage />} />
+                <Route path="talento" element={<TalentoPage />} />
+                <Route path="pacientes" element={<EmpresaPacientesPage />} />
+                <Route path="citas" element={<EmpresaCitasPage />} />
                 <Route path="oauth/mercadopago" element={<OAuthCallbackPage />} />
                 <Route path="pago-exitoso" element={<PaymentSuccessPageEmpresa />} />
               </Route>
@@ -125,9 +136,11 @@ function App() {
             <Route element={<RequiresProfile />}>
               <Route path="/portal/veterinario" element={<DashboardVeterinario />}>
                 <Route index element={<VetHomePage />} />
+                <Route path="citas" element={<VetCitasPage />} />
+                <Route path="pacientes" element={<VetPacientesPage />} />
                 <Route path="servicios" element={<VetServiciosPage />} />
                 <Route path="invitaciones" element={<InvitacionesPage />} />
-                <Route path="configuracion" element={<div className="p-8 text-xl text-slate-500 font-medium">Configuración en Construcción...</div>} />
+                <Route path="configuracion" element={<VetConfiguracionPage />} />
               </Route>
             </Route>
           </Route>
@@ -140,7 +153,9 @@ function App() {
                 <Route path="mascotas" element={<MascotasPage />} />
                 <Route path="adopciones" element={<AdopcionesPage />} />
                 <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
-                <Route path="perfil" element={<MiPerfilPage />} />
+                <Route path="mis-solicitudes" element={<MisSolicitudesPage />} />
+                <Route path="servicios" element={<ClienteMisServiciosPage />} />
+                <Route path="citas" element={<MisCitasPage />} />
                 <Route path="configuracion" element={<ClienteConfigPage />} />
               </Route>
             </Route>

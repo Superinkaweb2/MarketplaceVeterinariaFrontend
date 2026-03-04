@@ -9,6 +9,7 @@ export interface Service {
   modalidad: ModalidadServicio;
   activo: boolean;
   visible: boolean;
+  imagenUrl?: string;
   empresaId?: number;
   empresaNombre?: string;
   veterinarioId?: number;

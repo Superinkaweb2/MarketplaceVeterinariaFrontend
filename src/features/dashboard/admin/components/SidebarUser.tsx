@@ -7,7 +7,7 @@ import { LogoutButton } from "../../../../components/LogoutButton";
 
 export const SidebarUser = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { role } = useAuth();
+  const { role, nombre } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export const SidebarUser = () => {
 
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-            Admin User
+            {nombre || "Admin User"}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 truncate uppercase tracking-tighter">
             {role || "Administrator"}

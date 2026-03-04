@@ -11,33 +11,54 @@ export const ProductCard = ({ product }: { product: Product }) => {
     approved: "bg-green-100 text-green-700 border-green-200",
     adoption: "bg-orange-100 text-orange-700 border-orange-200"
   };
-
   const imageUrl = product.imagenes && product.imagenes.length > 0
     ? product.imagenes[0]
-    : "https://via.placeholder.com/300?text=Sin+Imagen";
+    : null;
+
+  const isService = product.categoriaId === -2;
+  const isAdoption = product.categoriaId === -1;
+
+
+  const cardContent = (
+    <>
+      {product.badge && (
+        <div className="absolute top-3 left-3 z-10">
+          <span className={`px-2 py-1 ${badgeStyles[product.badge.style as keyof typeof badgeStyles]} text-[10px] font-bold uppercase rounded border`}>
+            {product.badge.text}
+          </span>
+        </div>
+      )}
+      <div
+        className="h-48 bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6 bg-cover bg-center transition-transform group-hover:scale-105"
+        style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : {}}
+      >
+        {!imageUrl && (
+          <div className="flex flex-col items-center text-slate-300">
+            <span className="material-symbols-outlined text-4xl mb-2">image</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider">Sin Imagen</span>
+          </div>
+        )}
+      </div>
+      <div className="p-4 flex flex-col flex-1">
+        <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-1 line-clamp-2 hover:text-blue-600 transition-colors">{product.nombre}</h3>
+        <p className="text-xs text-slate-500 mb-3">{product.empresaNombre}</p>
+      </div>
+    </>
+  );
 
   return (
     <div className="group flex flex-col bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-lg transition-all duration-300 relative">
+      {/* Todos los tipos llevan a su página de detalle */}
       <Link to={`/marketplace/product/${product.id}`} className="flex-1 flex flex-col">
-        {product.badge && (
-          <div className="absolute top-3 left-3 z-10">
-            <span className={`px-2 py-1 ${badgeStyles[product.badge.style]} text-[10px] font-bold uppercase rounded border`}>
-              {product.badge.text}
-            </span>
-          </div>
-        )}
-        <div className="h-48 bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6 bg-cover bg-center transition-transform group-hover:scale-105" style={{ backgroundImage: `url(${imageUrl})` }}>
-          {!imageUrl && <span className="material-symbols-outlined text-4xl text-slate-300">image</span>}
-        </div>
-        <div className="p-4 flex flex-col flex-1">
-          <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-1 line-clamp-2 hover:text-blue-600 transition-colors">{product.nombre}</h3>
-          <p className="text-xs text-slate-500 mb-3">{product.empresaNombre}</p>
-        </div>
+        {cardContent}
       </Link>
+
       <div className="p-4 pt-0 mt-auto flex items-center justify-between">
         <div className="flex flex-col">
-          {product.categoriaId === -1 ? (
+          {isAdoption ? (
             <span className="text-lg font-bold text-orange-600 dark:text-orange-400">¡Adóptame!</span>
+          ) : isService ? (
+            <span className="text-lg font-bold text-purple-600 dark:text-purple-400">${product.precioActual}</span>
           ) : (
             <>
               {product.precioOferta && (
@@ -47,13 +68,22 @@ export const ProductCard = ({ product }: { product: Product }) => {
             </>
           )}
         </div>
-        {product.categoriaId === -1 ? (
+
+        {isAdoption ? (
           <Link
             to={`/marketplace/product/${product.id}`}
             className="p-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600 shadow-md transition-all active:scale-90"
             title="Ver detalles de adopción"
           >
             <span className="material-symbols-outlined text-xl">visibility</span>
+          </Link>
+        ) : isService ? (
+          <Link
+            to={`/marketplace/product/${product.id}`}
+            className="p-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 shadow-md transition-all active:scale-90"
+            title="Ver detalles del servicio"
+          >
+            <span className="material-symbols-outlined text-xl">event_available</span>
           </Link>
         ) : (
           <button
@@ -68,7 +98,6 @@ export const ProductCard = ({ product }: { product: Product }) => {
           </button>
         )}
       </div>
-
     </div>
   );
 };
