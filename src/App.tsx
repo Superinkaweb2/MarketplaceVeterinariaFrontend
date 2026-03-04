@@ -53,6 +53,10 @@ import { MisAdopcionesPage } from "./features/dashboard/shared/adopciones/pages/
 import { EmpresaConfigPage } from "./features/dashboard/empresa/pages/EmpresaConfigPage";
 import { OAuthCallbackPage } from "./features/dashboard/empresa/pages/OAuthCallbackPage";
 import { ClienteConfigPage } from "./features/dashboard/cliente/pages/ClienteConfigPage";
+import { MisServiciosPage as ClienteMisServiciosPage } from "./features/dashboard/cliente/pages/MisServiciosPage";
+import { MisCitasPage } from "./features/dashboard/cliente/pages/MisCitasPage";
+import { MisSolicitudesPage } from "./features/dashboard/cliente/pages/MisSolicitudesPage";
+import { EmpresaCitasPage } from "./features/dashboard/empresa/pages/EmpresaCitasPage";
 
 // Portal Veterinario
 import DashboardVeterinario from "./features/dashboard/veterinario/pages/DashboardVeterinario";
@@ -120,6 +124,7 @@ function App() {
                 <Route path="configuracion" element={<EmpresaConfigPage />} />
                 <Route path="talento" element={<TalentoPage />} />
                 <Route path="pacientes" element={<EmpresaPacientesPage />} />
+                <Route path="citas" element={<EmpresaCitasPage />} />
                 <Route path="oauth/mercadopago" element={<OAuthCallbackPage />} />
                 <Route path="pago-exitoso" element={<PaymentSuccessPageEmpresa />} />
               </Route>
@@ -148,6 +153,9 @@ function App() {
                 <Route path="mascotas" element={<MascotasPage />} />
                 <Route path="adopciones" element={<AdopcionesPage />} />
                 <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
+                <Route path="mis-solicitudes" element={<MisSolicitudesPage />} />
+                <Route path="servicios" element={<ClienteMisServiciosPage />} />
+                <Route path="citas" element={<MisCitasPage />} />
                 <Route path="configuracion" element={<ClienteConfigPage />} />
               </Route>
             </Route>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +27,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export const Login = () => {
   const { login: loginUser } = useLogin();
   const { isAuthenticated, role, perfilCompleto } = useAuth();
+  const [searchParams] = useSearchParams();
+  const nextUrl = searchParams.get("next") || undefined;
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -37,17 +39,17 @@ export const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  // Si ya está autenticado, redirigir a su portal o a completar perfil
+  // Si ya está autenticado, redirigir al ?next si existe, o al portal por rol
   if (isAuthenticated && role) {
     if (perfilCompleto) {
-      return <Navigate to={getRedirectByRole(role)} replace />;
+      return <Navigate to={nextUrl || getRedirectByRole(role)} replace />;
     } else {
       return <Navigate to={`/register/perfil/${role.toLowerCase()}`} replace />;
     }
   }
 
   const onSubmit = (data: LoginFormData) => {
-    loginUser(data.correo, data.password);
+    loginUser(data.correo, data.password, nextUrl);
   };
 
   return (
@@ -66,9 +68,9 @@ export const Login = () => {
         <div className="relative z-10 flex flex-col justify-end p-16 h-full w-full">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6 text-white">
-              <img 
-                src="/LOGO HUELLA360_logo primario.png" 
-                alt="Logo Huella360" 
+              <img
+                src="/LOGO HUELLA360_logo primario.png"
+                alt="Logo Huella360"
                 className="h-12 w-auto object-contain"
               />
               <span className="text-4xl font-bold tracking-tight">Huella360</span>
@@ -96,9 +98,9 @@ export const Login = () => {
         {/* Logo móvil */}
         <div className="lg:hidden mb-12">
           <div className="flex items-center gap-2 text-slate-900 dark:text-white">
-            <img 
-              src="/LOGO HUELLA360_logo primario.png" 
-              alt="Logo Huella360" 
+            <img
+              src="/LOGO HUELLA360_logo primario.png"
+              alt="Logo Huella360"
               className="h-8 w-auto object-contain"
             />
             <span className="text-2xl font-bold">Huella360</span>
@@ -136,11 +138,10 @@ export const Login = () => {
                     placeholder="doctor@clinica.com"
                     {...register("correo")}
                     aria-invalid={!!errors.correo}
-                    className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${
-                      errors.correo
+                    className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${errors.correo
                         ? "border-red-400 dark:border-red-500"
                         : "border-slate-200 dark:border-slate-700"
-                    }`}
+                      }`}
                   />
                 </div>
                 {errors.correo && (
@@ -177,11 +178,10 @@ export const Login = () => {
                     placeholder="••••••••"
                     {...register("password")}
                     aria-invalid={!!errors.password}
-                    className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${
-                      errors.password
+                    className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${errors.password
                         ? "border-red-400 dark:border-red-500"
                         : "border-slate-200 dark:border-slate-700"
-                    }`}
+                      }`}
                   />
                   <button
                     type="button"

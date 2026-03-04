@@ -20,16 +20,32 @@ export const serviceService = {
   /**
    * Crea un nuevo servicio.
    */
-  createService: async (payload: CreateServiceRequest): Promise<Service> => {
-    const { data } = await api.post<ApiResponse<Service>>("/services", payload);
+  createService: async (payload: CreateServiceRequest, imagen?: File): Promise<Service> => {
+    const formData = new FormData();
+    formData.append("data", new Blob([JSON.stringify(payload)], { type: "application/json" }));
+    if (imagen) {
+      formData.append("imagen", imagen);
+    }
+
+    const { data } = await api.post<ApiResponse<Service>>("/services", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return data.data;
   },
 
   /**
    * Actualiza parcialmente un servicio existente.
    */
-  updateService: async (id: number, payload: UpdateServiceRequest): Promise<Service> => {
-    const { data } = await api.patch<ApiResponse<Service>>(`/services/${id}`, payload);
+  updateService: async (id: number, payload: UpdateServiceRequest, imagen?: File): Promise<Service> => {
+    const formData = new FormData();
+    formData.append("data", new Blob([JSON.stringify(payload)], { type: "application/json" }));
+    if (imagen) {
+      formData.append("imagen", imagen);
+    }
+
+    const { data } = await api.patch<ApiResponse<Service>>(`/services/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return data.data;
   },
 

@@ -38,7 +38,7 @@ export const useLogin = () => {
   const navigate = useNavigate();
   const { login, setPerfilCompleto } = useAuth();
 
-  const loginUser = async (correo: string, password: string) => {
+  const loginUser = async (correo: string, password: string, redirectTo?: string) => {
     try {
       const response = await authService.login({ correo, password });
 
@@ -59,7 +59,7 @@ export const useLogin = () => {
       });
 
       if (tieneP) {
-        navigate(getRedirectByRole(response.rol));
+        navigate(redirectTo || getRedirectByRole(response.rol));
       } else {
         navigate(`/register/perfil/${response.rol.toLowerCase()}`);
       }

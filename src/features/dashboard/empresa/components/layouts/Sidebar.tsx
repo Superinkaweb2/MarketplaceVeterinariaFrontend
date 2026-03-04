@@ -14,7 +14,9 @@ import {
   Zap,
   Search,
   PawPrint,
+  Calendar,
 } from "lucide-react";
+
 
 
 interface SidebarProps {
@@ -84,6 +86,11 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 label="Dashboard"
                 to="/portal/empresa"
                 end
+              />
+              <NavItem
+                icon={<Calendar size={20} />}
+                label="Citas"
+                to="/portal/empresa/citas"
               />
               <NavItem
                 icon={<Stethoscope size={20} />}

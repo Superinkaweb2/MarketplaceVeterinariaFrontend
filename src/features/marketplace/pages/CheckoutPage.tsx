@@ -54,10 +54,18 @@ export const CheckoutPage = () => {
                 return;
             }
 
-            const orderItems = group.items.map((item: any) => ({
-                productoId: item.id,
-                cantidad: item.quantity
-            }));
+            const orderItems = group.items.map((item: any) => {
+                const isService = item.itemType === 'service' || String(item.id).startsWith('service_');
+                const numericId = typeof item.id === 'string'
+                    ? Number(item.id.split('_').pop())
+                    : item.id;
+
+                return {
+                    productoId: isService ? null : numericId,
+                    servicioId: isService ? numericId : null,
+                    cantidad: item.quantity
+                };
+            });
 
             // 1. Create Order
             const orderId = await marketplaceService.createOrder({

@@ -9,7 +9,7 @@ interface TopHeaderProps {
 }
 
 export const TopHeader = ({ onMenuClick }: TopHeaderProps) => {
-    const { role } = useAuth();
+    const { role, nombre } = useAuth();
     const [profile, setProfile] = useState<ClienteProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -29,7 +29,7 @@ export const TopHeader = ({ onMenuClick }: TopHeaderProps) => {
 
     const displayName = profile
         ? `${profile.nombres} ${profile.apellidos}`.trim()
-        : "Usuario";
+        : (nombre || "Usuario");
 
     return (
         <header className="h-16 flex items-center justify-between px-6 bg-white dark:bg-surface-dark border-b border-gray-200 dark:border-gray-800 flex-shrink-0 z-20">

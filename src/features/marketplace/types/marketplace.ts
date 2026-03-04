@@ -6,7 +6,7 @@ export interface Category {
 }
 
 export interface Product {
-  id: number;
+  id: number | string;
   nombre: string;
   descripcion: string;
   precio: number;
@@ -20,6 +20,7 @@ export interface Product {
   empresaNombre: string;
   mpPublicKey?: string;
   badge?: { text: string; style: 'rx' | 'service' | 'approved' | 'adoption' };
+  itemType?: 'product' | 'service';
 }
 
 export interface MarketplaceFilters {

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { marketplaceService } from "../services/marketplaceService";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../../auth/context/AuthContext";
 import { PostularAdopcionModal } from "../../dashboard/shared/adopciones/components/PostularAdopcionModal";
 import type { AdoptionResponse } from "../../dashboard/shared/adopciones/types/adoption.types";
 import type { Product } from "../types/marketplace";
@@ -14,8 +15,24 @@ export const ProductDetails = () => {
     const [rawAdoption, setRawAdoption] = useState<AdoptionResponse | null>(null);
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
-    const { addToCart } = useCart();
+    const { addToCart, items } = useCart();
+    const { isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
 
+    const handleReservar = () => {
+        if (!isAuthenticated) {
+            navigate(`/login?next=${encodeURIComponent(location.pathname)}`);
+            return;
+        }
+        if (product) addToCart(product);
+    };
+
+    const isService = product?.categoriaId === -2;
+    const isAdoption = product?.categoriaId === -1;
+
+    // Check if this service is already in cart (services can only be reserved once)
+    const isServiceInCart = isService && items.some(item => item.id === product?.id);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -25,9 +42,8 @@ export const ProductDetails = () => {
                     const actualId = Number(id.replace("adoption_", ""));
                     const data = await marketplaceService.getAdoptionById(actualId);
                     setRawAdoption(data);
-                    // Map AdoptionResponse to Product type
                     const mappedProduct: Product = {
-                        id: `adoption_${data.id}` as any,
+                        id: `adoption_${data.id}`,
                         nombre: data.titulo,
                         descripcion: data.historia,
                         precio: 0,
@@ -38,13 +54,34 @@ export const ProductDetails = () => {
                         categoriaNombre: "Adopción",
                         empresaId: data.publicadoPorId,
                         empresaNombre: data.publicadoPorNombre || "Dueño Particular",
-                        badge: { text: "Adopción", style: "adoption" }
+                        badge: { text: "Adopción", style: "adoption" },
+                        itemType: 'product'
+                    };
+                    setProduct(mappedProduct);
+
+                } else if (id.startsWith("service_")) {
+                    const actualId = Number(id.replace("service_", ""));
+                    const data = await marketplaceService.getServiceById(actualId);
+                    const mappedProduct: Product = {
+                        id: `service_${data.id}`,
+                        nombre: data.nombre,
+                        descripcion: data.descripcion || "Sin descripción disponible.",
+                        precio: data.precio,
+                        precioActual: data.precio,
+                        stock: 1,
+                        imagenes: data.fotoUrl ? [data.fotoUrl] : [],
+                        categoriaId: -2,
+                        categoriaNombre: "Cita Médica",
+                        empresaId: data.veterinarioId || data.empresaId,
+                        empresaNombre: data.empresaNombre || "Veterinario",
+                        badge: { text: data.modalidad || "Servicio", style: "service" },
+                        itemType: 'service'
                     };
                     setProduct(mappedProduct);
 
                 } else {
                     const data = await marketplaceService.getProductById(Number(id));
-                    setProduct(data);
+                    setProduct({ ...data, itemType: 'product' });
                 }
             } catch (error) {
                 console.error("Error fetching product details:", error);
@@ -113,7 +150,12 @@ export const ProductDetails = () => {
                     {/* Info */}
                     <div className="flex flex-col">
                         <div className="mb-6">
-                            <span className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold rounded-full mb-4 uppercase tracking-wider">
+                            <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full mb-4 uppercase tracking-wider ${isService
+                                ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400"
+                                : isAdoption
+                                    ? "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400"
+                                    : "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+                                }`}>
                                 {product.categoriaNombre}
                             </span>
                             <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-2 leading-tight">
@@ -121,20 +163,19 @@ export const ProductDetails = () => {
                             </h1>
                             <p className="text-slate-500 flex items-center gap-2">
                                 <span className="material-symbols-outlined text-sm">
-                                    {product.categoriaId === -1 ? "person" : "storefront"}
+                                    {isAdoption ? "person" : "storefront"}
                                 </span>
-                                {product.categoriaId === -1 ? "Publicado por:" : "Vendido por:"}{" "}
+                                {isAdoption ? "Publicado por:" : isService ? "Ofrecido por:" : "Vendido por:"}{" "}
                                 <span className="font-semibold text-slate-700 dark:text-slate-300">
                                     {product.empresaNombre}
                                 </span>
                             </p>
-
                         </div>
 
-                        {product.categoriaId !== -1 && (
+                        {!isAdoption && (
                             <div className="mb-8 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                                 <div className="flex items-baseline gap-4 mb-2">
-                                    <span className="text-4xl font-black text-slate-900 dark:text-white">
+                                    <span className={`text-4xl font-black ${isService ? "text-purple-700 dark:text-purple-400" : "text-slate-900 dark:text-white"}`}>
                                         ${product.precioActual.toFixed(2)}
                                     </span>
                                     {product.precioOferta && (
@@ -143,7 +184,14 @@ export const ProductDetails = () => {
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-sm text-slate-500 italic">Precios con impuestos incluidos</p>
+                                {isService ? (
+                                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-sm">info</span>
+                                        Los servicios se reservan por turno único
+                                    </p>
+                                ) : (
+                                    <p className="text-sm text-slate-500 italic">Precios con impuestos incluidos</p>
+                                )}
                             </div>
                         )}
 
@@ -159,13 +207,28 @@ export const ProductDetails = () => {
                         </div>
 
                         <div className="mt-auto flex flex-col sm:flex-row gap-4">
-                            {product.categoriaId === -1 ? (
+                            {isAdoption ? (
                                 <button
                                     onClick={() => setIsApplyModalOpen(true)}
                                     className="flex-1 bg-orange-500 text-white font-bold py-4 px-8 rounded-2xl hover:bg-orange-600 shadow-xl shadow-orange-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                                 >
                                     <span className="material-symbols-outlined">pets</span>
                                     Solicitar Adopción
+                                </button>
+
+                            ) : isService ? (
+                                <button
+                                    onClick={handleReservar}
+                                    disabled={isServiceInCart}
+                                    className={`flex-1 font-bold py-4 px-8 rounded-2xl shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 ${isServiceInCart
+                                        ? "bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed shadow-none"
+                                        : "bg-purple-600 text-white hover:bg-purple-700 shadow-purple-500/20"
+                                        }`}
+                                >
+                                    <span className="material-symbols-outlined">
+                                        {isServiceInCart ? "check_circle" : !isAuthenticated ? "login" : "event_available"}
+                                    </span>
+                                    {isServiceInCart ? "Servicio ya reservado" : !isAuthenticated ? "Iniciar sesión para reservar" : "Reservar Turno"}
                                 </button>
 
                             ) : (
@@ -177,9 +240,6 @@ export const ProductDetails = () => {
                                     Añadir al carrito
                                 </button>
                             )}
-                            <button className="sm:w-16 h-16 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-500 transition-all">
-                                <span className="material-symbols-outlined text-2xl">favorite</span>
-                            </button>
                         </div>
 
                     </div>

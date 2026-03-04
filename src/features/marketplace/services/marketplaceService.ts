@@ -25,8 +25,15 @@ export const marketplaceService = {
         return data.data;
     },
 
-    createOrder: async (orderData: { empresaId: number; items: { productoId: number; cantidad: number }[] }): Promise<number> => {
+    createOrder: async (orderData: { empresaId: number; items: { productoId: number | null; servicioId: number | null; cantidad: number }[] }): Promise<number> => {
         const { data } = await api.post<ApiResponse<number>>("/orders", orderData);
+        return data.data;
+    },
+
+    getMyOrders: async (page = 0, size = 10) => {
+        const { data } = await api.get<ApiResponse<{ content: any[] }>>("/orders/me", {
+            params: { page, size }
+        });
         return data.data;
     },
 
@@ -47,10 +54,15 @@ export const marketplaceService = {
         return data.data;
     },
 
-    searchServices: async (page = 0, size = 12) => {
+    searchServices: async (page = 0, size = 12, q?: string) => {
         const { data } = await api.get<ApiResponse<{ content: any[] }>>("/services", {
-            params: { page, size }
+            params: { page, size, q }
         });
+        return data.data;
+    },
+
+    getServiceById: async (id: number): Promise<any> => {
+        const { data } = await api.get<ApiResponse<any>>(`/services/${id}`);
         return data.data;
     }
 };

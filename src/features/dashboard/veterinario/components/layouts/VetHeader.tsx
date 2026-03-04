@@ -10,7 +10,7 @@ interface VetHeaderProps {
 }
 
 export const VetHeader = ({ onMenuClick }: VetHeaderProps) => {
-    const { role } = useAuth();
+    const { role, nombre } = useAuth();
     const [profile, setProfile] = useState<VetProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -28,7 +28,7 @@ export const VetHeader = ({ onMenuClick }: VetHeaderProps) => {
         fetchProfile();
     }, []);
 
-    const displayName = profile ? `${profile.nombres} ${profile.apellidos}` : "Veterinario";
+    const displayName = profile ? `${profile.nombres} ${profile.apellidos}` : (nombre || "Veterinario");
 
     return (
         <header className="h-14 shrink-0 bg-white dark:bg-surface-dark border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 md:px-6">

@@ -8,7 +8,9 @@ import {
   LogOut,
   ChevronLeft,
   X,
-  Heart
+  Heart,
+  Calendar,
+  CalendarCheck
 } from "lucide-react";
 import { useAuth } from "../../../../auth/context/useAuth";
 
@@ -16,7 +18,9 @@ const MENU_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/portal/cliente", end: true },
   { label: "Mis Mascotas", icon: PawPrint, href: "/portal/cliente/mascotas" },
   { label: "Adopciones", icon: Heart, href: "/portal/cliente/adopciones" },
-  { label: "Mis Solicitudes", icon: Heart, href: "/portal/cliente/mis-adopciones" },
+  { label: "Mis Solicitudes", icon: Heart, href: "/portal/cliente/mis-solicitudes" },
+  { label: "Mis Servicios", icon: Calendar, href: "/portal/cliente/servicios" },
+  { label: "Mis Citas", icon: CalendarCheck, href: "/portal/cliente/citas" },
   { label: "Marketplace", icon: ShoppingBag, href: "/marketplace" },
 ];
 
