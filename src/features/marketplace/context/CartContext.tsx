@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Product } from '../types/marketplace';
 
 interface CartItem extends Product {
@@ -13,6 +13,8 @@ interface CartContextType {
     updateQuantity: (productId: number | string, quantity: number) => void;
     clearCart: () => void;
     toggleCart: () => void;
+    openCart: () => void;
+    closeCart: () => void;
     cartCount: number;
     cartTotal: number;
 }
@@ -40,36 +42,59 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('vetsaas_cart', JSON.stringify(items));
     }, [items]);
 
-    const addToCart = (product: Product) => {
+    const addToCart = useCallback((product: Product) => {
+        const isService = product.itemType === 'service' || String(product.id).startsWith('service_');
+
         setItems(currentItems => {
             const existingItem = currentItems.find(item => item.id === product.id);
+
             if (existingItem) {
+                // Services can only have quantity 1
+                if (isService) return currentItems;
+
+                // Don't exceed stock
+                if (existingItem.quantity >= product.stock) return currentItems;
+
                 return currentItems.map(item =>
                     item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
                 );
             }
             return [...currentItems, { ...product, quantity: 1 }];
         });
-        setIsOpen(true); // Open cart sidebar when item is added
-    };
+        setIsOpen(true);
+    }, []);
 
-    const removeFromCart = (productId: number | string) => {
-        setItems(items => items.filter(item => item.id !== productId));
-    };
+    const removeFromCart = useCallback((productId: number | string) => {
+        setItems(prev => prev.filter(item => item.id !== productId));
+    }, []);
 
-    const updateQuantity = (productId: number | string, quantity: number) => {
+    const updateQuantity = useCallback((productId: number | string, quantity: number) => {
+        // Prevent negative or zero
         if (quantity <= 0) {
             removeFromCart(productId);
             return;
         }
-        setItems(items =>
-            items.map(item => (item.id === productId ? { ...item, quantity } : item))
+
+        setItems(prev =>
+            prev.map(item => {
+                if (item.id !== productId) return item;
+
+                const isService = item.itemType === 'service' || String(item.id).startsWith('service_');
+
+                // Services always stay at 1
+                if (isService) return item;
+
+                // Clamp to available stock
+                const clampedQty = Math.min(quantity, item.stock);
+                return { ...item, quantity: clampedQty };
+            })
         );
-    };
+    }, [removeFromCart]);
 
-    const clearCart = () => setItems([]);
-
-    const toggleCart = () => setIsOpen(!isOpen);
+    const clearCart = useCallback(() => setItems([]), []);
+    const toggleCart = useCallback(() => setIsOpen(prev => !prev), []);
+    const openCart = useCallback(() => setIsOpen(true), []);
+    const closeCart = useCallback(() => setIsOpen(false), []);
 
     const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
     const cartTotal = items.reduce((acc, item) => acc + item.precioActual * item.quantity, 0);
@@ -84,6 +109,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 updateQuantity,
                 clearCart,
                 toggleCart,
+                openCart,
+                closeCart,
                 cartCount,
                 cartTotal
             }}

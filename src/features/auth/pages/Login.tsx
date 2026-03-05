@@ -139,8 +139,8 @@ export const Login = () => {
                     {...register("correo")}
                     aria-invalid={!!errors.correo}
                     className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${errors.correo
-                        ? "border-red-400 dark:border-red-500"
-                        : "border-slate-200 dark:border-slate-700"
+                      ? "border-red-400 dark:border-red-500"
+                      : "border-slate-200 dark:border-slate-700"
                       }`}
                   />
                 </div>
@@ -160,6 +160,12 @@ export const Login = () => {
                   >
                     Contraseña
                   </label>
+                  <Link
+                    to="/auth/forgot-password"
+                    className="text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </Link>
                 </div>
                 <div className="relative mt-2">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 pointer-events-none">
@@ -173,8 +179,8 @@ export const Login = () => {
                     {...register("password")}
                     aria-invalid={!!errors.password}
                     className={`block w-full rounded-xl border bg-slate-50 dark:bg-slate-800/50 py-3 pl-11 pr-11 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all ${errors.password
-                        ? "border-red-400 dark:border-red-500"
-                        : "border-slate-200 dark:border-slate-700"
+                      ? "border-red-400 dark:border-red-500"
+                      : "border-slate-200 dark:border-slate-700"
                       }`}
                   />
                   <button

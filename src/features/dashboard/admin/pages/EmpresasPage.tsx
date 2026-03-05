@@ -1,14 +1,19 @@
 import { useState, useEffect } from "react";
-import { Search, Filter, Building2, Eye, Ban, CheckCircle } from "lucide-react";
+import { Search, Building2, Eye, Ban, CheckCircle } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { adminService } from "../services/adminService";
 import type { Company } from "../types/admin.types";
+import { CompanyDetailModal } from "../components/CompanyDetailModal";
 import Swal from "sweetalert2";
 
 export const EmpresasPage = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Modal State
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const fetchCompanies = async () => {
     setIsLoading(true);
@@ -28,18 +33,21 @@ export const EmpresasPage = () => {
 
   const handleToggleStatus = async (company: Company) => {
     const isVerified = company.estadoValidacion === 'VERIFICADO';
+
     const result = await Swal.fire({
       title: isVerified ? '¿Desactivar empresa?' : '¿Activar empresa?',
       text: `La empresa ${company.nombreComercial} cambiará su estado de validación.`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: isVerified ? '#ef4444' : '#10b981',
+      confirmButtonColor: isVerified ? '#ef4444' : '#1ea59c',
       confirmButtonText: isVerified ? 'Sí, desactivar' : 'Sí, activar',
       cancelButtonText: 'Cancelar',
+      background: 'rgba(255, 255, 255, 0.9)',
+      backdrop: `rgba(45, 62, 130, 0.1)`,
       customClass: {
-        popup: 'rounded-2xl',
-        confirmButton: 'rounded-xl',
-        cancelButton: 'rounded-xl'
+        popup: 'rounded-[1.5rem] border border-white/40 shadow-2xl backdrop-blur-xl',
+        confirmButton: 'rounded-xl px-6 py-2.5 font-bold transition-all hover:scale-105',
+        cancelButton: 'rounded-xl px-6 py-2.5 font-bold transition-all hover:scale-105'
       }
     });
 
@@ -54,14 +62,16 @@ export const EmpresasPage = () => {
           title: '¡Éxito!',
           text: 'Estado actualizado correctamente.',
           icon: 'success',
-          customClass: { popup: 'rounded-2xl' }
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: { popup: 'rounded-[1.5rem]' }
         });
       } catch (error) {
         Swal.fire({
           title: 'Error',
           text: 'No se pudo actualizar el estado.',
           icon: 'error',
-          customClass: { popup: 'rounded-2xl' }
+          customClass: { popup: 'rounded-[1.5rem]' }
         });
       }
     }
@@ -69,183 +79,225 @@ export const EmpresasPage = () => {
 
   const filteredCompanies = companies.filter(c =>
     c.nombreComercial.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.ruc.includes(searchTerm)
+    c.ruc.includes(searchTerm) ||
+    c.emailContacto.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="h-full flex flex-col gap-6 overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-            Gestión de Empresas
-          </h1>
-          <p className="text-sm mt-1 text-slate-500 dark:text-slate-400">
-            Administra los tenants (clínicas y petshops) registrados en la plataforma.
-          </p>
-        </div>
-      </div>
+    <>
+      <div className="h-full flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* Header Container */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-1">
+            <h1 className="text-4xl font-black text-[#2D3E82] dark:text-white tracking-tight flex items-center gap-3">
+              <Building2 className="text-[#1ea59c]" size={36} />
+              Gestión de Empresas
+            </h1>
+            <p className="text-slate-500 dark:text-gray-400 font-medium max-w-lg">
+              Administra los tenants (clínicas y petshops) registrados en la plataforma central de Huella360.
+            </p>
+          </div>
 
-      {/* Filters & Search */}
-      <div className="shrink-0 flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
-          <input
-            type="text"
-            placeholder="Buscar por nombre o RUC..."
-            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary dark:text-white transition-all outline-none placeholder:text-slate-400 shadow-sm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          {/* Filter & Search Bar - High Premium Look */}
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="relative group w-full sm:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#1ea59c] transition-colors" size={18} />
+              <input
+                type="text"
+                placeholder="Buscar por nombre, RUC o email..."
+                className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-white/40 dark:border-white/10 bg-white/60 dark:bg-black/20 backdrop-blur-xl focus:ring-4 focus:ring-[#1ea59c]/10 focus:border-[#1ea59c] dark:text-white transition-all outline-none placeholder:text-slate-400 shadow-soft"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
-        <Button variant="outline" className="px-6 py-3 rounded-xl flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
-          <Filter size={18} className="text-slate-500" />
-          <span className="font-medium">Filtros</span>
-        </Button>
-      </div>
 
-      {/* Table Area */}
-      <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div className="flex-1 overflow-auto custom-scrollbar">
-          {/* Desktop View */}
-          <div className="hidden md:block min-w-[1000px]">
-            <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 z-10 bg-slate-50/95 dark:bg-slate-800/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
-                <tr>
-                  <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Empresa</th>
-                  <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">RUC</th>
-                  <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Contacto</th>
-                  <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Estado</th>
-                  <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                {isLoading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} className="animate-pulse">
-                      <td colSpan={5} className="px-6 py-4 h-20 bg-slate-50/30 dark:bg-slate-800/10"></td>
-                    </tr>
-                  ))
-                ) : filteredCompanies.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-16 text-center">
-                      <div className="flex flex-col items-center justify-center max-w-sm mx-auto">
-                        <Building2 size={48} className="text-slate-300 dark:text-slate-700 mb-4" />
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">No hay empresas</h3>
-                        <p className="text-sm text-slate-500">No encontramos coincidencias para tu búsqueda.</p>
-                      </div>
-                    </td>
+        {/* Main Table Content - Glassmorphic Card */}
+        <div className="flex-1 min-h-0 bg-white/40 dark:bg-black/20 backdrop-blur-2xl rounded-[2.5rem] border border-white/40 dark:border-white/10 shadow-soft overflow-hidden flex flex-col relative">
+          <div className="flex-1 overflow-auto custom-scrollbar">
+            {/* Desktop View */}
+            <div className="hidden md:block min-w-[1000px]">
+              <table className="w-full text-left border-collapse">
+                <thead className="sticky top-0 z-20">
+                  <tr className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-2xl border-b border-gray-100 dark:border-white/5">
+                    <th className="px-8 py-6 text-[11px] uppercase tracking-[0.2em] font-black text-slate-400 dark:text-gray-500">Empresa</th>
+                    <th className="px-8 py-6 text-[11px] uppercase tracking-[0.2em] font-black text-slate-400 dark:text-gray-500">Identificación</th>
+                    <th className="px-8 py-6 text-[11px] uppercase tracking-[0.2em] font-black text-slate-400 dark:text-gray-500">Contacto Directo</th>
+                    <th className="px-8 py-6 text-[11px] uppercase tracking-[0.2em] font-black text-slate-400 dark:text-gray-500">Validación</th>
+                    <th className="px-8 py-6 text-[11px] uppercase tracking-[0.2em] font-black text-slate-400 dark:text-gray-500 text-right">Acciones</th>
                   </tr>
-                ) : (
-                  filteredCompanies.map((company) => (
-                    <tr key={company.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0 font-bold">
-                            {company.nombreComercial.charAt(0)}
+                </thead>
+                <tbody className="divide-y divide-gray-100/50 dark:divide-white/5">
+                  {isLoading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <tr key={i} className="animate-pulse">
+                        <td colSpan={5} className="px-8 py-8">
+                          <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 rounded-2xl bg-slate-200 dark:bg-white/5" />
+                            <div className="space-y-2">
+                              <div className="h-4 w-32 bg-slate-200 dark:bg-white/5 rounded" />
+                              <div className="h-3 w-24 bg-slate-100 dark:bg-white/5 rounded" />
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{company.nombreComercial}</p>
-                            <p className="text-xs text-slate-500 truncate">{company.emailContacto}</p>
+                        </td>
+                      </tr>
+                    ))
+                  ) : filteredCompanies.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-8 py-24 text-center">
+                        <div className="flex flex-col items-center justify-center max-w-sm mx-auto space-y-4">
+                          <div className="w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center">
+                            <Building2 size={40} className="text-slate-300 dark:text-gray-600" />
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 font-mono">
-                        {company.ruc}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="text-sm text-slate-700 dark:text-slate-300">{company.telefonoContacto}</span>
-                          <span className="text-xs text-slate-500 truncate max-w-[200px]">{company.direccion}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${company.estadoValidacion === 'VERIFICADO'
-                          ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400'
-                          : company.estadoValidacion === 'PENDIENTE'
-                            ? 'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/10 dark:text-amber-400'
-                            : 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/10 dark:text-red-400'
-                          }`}>
-                          {company.estadoValidacion}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button title="Ver detalles" className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
-                            <Eye size={18} />
-                          </button>
-                          <button
-                            title={company.estadoValidacion === 'VERIFICADO' ? "Desactivar" : "Activar"}
-                            onClick={() => handleToggleStatus(company)}
-                            className={`p-2 rounded-lg transition-colors ${company.estadoValidacion === 'VERIFICADO'
-                              ? 'text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10'
-                              : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
-                              }`}
-                          >
-                            {company.estadoValidacion === 'VERIFICADO' ? <Ban size={18} /> : <CheckCircle size={18} />}
-                          </button>
+                          <h3 className="text-xl font-bold text-[#2D3E82] dark:text-white">Sin resultados</h3>
+                          <p className="text-slate-500 dark:text-gray-400 text-sm">No encontramos ninguna empresa que coincida con "<span className="font-bold text-[#1ea59c]">{searchTerm}</span>".</p>
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filteredCompanies.map((company) => (
+                      <tr key={company.id} className="hover:bg-white/60 dark:hover:bg-white/5 transition-all duration-300 group">
+                        <td className="px-8 py-6">
+                          <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#1ea59c]/20 to-[#2D3E82]/20 flex items-center justify-center text-[#1ea59c] shrink-0 font-black text-lg border border-[#1ea59c]/20 shadow-sm group-hover:scale-110 transition-transform duration-500">
+                              {company.nombreComercial.charAt(0)}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-[#2D3E82] dark:text-white tracking-tight truncate group-hover:text-[#1ea59c] transition-colors">{company.nombreComercial}</p>
+                              <p className="text-[11px] text-slate-500 dark:text-gray-400 font-medium truncate">{company.emailContacto}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-8 py-6">
+                          <div className="space-y-1">
+                            <p className="text-[11px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-wider">RUC</p>
+                            <p className="text-sm font-mono font-bold text-slate-700 dark:text-gray-300">{company.ruc}</p>
+                          </div>
+                        </td>
+                        <td className="px-8 py-6">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold text-slate-800 dark:text-gray-200">{company.telefonoContacto}</span>
+                            <span className="text-[11px] text-slate-500 dark:text-gray-400 truncate max-w-[200px] font-medium italic">{company.direccion}</span>
+                          </div>
+                        </td>
+                        <td className="px-8 py-6">
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all duration-300 ${company.estadoValidacion === 'VERIFICADO'
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                            : company.estadoValidacion === 'PENDIENTE'
+                              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                            }`}>
+                            <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${company.estadoValidacion === 'VERIFICADO' ? 'bg-emerald-500' : company.estadoValidacion === 'PENDIENTE' ? 'bg-amber-500' : 'bg-rose-500'
+                              }`} />
+                            {company.estadoValidacion}
+                          </span>
+                        </td>
+                        <td className="px-8 py-6 text-right">
+                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                            <button
+                              onClick={() => {
+                                setSelectedCompany(company);
+                                setIsDetailModalOpen(true);
+                              }}
+                              className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-[#1ea59c] hover:bg-[#1ea59c]/10 rounded-xl transition-all duration-300 border border-transparent hover:border-[#1ea59c]/20 shadow-sm"
+                              title="Ver detalles"
+                            >
+                              <Eye size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleToggleStatus(company)}
+                              className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 border border-transparent shadow-sm ${company.estadoValidacion === 'VERIFICADO'
+                                ? 'text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 hover:border-rose-500/20'
+                                : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-500/10 hover:border-emerald-500/20'
+                                }`}
+                              title={company.estadoValidacion === 'VERIFICADO' ? "Desactivar" : "Activar"}
+                            >
+                              {company.estadoValidacion === 'VERIFICADO' ? <Ban size={18} /> : <CheckCircle size={18} />}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View - Enhanced Cards */}
+            <div className="md:hidden flex flex-col p-6 gap-6">
+              {filteredCompanies.map((company) => (
+                <div key={company.id} className="relative group overflow-hidden bg-white/40 dark:bg-white/5 p-6 rounded-[2rem] border border-white/40 dark:border-white/10 shadow-soft animate-in zoom-in-95 duration-500">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#1ea59c]/5 to-[#2D3E82]/5 blur-3xl rounded-full" />
+
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="h-14 w-14 rounded-2xl bg-[#1ea59c]/10 flex items-center justify-center text-[#1ea59c] shrink-0 font-black text-2xl border border-[#1ea59c]/10 shadow-sm">
+                      {company.nombreComercial.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base font-black text-[#2D3E82] dark:text-white tracking-tight truncate">{company.nombreComercial}</h3>
+                      <p className="text-xs text-slate-500 dark:text-gray-400 truncate">{company.emailContacto}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-6 relative z-10">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Identificación</p>
+                      <p className="text-sm font-mono font-bold dark:text-white">{company.ruc}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Validación</p>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-black uppercase ${company.estadoValidacion === 'VERIFICADO' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'
+                        }`}>
+                        {company.estadoValidacion}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-5 border-t border-gray-100 dark:border-white/10">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedCompany(company);
+                        setIsDetailModalOpen(true);
+                      }}
+                      className="flex-1 text-[11px] font-black uppercase py-4 h-auto rounded-xl bg-white/50 backdrop-blur-md"
+                    >
+                      Detalles
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleToggleStatus(company)}
+                      className={`flex-1 text-[11px] font-black uppercase py-4 h-auto rounded-xl transition-all active:scale-95 ${company.estadoValidacion === 'VERIFICADO' ? 'text-rose-600 border-rose-200 hover:bg-rose-50' : 'text-emerald-600 border-emerald-200 hover:bg-emerald-50'
+                        }`}
+                    >
+                      {company.estadoValidacion === 'VERIFICADO' ? 'Desactivar' : 'Activar'}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Mobile View */}
-          <div className="md:hidden flex flex-col p-4 gap-4">
-            {filteredCompanies.map((company) => (
-              <div key={company.id} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 font-bold text-xl">
-                    {company.nombreComercial.charAt(0)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">{company.nombreComercial}</h3>
-                    <p className="text-xs text-slate-500 truncate">{company.emailContacto}</p>
-                  </div>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${company.estadoValidacion === 'VERIFICADO' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-                    }`}>
-                    {company.estadoValidacion}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <p className="text-slate-400 uppercase font-semibold text-[10px]">RUC</p>
-                    <p className="dark:text-white font-mono">{company.ruc}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-400 uppercase font-semibold text-[10px]">Teléfono</p>
-                    <p className="dark:text-white">{company.telefonoContacto}</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 pt-3 border-t border-slate-200/60 dark:border-slate-700">
-                  <Button variant="outline" className="flex-1 text-xs py-2 h-auto rounded-lg">Detalles</Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleToggleStatus(company)}
-                    className={`flex-1 text-xs py-2 h-auto rounded-lg ${company.estadoValidacion === 'VERIFICADO' ? 'text-red-600 hover:bg-red-50' : 'text-emerald-600 hover:bg-emerald-50'}`}
-                  >
-                    {company.estadoValidacion === 'VERIFICADO' ? 'Desactivar' : 'Activar'}
-                  </Button>
-                </div>
+          {/* Premium Pagination Section */}
+          <div className="shrink-0 px-8 py-5 bg-white/60 dark:bg-slate-900/40 backdrop-blur-2xl border-t border-gray-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-[#1ea59c]/10 rounded-lg">
+                <Building2 size={16} className="text-[#1ea59c]" />
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Pagination Section */}
-        <div className="shrink-0 px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-sm font-medium text-slate-500">
-            Mostrando <span className="text-slate-900 dark:text-white">{filteredCompanies.length}</span> empresas
-          </span>
-          <div className="flex gap-2">
-            <Button variant="outline" className="text-sm px-4 py-2 h-auto" disabled>Anterior</Button>
-            <Button variant="outline" className="text-sm px-4 py-2 h-auto" disabled>Siguiente</Button>
+              <span className="text-xs font-bold text-slate-500 dark:text-gray-400">
+                Mostrando <strong className="text-[#2D3E82] dark:text-white mx-1">{filteredCompanies.length}</strong> de <strong className="text-[#2D3E82] dark:text-white mx-1">{companies.length}</strong> entidades registradas
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <CompanyDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        company={selectedCompany}
+      />
+    </>
   );
 };

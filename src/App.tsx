@@ -4,6 +4,8 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { ShoppingBag, BarChart3 } from "lucide-react";
+import { AdminComingSoon } from "./features/dashboard/admin/components/AdminComingSoon";
 import { Header } from "./components/layouts/Header";
 import { Footer } from "./components/layouts/Footer";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -23,6 +25,9 @@ import { CartProvider } from "./features/marketplace/context/CartContext";
 import { CartSidebar } from "./features/marketplace/components/CartSidebar";
 import { Login } from "./features/auth/pages/Login";
 import { Register } from "./features/auth/pages/Register";
+import ForgotPassword from "./features/auth/pages/ForgotPassword";
+import ResetPassword from "./features/auth/pages/ResetPassword";
+import VerifyEmail from "./features/auth/pages/VerifyEmail";
 import { ClienteProfilePage } from "./features/auth/pages/profiles/ClienteProfilePage";
 import { VeterinarioProfilePage } from "./features/auth/pages/profiles/VeterinarioProfilePage";
 import { EmpresaProfilePage } from "./features/auth/pages/profiles/EmpresaProfilePage";
@@ -45,6 +50,7 @@ import { PacientesPage as EmpresaPacientesPage } from "./features/dashboard/empr
 import { EmpresasPage } from "./features/dashboard/admin/pages/EmpresasPage";
 import { UsuariosPage } from "./features/dashboard/admin/pages/UsuariosPage";
 import { CategoriasPage } from "./features/dashboard/admin/pages/CategoriasPage";
+import { VeterinariosPage } from "./features/dashboard/admin/pages/VeterinariosPage";
 import { SubscriptionAdminPage } from "./features/dashboard/admin/pages/SubscriptionAdminPage";
 import { DashboardCliente } from "./features/dashboard/cliente/components/layouts/DashboardCliente";
 import { MascotasPage } from "./features/dashboard/cliente/pages/MascotasPage";
@@ -78,6 +84,9 @@ function App() {
           {/* Rutas publicas: Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+          <Route path="/auth/reset-password" element={<ResetPassword />} />
+          <Route path="/auth/verify-email" element={<VerifyEmail />} />
 
           {/* Formilarios de Perfil (Requieren token del rol, pero perfilCompleto=false) */}
           {/* Ojo: el Admin no tiene formulario de perfil propio, se crea desde BD/Dashboard */}
@@ -101,10 +110,10 @@ function App() {
                 <Route path="empresas" element={<EmpresasPage />} />
                 <Route path="usuarios" element={<UsuariosPage />} />
                 <Route path="categorias" element={<CategoriasPage />} />
-                <Route path="veterinarios" element={<div className="p-8 text-xl text-slate-500 font-medium">Gestión de Veterinarios en Construcción...</div>} />
-                <Route path="marketplace" element={<div className="p-8 text-xl text-slate-500 font-medium">Gestión de Marketplace en Construcción...</div>} />
+                <Route path="veterinarios" element={<VeterinariosPage />} />
+                <Route path="marketplace" element={<AdminComingSoon title="Marketplace" description="Control global de productos, servicios y transacciones." icon={ShoppingBag} />} />
                 <Route path="suscripciones" element={<SubscriptionAdminPage />} />
-                <Route path="reportes" element={<div className="p-8 text-xl text-slate-500 font-medium">Reportes en Construcción...</div>} />
+                <Route path="reportes" element={<AdminComingSoon title="Reportes" description="Análisis avanzado de datos e inteligencia de negocio." icon={BarChart3} />} />
               </Route>
             </Route>
           </Route>

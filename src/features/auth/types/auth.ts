@@ -22,6 +22,24 @@ export interface LoginResponse {
   nombre?: string;
 }
 
+/** Body enviado al backend en POST /auth/change-password */
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+/** Body enviado al backend en POST /auth/forgot-password */
+export interface ForgotPasswordRequest {
+  correo: string;
+}
+
+/** Body enviado al backend en POST /auth/reset-password */
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+
 // ─── Perfiles ─────────────────────────────────────────────────────────────────
 
 /** POST /api/v1/clients/me */

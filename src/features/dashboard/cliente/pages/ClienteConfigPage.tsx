@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { useAuth } from "../../../auth/context/useAuth";
+import { authService } from "../../../auth/services/authService";
 import { clienteService } from "../services/clienteService";
 import Swal from "sweetalert2";
 
@@ -31,7 +32,7 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 export const ClienteConfigPage = () => {
-    const { nombre } = useAuth();
+    const { nombre, logout } = useAuth();
     const [activeTab, setActiveTab] = useState<"perfil" | "seguridad">("perfil");
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -91,6 +92,98 @@ export const ClienteConfigPage = () => {
             Swal.fire("Error", error.response?.data?.message || "Hubo un problema al actualizar tu perfil.", "error");
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleLogoutAll = async () => {
+        const result = await Swal.fire({
+            title: "¿Cerrar todas las sesiones?",
+            text: "Se cerrará la sesión en todos tus dispositivos activos.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, cerrar todas",
+            cancelButtonText: "Cancelar"
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await authService.logoutAll();
+                logout(); // [NUEVO] Limpiar estado local inmediatamente
+                Swal.fire({
+                    icon: "success",
+                    title: "Sesiones cerradas",
+                    text: "Has cerrado todas tus sesiones exitosamente. Serás redirigido al login.",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                setTimeout(() => {
+                    window.location.href = "/login"; // [CORREGIDO] /auth/login -> /login
+                }, 2000);
+            } catch (error: any) {
+                Swal.fire("Error", error.response?.data?.message || "No se pudo cerrar las sesiones.", "error");
+            }
+        }
+    };
+
+    const handleChangePassword = async () => {
+        const { value: formValues } = await Swal.fire({
+            title: "Cambiar Contraseña",
+            html: `
+                <div class="space-y-4 text-left">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Contraseña Actual</label>
+                        <input id="swal-input1" type="password" class="swal2-input !mt-1 !mb-2 !w-full" placeholder="Contraseña actual">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Nueva Contraseña</label>
+                        <input id="swal-input2" type="password" class="swal2-input !mt-1 !mb-2 !w-full" placeholder="Nueva contraseña">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Confirmar Contraseña</label>
+                        <input id="swal-input3" type="password" class="swal2-input !mt-1 !w-full" placeholder="Confirmar contraseña">
+                    </div>
+                </div>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: "Actualizar Contraseña",
+            cancelButtonText: "Cancelar",
+            preConfirm: () => {
+                const oldPassword = (document.getElementById("swal-input1") as HTMLInputElement).value;
+                const newPassword = (document.getElementById("swal-input2") as HTMLInputElement).value;
+                const confirmPassword = (document.getElementById("swal-input3") as HTMLInputElement).value;
+
+                if (!oldPassword || !newPassword || !confirmPassword) {
+                    Swal.showValidationMessage("Por favor completa todos los campos");
+                    return false;
+                }
+                if (newPassword.length < 8) {
+                    Swal.showValidationMessage("La nueva contraseña debe tener al menos 8 caracteres");
+                    return false;
+                }
+                if (newPassword !== confirmPassword) {
+                    Swal.showValidationMessage("Las contraseñas no coinciden");
+                    return false;
+                }
+                return { oldPassword, newPassword, confirmPassword };
+            }
+        });
+
+        if (formValues) {
+            try {
+                await authService.changePassword(formValues);
+                Swal.fire({
+                    icon: "success",
+                    title: "¡Contraseña Actualizada!",
+                    text: "Tu contraseña ha sido cambiada correctamente.",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (error: any) {
+                Swal.fire("Error", error.response?.data?.message || "No se pudo cambiar la contraseña.", "error");
+            }
         }
     };
 
@@ -271,16 +364,23 @@ export const ClienteConfigPage = () => {
                                 <div>
                                     <h4 className="font-bold text-slate-700 dark:text-slate-300 mb-2">Contraseña</h4>
                                     <p className="text-sm text-slate-500 mb-4">Te recomendamos cambiar tu contraseña periódicamente para mantener tu cuenta segura.</p>
-                                    <Button variant="outline" className="w-full sm:w-auto justify-between items-center group font-medium text-slate-700 dark:text-slate-300 rounded-xl px-6">
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleChangePassword}
+                                        className="w-full sm:w-auto justify-between items-center group font-medium text-slate-700 dark:text-slate-300 rounded-xl px-6"
+                                    >
                                         <span>Cambiar mi contraseña</span>
                                         <Settings size={16} className="text-slate-400 group-hover:text-primary transition-colors ml-4" />
                                     </Button>
                                 </div>
-
                                 <div className="pt-6 border-t border-slate-50 dark:border-slate-800">
                                     <h4 className="font-bold text-slate-700 dark:text-slate-300 mb-2">Sesión</h4>
                                     <p className="text-sm text-slate-500 mb-4">Si crees que alguien más ha accedido a tu cuenta, puedes cerrar sesión en todos los dispositivos.</p>
-                                    <Button variant="outline" className="w-full sm:w-auto text-red-500 border-red-100 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/20 rounded-xl">
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleLogoutAll}
+                                        className="w-full sm:w-auto text-red-500 border-red-100 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/20 rounded-xl"
+                                    >
                                         Cerrar todas las sesiones
                                     </Button>
                                 </div>

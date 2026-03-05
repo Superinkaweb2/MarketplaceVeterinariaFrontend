@@ -1,6 +1,6 @@
 import { api } from "../../../../shared/http/api";
 import type { ApiResponse, PageResponse } from "../../../../shared/types/api";
-import type { Company, AdminUser, AdminStats, Category, CreateCategoryRequest, UpdateCategoryRequest } from "../types/admin.types";
+import type { Company, AdminUser, AdminVeterinario, AdminStats, Category, CreateCategoryRequest, UpdateCategoryRequest } from "../types/admin.types";
 
 export const adminService = {
   getStats: async (): Promise<AdminStats> => {
@@ -28,6 +28,17 @@ export const adminService = {
 
   toggleUserStatus: async (id: number): Promise<void> => {
     await api.patch(`/admin/users/${id}/toggle-status`);
+  },
+
+  getVeterinarios: async (page = 0, size = 10): Promise<PageResponse<AdminVeterinario>> => {
+    const { data } = await api.get<ApiResponse<PageResponse<AdminVeterinario>>>("/admin/veterinarios", {
+      params: { page, size }
+    });
+    return data.data;
+  },
+
+  toggleVeterinarioStatus: async (id: number): Promise<void> => {
+    await api.patch(`/admin/veterinarios/${id}/toggle-status`);
   },
 
   // Category CRUD
