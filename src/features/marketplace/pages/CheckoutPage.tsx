@@ -1,7 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { marketplaceService } from "../services/marketplaceService";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "../../auth/context/useAuth";
 
 export const CheckoutPage = () => {
@@ -10,6 +10,13 @@ export const CheckoutPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Detect sandbox mode from the first item's mpPublicKey
+    const isSandboxMode = useMemo(() => {
+        if (items.length === 0) return false;
+        const firstKey = items[0]?.mpPublicKey;
+        return firstKey ? firstKey.startsWith('TEST-') : false;
+    }, [items]);
 
     // Group items by company since backend orders are per company
     const groupedItems = items.reduce((acc, item) => {
@@ -107,7 +114,27 @@ export const CheckoutPage = () => {
     return (
         <div className="w-full bg-slate-50 dark:bg-slate-950 min-h-screen pb-20">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-8">Confirmar Pedido</h1>
+                <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-6">Confirmar Pedido</h1>
+
+                {/* Sandbox Banner */}
+                {isSandboxMode && (
+                    <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl">
+                        <div className="flex items-start gap-3">
+                            <span className="material-symbols-outlined text-amber-500 text-xl mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>science</span>
+                            <div>
+                                <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Modo Sandbox (Pruebas)</p>
+                                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                                    Estás en entorno de pruebas. Para completar el pago:
+                                </p>
+                                <ul className="text-xs text-amber-700 dark:text-amber-400 mt-1.5 space-y-1 list-disc list-inside">
+                                    <li>Inicia sesión en MercadoPago con tu <strong>cuenta de comprador de prueba</strong> (no tu correo real)</li>
+                                    <li>Usa las <a href="https://www.mercadopago.com.pe/developers/es/docs/your-integrations/test/cards" target="_blank" rel="noopener noreferrer" className="underline font-semibold hover:text-amber-900">tarjetas de prueba oficiales</a></li>
+                                    <li>Mastercard: <code className="bg-amber-100 dark:bg-amber-900/40 px-1 rounded">5031 7557 3453 0604</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Resumen */}
@@ -129,7 +156,7 @@ export const CheckoutPage = () => {
                                                 <p className="text-sm text-slate-500">Cantidad: {item.quantity}</p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-slate-900 dark:text-white font-bold">${(item.precioActual * item.quantity).toFixed(2)}</p>
+                                                <p className="text-slate-900 dark:text-white font-bold">S/{(item.precioActual * item.quantity).toFixed(2)}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -146,7 +173,7 @@ export const CheckoutPage = () => {
                             <div className="space-y-4 mb-8">
                                 <div className="flex justify-between text-slate-600 dark:text-slate-400">
                                     <span>Subtotal</span>
-                                    <span>${cartTotal.toFixed(2)}</span>
+                                    <span>S/{cartTotal.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-slate-600 dark:text-slate-400">
                                     <span>Envío</span>
@@ -154,7 +181,7 @@ export const CheckoutPage = () => {
                                 </div>
                                 <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between text-xl font-black text-slate-900 dark:text-white">
                                     <span>Total</span>
-                                    <span>${cartTotal.toFixed(2)}</span>
+                                    <span>S/{cartTotal.toFixed(2)}</span>
                                 </div>
                             </div>
 
