@@ -1,90 +1,96 @@
-import { Card } from "./ui/Card";
-
-// esto es de prueba
 const activities = [
   {
     id: 1,
-    name: "Dr. Sarah Smith",
-    role: "Veterinarian",
-    action: "License Verification",
-    date: "Today, 10:24 AM",
-    status: "Pending",
+    name: "Clínica San José",
+    role: "Empresa",
+    action: "Suscripción Premium",
+    date: "Hoy, 10:24 AM",
+    status: "Completado",
+    iconColor: "text-[#1ea59c]",
+    iconBg: "bg-[#1ea59c]/10"
   },
   {
     id: 2,
-    name: "Animal Care Clinic",
-    role: "Enterprise",
-    action: "Subscription Upgrade",
-    date: "Yesterday",
-    status: "Completed",
+    name: "Dr. Carlos Ruiz",
+    role: "Veterinario",
+    action: "Carga de Título",
+    date: "Ayer, 18:45 PM",
+    status: "Pendiente",
+    iconColor: "text-[#2D3E82]",
+    iconBg: "bg-[#2D3E82]/10"
   },
+  {
+    id: 3,
+    name: "María Garcia",
+    role: "Cliente",
+    action: "Registro Nuevo",
+    date: "Ayer, 14:20 PM",
+    status: "Completado",
+    iconColor: "text-[#1ea59c]",
+    iconBg: "bg-[#1ea59c]/10"
+  }
 ];
 
 export const ActivityTable = () => {
   return (
-    <Card>
-      <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-        <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-          Recent Activity
-        </h3>
-        <a
-          href="#"
-          className="text-sm font-medium text-primary hover:text-primary-dark"
-        >
-          View all
-        </a>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-          <thead className="bg-gray-50 dark:bg-surface-darker">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                User
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Action
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-surface-dark divide-y divide-gray-200 dark:divide-gray-800">
-            {activities.map((activity) => (
-              <tr key={activity.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {activity.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {activity.role}
-                      </div>
+    <div className="w-full">
+      <table className="min-w-full">
+        <thead>
+          <tr className="border-b border-gray-100/50 dark:border-white/5">
+            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+              Usuario / Entidad
+            </th>
+            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+              Acción REALIZADA
+            </th>
+            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+              Estado
+            </th>
+            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+              Fecha
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100/50 dark:divide-white/5">
+          {activities.map((activity) => (
+            <tr key={activity.id} className="group hover:bg-[#1ea59c]/5 dark:hover:bg-[#1ea59c]/5 transition-colors duration-300">
+              <td className="px-6 py-5 whitespace-nowrap">
+                <div className="flex items-center">
+                  <div className={`h-10 w-10 rounded-xl ${activity.iconBg} ${activity.iconColor} flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-110 transition-transform duration-500`}>
+                    {activity.name.charAt(0)}
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-sm font-black text-[#2D3E82] dark:text-white">
+                      {activity.name}
+                    </div>
+                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                      {activity.role}
                     </div>
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+                </div>
+              </td>
+              <td className="px-6 py-5 whitespace-nowrap">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
                   {activity.action}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${activity.status === "Completed" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}
-                  >
-                    {activity.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {activity.date}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
+                </p>
+              </td>
+              <td className="px-6 py-5 whitespace-nowrap">
+                <span
+                  className={`px-3 py-1 inline-flex text-[10px] font-black uppercase tracking-tighter rounded-full ${activity.status === "Completado"
+                      ? "bg-[#1ea59c]/10 text-[#1ea59c] border border-[#1ea59c]/20"
+                      : "bg-amber-100/50 text-amber-600 border border-amber-200/50"
+                    }`}
+                >
+                  {activity.status}
+                </span>
+              </td>
+              <td className="px-6 py-5 whitespace-nowrap text-sm font-medium text-gray-400 group-hover:text-gray-500 transition-colors">
+                {activity.date}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
