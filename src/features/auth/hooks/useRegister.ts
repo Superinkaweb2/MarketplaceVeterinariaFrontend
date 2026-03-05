@@ -24,14 +24,11 @@ export const useRegister = () => {
       setPerfilCompleto(false);
 
       Swal.fire({
-        toast: true,
-        position: "top-end",
         icon: "success",
-        title: "¡Cuenta creada!",
-        text: "Ahora completa tu perfil para continuar.",
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false,
+        title: "¡Cuenta creada exitosamente!",
+        text: "Hemos enviado un correo de verificación. Por favor, revisa tu bandeja de entrada mientras completas tu perfil.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#3b82f6",
       });
 
       // Redirigir al formulario de perfil del rol

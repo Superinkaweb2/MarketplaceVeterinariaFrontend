@@ -23,6 +23,9 @@ import { CartProvider } from "./features/marketplace/context/CartContext";
 import { CartSidebar } from "./features/marketplace/components/CartSidebar";
 import { Login } from "./features/auth/pages/Login";
 import { Register } from "./features/auth/pages/Register";
+import ForgotPassword from "./features/auth/pages/ForgotPassword";
+import ResetPassword from "./features/auth/pages/ResetPassword";
+import VerifyEmail from "./features/auth/pages/VerifyEmail";
 import { ClienteProfilePage } from "./features/auth/pages/profiles/ClienteProfilePage";
 import { VeterinarioProfilePage } from "./features/auth/pages/profiles/VeterinarioProfilePage";
 import { EmpresaProfilePage } from "./features/auth/pages/profiles/EmpresaProfilePage";
@@ -78,6 +81,9 @@ function App() {
           {/* Rutas publicas: Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+          <Route path="/auth/reset-password" element={<ResetPassword />} />
+          <Route path="/auth/verify-email" element={<VerifyEmail />} />
 
           {/* Formilarios de Perfil (Requieren token del rol, pero perfilCompleto=false) */}
           {/* Ojo: el Admin no tiene formulario de perfil propio, se crea desde BD/Dashboard */}

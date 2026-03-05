@@ -14,10 +14,13 @@ import {
     MapPin,
     AlertCircle,
     Camera,
-    Image as ImageIcon
+    Image as ImageIcon,
+    Lock
 } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { api } from "../../../../shared/http/api";
+import { useAuth } from "../../../auth/context/useAuth";
+import { authService } from "../../../auth/services/authService";
 import Swal from "sweetalert2";
 
 const generalDataSchema = z.object({
@@ -38,7 +41,8 @@ const mercadopagoSchema = z.object({
 type MercadoPagoValues = z.infer<typeof mercadopagoSchema>;
 
 export const EmpresaConfigPage = () => {
-    const [activeTab, setActiveTab] = useState<"general" | "pago">("general");
+    const { logout } = useAuth();
+    const [activeTab, setActiveTab] = useState<"general" | "pago" | "seguridad">("general");
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -149,6 +153,98 @@ export const EmpresaConfigPage = () => {
         }
     };
 
+    const handleLogoutAll = async () => {
+        const result = await Swal.fire({
+            title: "¿Cerrar todas las sesiones?",
+            text: "Se cerrará la sesión en todos tus dispositivos activos.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, cerrar todas",
+            cancelButtonText: "Cancelar"
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await authService.logoutAll();
+                logout();
+                Swal.fire({
+                    icon: "success",
+                    title: "Sesiones cerradas",
+                    text: "Has cerrado todas tus sesiones exitosamente. Serás redirigido al login.",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                setTimeout(() => {
+                    window.location.href = "/login";
+                }, 2000);
+            } catch (error: any) {
+                Swal.fire("Error", error.response?.data?.message || "No se pudo cerrar las sesiones.", "error");
+            }
+        }
+    };
+
+    const handleChangePassword = async () => {
+        const { value: formValues } = await Swal.fire({
+            title: "Cambiar Contraseña",
+            html: `
+                <div class="space-y-4 text-left">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Contraseña Actual</label>
+                        <input id="swal-input1" type="password" class="swal2-input !mt-1 !mb-2 !w-full" placeholder="Contraseña actual">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Nueva Contraseña</label>
+                        <input id="swal-input2" type="password" class="swal2-input !mt-1 !mb-2 !w-full" placeholder="Nueva contraseña">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Confirmar Contraseña</label>
+                        <input id="swal-input3" type="password" class="swal2-input !mt-1 !w-full" placeholder="Confirmar contraseña">
+                    </div>
+                </div>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: "Actualizar Contraseña",
+            cancelButtonText: "Cancelar",
+            preConfirm: () => {
+                const oldPassword = (document.getElementById("swal-input1") as HTMLInputElement).value;
+                const newPassword = (document.getElementById("swal-input2") as HTMLInputElement).value;
+                const confirmPassword = (document.getElementById("swal-input3") as HTMLInputElement).value;
+
+                if (!oldPassword || !newPassword || !confirmPassword) {
+                    Swal.showValidationMessage("Por favor completa todos los campos");
+                    return false;
+                }
+                if (newPassword.length < 8) {
+                    Swal.showValidationMessage("La nueva contraseña debe tener al menos 8 caracteres");
+                    return false;
+                }
+                if (newPassword !== confirmPassword) {
+                    Swal.showValidationMessage("Las contraseñas no coinciden");
+                    return false;
+                }
+                return { oldPassword, newPassword, confirmPassword };
+            }
+        });
+
+        if (formValues) {
+            try {
+                await authService.changePassword(formValues);
+                Swal.fire({
+                    icon: "success",
+                    title: "¡Contraseña Actualizada!",
+                    text: "Tu contraseña ha sido cambiada correctamente.",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (error: any) {
+                Swal.fire("Error", error.response?.data?.message || "No se pudo cambiar la contraseña.", "error");
+            }
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="h-full flex items-center justify-center">
@@ -189,6 +285,16 @@ export const EmpresaConfigPage = () => {
                     >
                         <CreditCard size={18} />
                         <span>Pagos & MercadoPago</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("seguridad")}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "seguridad"
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800 hover:bg-slate-50"
+                            }`}
+                    >
+                        <Lock size={18} />
+                        <span>Seguridad</span>
                     </button>
                 </div>
 
@@ -349,6 +455,51 @@ export const EmpresaConfigPage = () => {
                                     </Button>
                                 </div>
                             </form>
+                        </div>
+                    ) : activeTab === "seguridad" ? (
+                        <div className="p-6 md:p-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="p-3 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl">
+                                    <Lock size={24} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Seguridad de la Cuenta</h2>
+                                    <p className="text-sm text-slate-500">Protege tu cuenta y gestiona tus sesiones.</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-8 max-w-2xl">
+                                <div className="p-6 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+                                    <div>
+                                        <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-lg">Contraseña</h3>
+                                        <p className="text-sm text-slate-500">Actualiza tu contraseña regularmente para mayor seguridad.</p>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        type="button"
+                                        onClick={handleChangePassword}
+                                        className="w-full sm:w-auto justify-between items-center group font-medium text-slate-700 dark:text-slate-300 rounded-xl px-6"
+                                    >
+                                        <span>Cambiar mi contraseña</span>
+                                        <Settings size={16} className="text-slate-400 group-hover:text-primary transition-colors ml-4" />
+                                    </Button>
+                                </div>
+
+                                <div className="p-6 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+                                    <div>
+                                        <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-lg text-red-500">Cerrar Sesión Global</h3>
+                                        <p className="text-sm text-slate-500 text-pretty">Si sospechas de actividad inusual, puedes cerrar todas las sesiones activas en otros dispositivos.</p>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        type="button"
+                                        onClick={handleLogoutAll}
+                                        className="w-full sm:w-auto text-red-500 border-red-100 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/20 rounded-xl"
+                                    >
+                                        Cerrar todas las sesiones
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     ) : (
                         <div className="p-6 md:p-8">
