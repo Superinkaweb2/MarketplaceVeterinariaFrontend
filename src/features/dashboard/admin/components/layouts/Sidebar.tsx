@@ -19,9 +19,7 @@ const MENU_ITEMS = [
 ];
 
 const MANAGEMENT_ITEMS = [
-  { label: "Marketplace", icon: "Store", href: "/portal/admin/marketplace" },
   { label: "Suscripciones", icon: "CreditCard", href: "/portal/admin/suscripciones" },
-  { label: "Reportes", icon: "BarChart3", href: "/portal/admin/reportes" },
 ];
 
 export const Sidebar = () => {

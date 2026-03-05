@@ -4,6 +4,8 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { ShoppingBag, BarChart3 } from "lucide-react";
+import { AdminComingSoon } from "./features/dashboard/admin/components/AdminComingSoon";
 import { Header } from "./components/layouts/Header";
 import { Footer } from "./components/layouts/Footer";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -48,6 +50,7 @@ import { PacientesPage as EmpresaPacientesPage } from "./features/dashboard/empr
 import { EmpresasPage } from "./features/dashboard/admin/pages/EmpresasPage";
 import { UsuariosPage } from "./features/dashboard/admin/pages/UsuariosPage";
 import { CategoriasPage } from "./features/dashboard/admin/pages/CategoriasPage";
+import { VeterinariosPage } from "./features/dashboard/admin/pages/VeterinariosPage";
 import { SubscriptionAdminPage } from "./features/dashboard/admin/pages/SubscriptionAdminPage";
 import { DashboardCliente } from "./features/dashboard/cliente/components/layouts/DashboardCliente";
 import { MascotasPage } from "./features/dashboard/cliente/pages/MascotasPage";
@@ -107,10 +110,10 @@ function App() {
                 <Route path="empresas" element={<EmpresasPage />} />
                 <Route path="usuarios" element={<UsuariosPage />} />
                 <Route path="categorias" element={<CategoriasPage />} />
-                <Route path="veterinarios" element={<div className="p-8 text-xl text-slate-500 font-medium">Gestión de Veterinarios en Construcción...</div>} />
-                <Route path="marketplace" element={<div className="p-8 text-xl text-slate-500 font-medium">Gestión de Marketplace en Construcción...</div>} />
+                <Route path="veterinarios" element={<VeterinariosPage />} />
+                <Route path="marketplace" element={<AdminComingSoon title="Marketplace" description="Control global de productos, servicios y transacciones." icon={ShoppingBag} />} />
                 <Route path="suscripciones" element={<SubscriptionAdminPage />} />
-                <Route path="reportes" element={<div className="p-8 text-xl text-slate-500 font-medium">Reportes en Construcción...</div>} />
+                <Route path="reportes" element={<AdminComingSoon title="Reportes" description="Análisis avanzado de datos e inteligencia de negocio." icon={BarChart3} />} />
               </Route>
             </Route>
           </Route>

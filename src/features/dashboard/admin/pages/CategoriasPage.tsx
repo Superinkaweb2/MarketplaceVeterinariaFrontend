@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Plus, Layers, Edit2, Trash2, ChevronRight, ChevronDown } from "lucide-react";
+import { Search, Plus, Layers, Edit2, Trash2, ChevronRight, ChevronDown, FolderTree } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { adminService } from "../services/adminService";
 import { CategoryModal } from "../components/CategoryModal";
@@ -18,7 +18,6 @@ export const CategoriasPage = () => {
     setIsLoading(true);
     try {
       const data = await adminService.getCategories();
-      // Ordenar por 'orden' primero, luego por nombre
       const sorted = [...data].sort((a, b) => {
         if (a.orden !== b.orden) return a.orden - b.orden;
         return a.nombre.localeCompare(b.nombre);
@@ -42,6 +41,8 @@ export const CategoriasPage = () => {
         title: "¡Creada!",
         text: "La categoría se ha creado correctamente.",
         icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
         customClass: { popup: "rounded-2xl" }
       });
       setIsModalOpen(false);
@@ -64,6 +65,8 @@ export const CategoriasPage = () => {
         title: "¡Actualizada!",
         text: "La categoría se ha actualizado correctamente.",
         icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
         customClass: { popup: "rounded-2xl" }
       });
       setIsModalOpen(false);
@@ -88,10 +91,12 @@ export const CategoriasPage = () => {
       confirmButtonColor: "#ef4444",
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
+      background: 'rgba(255, 255, 255, 0.9)',
+      backdrop: `rgba(45, 62, 130, 0.1)`,
       customClass: {
-        popup: "rounded-2xl",
-        confirmButton: "rounded-xl",
-        cancelButton: "rounded-xl"
+        popup: 'rounded-[1.5rem] border border-white/40 shadow-2xl backdrop-blur-xl',
+        confirmButton: 'rounded-xl px-6 py-2.5 font-bold',
+        cancelButton: 'rounded-xl px-6 py-2.5 font-bold'
       }
     });
 
@@ -103,14 +108,16 @@ export const CategoriasPage = () => {
           title: "¡Eliminada!",
           text: "Categoría eliminada con éxito.",
           icon: "success",
-          customClass: { popup: "rounded-2xl" }
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: { popup: "rounded-[1.5rem]" }
         });
       } catch (error) {
         Swal.fire({
           title: "Error",
           text: "No se pudo eliminar la categoría. Asegúrate de que no tenga productos asociados.",
           icon: "error",
-          customClass: { popup: "rounded-2xl" }
+          customClass: { popup: "rounded-[1.5rem]" }
         });
       }
     }
@@ -126,7 +133,7 @@ export const CategoriasPage = () => {
     setExpandedParents(newExpanded);
   };
 
-  const filteredCategories = categories.filter(c => 
+  const filteredCategories = categories.filter(c =>
     c.nombre.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -134,143 +141,154 @@ export const CategoriasPage = () => {
   const getSubcategories = (parentId: number) => filteredCategories.filter(c => c.padreId === parentId);
 
   return (
-    <div className="h-full flex flex-col gap-6 overflow-hidden">
+    <div className="h-full flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
-      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <h1 className="text-4xl font-black text-[#2D3E82] dark:text-white tracking-tight flex items-center gap-3">
+            <Layers className="text-[#1ea59c]" size={36} />
             Categorías del Catálogo
           </h1>
-          <p className="text-sm mt-1 text-slate-500 dark:text-slate-400">
-            Gestiona la jerarquía de categorías para productos y servicios del marketplace.
+          <p className="text-slate-500 dark:text-gray-400 font-medium max-w-xl">
+            Gestiona la jerarquía de categorías para organizar productos y servicios en el marketplace global.
           </p>
         </div>
-        <Button 
+        <Button
           onClick={() => {
             setEditingCategory(null);
             setIsModalOpen(true);
           }}
-          className="rounded-xl flex items-center gap-2 shadow-lg shadow-primary/20"
+          className="h-[56px] px-8 rounded-2xl flex items-center gap-3 bg-[#2D3E82] hover:bg-[#1ea59c] text-white shadow-lg shadow-[#2D3E82]/20 transition-all active:scale-95 group font-black uppercase tracking-wider text-xs"
         >
-          <Plus size={18} />
+          <Plus size={20} strokeWidth={3} className="group-hover:rotate-90 transition-transform duration-300" />
           <span>Nueva Categoría</span>
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="shrink-0 flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
-          <input
-            type="text"
-            placeholder="Buscar categorías..."
-            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary dark:text-white transition-all outline-none shadow-sm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      {/* Search Bar */}
+      <div className="relative group w-full max-w-md">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#1ea59c] transition-colors" size={18} />
+        <input
+          type="text"
+          placeholder="Buscar categorías por nombre..."
+          className="w-full pl-11 pr-4 py-4 rounded-2xl border border-white/40 dark:border-white/10 bg-white/60 dark:bg-black/20 backdrop-blur-xl focus:ring-4 focus:ring-[#1ea59c]/10 focus:border-[#1ea59c] dark:text-white transition-all outline-none shadow-soft"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
-      {/* List Area */}
-      <div className="flex-1 overflow-auto custom-scrollbar bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="p-4 space-y-2">
+      {/* List Area - Glassmorphic Container */}
+      <div className="flex-1 overflow-auto custom-scrollbar bg-white/40 dark:bg-black/20 backdrop-blur-2xl rounded-[2.5rem] border border-white/40 dark:border-white/10 shadow-soft p-6">
+        <div className="space-y-4">
           {isLoading ? (
-            <div className="flex flex-col gap-2 p-4 animate-pulse">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-16 bg-slate-50 dark:bg-slate-800/50 rounded-xl" />
+            <div className="flex flex-col gap-4 animate-pulse">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="h-20 bg-white/60 dark:bg-white/5 rounded-3xl" />
               ))}
             </div>
           ) : rootCategories.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Layers size={64} className="text-slate-200 dark:text-slate-800 mb-4" />
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Sin categorías</h3>
-              <p className="text-slate-500">Comienza creando tu primera categoría principal.</p>
+            <div className="flex flex-col items-center justify-center py-32 space-y-4">
+              <div className="w-24 h-24 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center text-slate-300">
+                <FolderTree size={48} />
+              </div>
+              <h3 className="text-xl font-bold text-[#2D3E82] dark:text-white">Sin categorías</h3>
+              <p className="text-slate-500 max-w-xs text-center">No se encontraron categorías. Comienza estructurando tu marketplace hoy mismo.</p>
             </div>
           ) : (
-            rootCategories.map((cat) => {
-              const subs = getSubcategories(cat.id);
-              const isExpanded = expandedParents.has(cat.id);
-              
-              return (
-                <div key={cat.id} className="space-y-1">
-                  {/* Parent Row */}
-                  <div className={`flex items-center gap-2 p-3 rounded-xl border border-transparent hover:border-slate-100 dark:hover:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group ${!cat.activo ? 'opacity-60' : ''}`}>
-                    <button 
-                      onClick={() => toggleExpand(cat.id)}
-                      className={`p-1 rounded-md text-slate-400 hover:text-primary transition-colors ${subs.length === 0 ? 'invisible' : ''}`}
-                    >
-                      {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                    </button>
-                    
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold">
-                      {cat.iconoUrl ? <img src={cat.iconoUrl} alt="" className="w-6 h-6" /> : cat.nombre.charAt(0)}
-                    </div>
+            <div className="grid grid-cols-1 gap-4">
+              {rootCategories.map((cat) => {
+                const subs = getSubcategories(cat.id);
+                const isExpanded = expandedParents.has(cat.id);
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900 dark:text-white truncate">{cat.nombre}</span>
-                        {!cat.activo && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-red-100 text-red-600 font-bold uppercase">Inactiva</span>
-                        )}
+                return (
+                  <div key={cat.id} className="group/container animate-in zoom-in-95 duration-500">
+                    {/* Parent Row - High Premium Item */}
+                    <div className={`flex items-center gap-4 p-5 rounded-[2rem] bg-white/40 dark:bg-white/5 border border-transparent hover:border-[#1ea59c]/30 hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-300 relative overflow-hidden ${!cat.activo ? 'opacity-50' : ''}`}>
+                      {/* Decoration Glow */}
+                      <div className="absolute -right-8 -top-8 w-24 h-24 bg-[#1ea59c]/5 blur-3xl rounded-full opacity-0 group-hover/container:opacity-100 transition-opacity" />
+
+                      <button
+                        onClick={() => toggleExpand(cat.id)}
+                        className={`w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-[#1ea59c] hover:bg-[#1ea59c]/10 transition-all ${subs.length === 0 ? 'invisible' : ''}`}
+                      >
+                        {isExpanded ? <ChevronDown size={20} strokeWidth={3} /> : <ChevronRight size={20} strokeWidth={3} />}
+                      </button>
+
+                      <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#1ea59c]/20 to-[#2D3E82]/20 flex items-center justify-center text-[#1ea59c] font-black text-xl border border-[#1ea59c]/10 shadow-sm group-hover/container:scale-105 transition-transform duration-500">
+                        {cat.iconoUrl ? <img src={cat.iconoUrl} alt="" className="w-8 h-8 object-contain" /> : cat.nombre.charAt(0)}
                       </div>
-                      <p className="text-xs text-slate-400 font-mono">{cat.slug}</p>
-                    </div>
 
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        onClick={() => {
-                          setEditingCategory(cat);
-                          setIsModalOpen(true);
-                        }}
-                        className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(cat)}
-                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Subcategories */}
-                  {isExpanded && subs.length > 0 && (
-                    <div className="ml-10 space-y-1 pl-4 border-l-2 border-slate-100 dark:border-slate-800">
-                      {subs.map(sub => (
-                        <div key={sub.id} className={`flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group ${!sub.activo ? 'opacity-60' : ''}`}>
-                          <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 text-sm">
-                            {sub.nombre.charAt(0)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{sub.nombre}</span>
-                            <p className="text-[10px] text-slate-400 font-mono">{sub.slug}</p>
-                          </div>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button 
-                              onClick={() => {
-                                setEditingCategory(sub);
-                                setIsModalOpen(true);
-                              }}
-                              className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                            >
-                              <Edit2 size={14} />
-                            </button>
-                            <button 
-                              onClick={() => handleDelete(sub)}
-                              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg font-black text-[#2D3E82] dark:text-white tracking-tight truncate group-hover/container:text-[#1ea59c] transition-colors">{cat.nombre}</span>
+                          {!cat.activo && (
+                            <span className="px-2 py-0.5 rounded-lg text-[9px] bg-rose-500/10 text-rose-600 font-black uppercase tracking-widest border border-rose-500/20">Inactiva</span>
+                          )}
+                          {subs.length > 0 && (
+                            <span className="px-2 py-0.5 rounded-lg text-[9px] bg-[#2D3E82]/5 text-[#2D3E82] dark:text-gray-400 font-black uppercase tracking-widest border border-[#2D3E82]/10">
+                              {subs.length} {subs.length === 1 ? 'Sub' : 'Subs'}
+                            </span>
+                          )}
                         </div>
-                      ))}
+                        <p className="text-[11px] text-slate-400 dark:text-gray-500 font-mono font-medium lowercase tracking-tighter">slug: {cat.slug}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 opacity-0 group-hover/container:opacity-100 transition-all translate-x-4 group-hover/container:translate-x-0">
+                        <button
+                          onClick={() => {
+                            setEditingCategory(cat);
+                            setIsModalOpen(true);
+                          }}
+                          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-[#1ea59c] hover:bg-[#1ea59c]/10 rounded-xl transition-all border border-transparent hover:border-[#1ea59c]/20"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(cat)}
+                          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 rounded-xl transition-all border border-transparent hover:border-rose-500/20"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
-                  )}
-                </div>
-              );
-            })
+
+                    {/* Subcategories - Nested with premium indentation */}
+                    {isExpanded && subs.length > 0 && (
+                      <div className="ml-16 mt-3 space-y-3 pl-8 border-l-2 border-slate-100 dark:border-white/5 animate-in slide-in-from-left-4 duration-500">
+                        {subs.map(sub => (
+                          <div key={sub.id} className={`flex items-center gap-4 p-4 rounded-2xl bg-white/20 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 transition-all group/sub ${!sub.activo ? 'opacity-50' : ''}`}>
+                            <div className="h-10 w-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 group-hover/sub:text-[#1ea59c] font-bold text-sm transition-colors border border-transparent group-hover/sub:border-[#1ea59c]/20">
+                              {sub.nombre.charAt(0)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-sm font-black text-[#2D3E82] dark:text-white tracking-tight">{sub.nombre}</span>
+                              <p className="text-[10px] text-slate-400 dark:text-gray-500 font-mono tracking-tighter">{sub.slug}</p>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover/sub:opacity-100 transition-all">
+                              <button
+                                onClick={() => {
+                                  setEditingCategory(sub);
+                                  setIsModalOpen(true);
+                                }}
+                                className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-[#1ea59c] rounded-lg transition-colors"
+                              >
+                                <Edit2 size={14} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(sub)}
+                                className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-rose-600 rounded-lg transition-colors"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>

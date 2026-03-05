@@ -21,6 +21,21 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface AdminVeterinario {
+  id: number;
+  nombres: string;
+  apellidos: string;
+  correo: string;
+  especialidad: string;
+  numeroColegiatura: string;
+  biografia: string;
+  aniosExperiencia: number;
+  fotoPerfilUrl: string;
+  estadoValidacion: 'PENDIENTE' | 'VERIFICADO' | 'RECHAZADO';
+  usuarioActivo: boolean;
+  createdAt: string;
+}
+
 export interface AdminStats {
   totalUsuarios: number;
   totalEmpresas: number;
