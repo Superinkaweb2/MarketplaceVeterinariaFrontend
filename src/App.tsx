@@ -195,12 +195,13 @@ function App() {
                             <Route index element={<Marketplace />} />
                             <Route path="product/:id" element={<ProductDetails />} />
                             <Route path="checkout" element={<CheckoutPage />} />
+                            <Route path="/payment/success" element={<PaymentSuccessPage />} />
                           </Routes>
                           <CartSidebar />
                         </CartProvider>
                       }
                     />
-                    <Route path="/payment/success" element={<PaymentSuccessPage />} />
+                    
                     <Route
                       path="*"
                       element={
