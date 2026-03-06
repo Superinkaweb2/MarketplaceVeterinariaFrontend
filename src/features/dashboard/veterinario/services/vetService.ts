@@ -62,17 +62,36 @@ export const vetService = {
    * Crea un nuevo servicio.
    * Endpoint: POST /services
    */
-  createService: async (serviceData: any): Promise<Service> => {
-    const { data } = await api.post<ApiResponse<Service>>("/services", serviceData);
+  createService: async (serviceData: any, imagen: File): Promise<Service> => {
+    const formData = new FormData();
+    // Importante: el Blob asegura que Spring lo lea como JSON
+    formData.append("data", new Blob([JSON.stringify(serviceData)], { type: "application/json" }));
+    formData.append("imagen", imagen);
+
+    // QUITA el objeto de headers, deja solo formData
+    const { data } = await api.post<ApiResponse<Service>>("/services", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
     return data.data;
   },
 
   /**
-   * Actualiza un servicio existente.
-   * Endpoint: PATCH /services/{id}
+   * Actualiza un servicio existente
    */
-  updateService: async (id: number, serviceData: any): Promise<Service> => {
-    const { data } = await api.patch<ApiResponse<Service>>(`/services/${id}`, serviceData);
+  updateService: async (id: number, serviceData: any, imagen?: File): Promise<Service> => {
+    const formData = new FormData();
+    formData.append("data", new Blob([JSON.stringify(serviceData)], { type: "application/json" }));
+
+    if (imagen) {
+      formData.append("imagen", imagen);
+    }
+
+    // QUITA el objeto de headers
+    const { data } = await api.patch<ApiResponse<Service>>(`/services/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
     return data.data;
   },
 

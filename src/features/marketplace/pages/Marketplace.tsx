@@ -46,8 +46,9 @@ export const Marketplace = () => {
           imagenes: s.imagenUrl ? [s.imagenUrl] : [],
           categoriaId: -2,
           categoriaNombre: "Cita Médica",
-          empresaId: s.veterinarioId || s.empresaId,
-          empresaNombre: s.empresaNombre || "Veterinario",
+          empresaId: s.empresaId || s.veterinarioId,
+          empresaNombre: s.empresaNombre || `${s.veterinarioNombres} ${s.veterinarioApellidos}`,
+          mpPublicKey: s.mpPublicKey,
           badge: { text: s.modalidad || "Servicio", style: "service" },
           itemType: 'service'
         }));
@@ -74,8 +75,9 @@ export const Marketplace = () => {
               imagenes: s.imagenUrl ? [s.imagenUrl] : [],
               categoriaId: -2,
               categoriaNombre: "Cita Médica",
-              empresaId: s.veterinarioId || s.empresaId,
-              empresaNombre: s.empresaNombre || "Veterinario",
+              empresaId: s.empresaId || s.veterinarioId,
+              empresaNombre: s.empresaNombre || `${s.veterinarioNombres} ${s.veterinarioApellidos}`,
+              mpPublicKey: s.mpPublicKey,
               badge: { text: s.modalidad || "Servicio", style: "service" },
               itemType: 'service'
             }));

@@ -1,5 +1,6 @@
 import { api } from "../../../shared/http/api";
-import type { ApiResponse } from "../../../shared/types/api";
+import type { ApiResponse, PageResponse } from "../../../shared/types/api";
+import type { Order } from "../../../types/mercadopago";
 import type { Product, Category, MarketplaceFilters } from "../types/marketplace";
 
 export const marketplaceService = {
@@ -25,13 +26,13 @@ export const marketplaceService = {
         return data.data;
     },
 
-    createOrder: async (orderData: { empresaId: number; items: { productoId: number | null; servicioId: number | null; cantidad: number }[] }): Promise<number> => {
+    createOrder: async (orderData: { empresaId: number | null; veterinarioId: number | null; items: { productoId: number | null; servicioId: number | null; cantidad: number }[] }): Promise<number> => {
         const { data } = await api.post<ApiResponse<number>>("/orders", orderData);
         return data.data;
     },
 
-    getMyOrders: async (page = 0, size = 10) => {
-        const { data } = await api.get<ApiResponse<{ content: any[] }>>("/orders/me", {
+    getMyOrders: async (page = 0, size = 10): Promise<PageResponse<Order>> => {
+        const { data } = await api.get<ApiResponse<PageResponse<Order>>>("/orders/me", {
             params: { page, size }
         });
         return data.data;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Settings, Save, ShieldCheck, Briefcase, Award, FileText, Camera, Lock } from "lucide-react";
+import { User, Settings, Save, ShieldCheck, Briefcase, Award, FileText, Camera, Lock, CreditCard } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { vetService } from "../services/vetService";
 import { useAuth } from "../../../auth/context/useAuth";
@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 export const VetConfiguracionPage = () => {
     const { logout } = useAuth();
     const [profile, setProfile] = useState<VetProfile | null>(null);
-    const [activeTab, setActiveTab] = useState<"perfil" | "seguridad">("perfil");
+    const [activeTab, setActiveTab] = useState<"perfil" | "seguridad" | "pagos">("perfil");
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -22,7 +22,9 @@ export const VetConfiguracionPage = () => {
         biografia: "",
         aniosExperiencia: 0,
         numeroColegiatura: "",
-        fotoPerfilUrl: ""
+        fotoPerfilUrl: "",
+        mpAccessToken: "",
+        mpPublicKey: ""
     });
 
     useEffect(() => {
@@ -37,7 +39,9 @@ export const VetConfiguracionPage = () => {
                     biografia: data.biografia || "",
                     aniosExperiencia: data.aniosExperiencia || 0,
                     numeroColegiatura: data.numeroColegiatura || "",
-                    fotoPerfilUrl: data.fotoPerfilUrl || ""
+                    fotoPerfilUrl: data.fotoPerfilUrl || "",
+                    mpAccessToken: data.mpAccessToken || "",
+                    mpPublicKey: data.mpPublicKey || ""
                 });
             } catch (error) {
                 console.error("Error fetching profile:", error);
@@ -206,10 +210,20 @@ export const VetConfiguracionPage = () => {
                     <Lock size={18} />
                     Seguridad
                 </button>
+                <button
+                    onClick={() => setActiveTab("pagos")}
+                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "pagos"
+                        ? "bg-white dark:bg-slate-700 text-teal-600 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                        }`}
+                >
+                    <CreditCard size={18} />
+                    Pagos
+                </button>
             </div>
 
             <div className="max-w-6xl">
-                {activeTab === "perfil" ? (
+                {activeTab === "perfil" && (
                     <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         {/* Left Column - Avatar & Core Info */}
                         <div className="lg:col-span-1 space-y-6">
@@ -352,7 +366,9 @@ export const VetConfiguracionPage = () => {
                             </div>
                         </div>
                     </form>
-                ) : (
+                )}
+
+                {activeTab === "seguridad" && (
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-2xl">
                         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
                             <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center gap-3">
@@ -384,6 +400,60 @@ export const VetConfiguracionPage = () => {
                                         Cerrar todas las sesiones
                                     </Button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === "pagos" && (
+                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-2xl">
+                        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                            <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center gap-3">
+                                <CreditCard size={18} className="text-teal-500" />
+                                <h3 className="font-bold text-slate-900 dark:text-white">Configuración de Pagos</h3>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40 rounded-2xl mb-4">
+                                    <p className="text-xs text-amber-800 dark:text-amber-400 font-medium leading-relaxed">
+                                        Configura tus credenciales de MercadoPago para recibir pagos directos de tus clientes. Recuerda usar credenciales de producción para cobros reales.
+                                    </p>
+                                </div>
+
+                                <form onSubmit={handleSave} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">MercadoPago Access Token</label>
+                                        <input
+                                            type="password"
+                                            name="mpAccessToken"
+                                            value={formData.mpAccessToken}
+                                            onChange={handleChange}
+                                            placeholder={formData.mpAccessToken === "CONFIGURADO" ? "••••••••••••••••" : "APP_USR-..."}
+                                            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 transition-all outline-none"
+                                        />
+                                        {formData.mpAccessToken === "CONFIGURADO" && (
+                                            <p className="text-[10px] text-teal-600 font-medium">✓ Ya tienes un token configurado. Ingrésalo de nuevo solo si deseas cambiarlo.</p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">MercadoPago Public Key</label>
+                                        <input
+                                            type="text"
+                                            name="mpPublicKey"
+                                            value={formData.mpPublicKey}
+                                            onChange={handleChange}
+                                            placeholder="APP_USR-..."
+                                            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 transition-all outline-none"
+                                        />
+                                    </div>
+
+                                    <div className="pt-4">
+                                        <Button type="submit" disabled={isSaving} className="w-full gap-2 bg-teal-500 hover:bg-teal-600">
+                                            <Save size={18} />
+                                            {isSaving ? "Guardando..." : "Guardar credenciales"}
+                                        </Button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>

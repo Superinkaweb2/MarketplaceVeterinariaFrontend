@@ -4,12 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { X, Save, Layers } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
-import type { Category } from "../types/admin.types";
+import type { Category, CreateCategoryRequest } from "../types/admin.types";
 
 const categorySchema = z.object({
   nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  padreId: z.number().nullable(),
-  iconoUrl: z.string().nullable(),
+  padreId: z.number().nullable().optional(),
+  iconoUrl: z.string().nullable().optional(),
   activo: z.boolean(),
   orden: z.number().int().min(0, "El orden debe ser un número positivo"),
 });
@@ -19,7 +19,7 @@ type CategoryFormValues = z.infer<typeof categorySchema>;
 interface CategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CategoryFormValues) => void;
+  onSubmit: (data: CreateCategoryRequest) => Promise<void>;
   category?: Category | null;
   allCategories: Category[];
   isLoading?: boolean;
@@ -71,8 +71,18 @@ export const CategoryModal = ({
 
   if (!isOpen) return null;
 
-  // Filtrar para evitar que una categoría sea su propio padre o que se asigne a una subcategoría (mantener jerarquía simple de 2 niveles por ahora)
   const availableParents = allCategories.filter(c => !c.padreId && (!category || c.id !== category.id));
+
+  const onFormSubmit = async (data: CategoryFormValues) => {
+    const payload: CreateCategoryRequest = {
+      nombre: data.nombre,
+      padreId: (!data.padreId || isNaN(Number(data.padreId))) ? null : Number(data.padreId),
+      iconoUrl: data.iconoUrl?.trim() || null,
+      activo: data.activo,
+      orden: data.orden,
+    };
+    await onSubmit(payload);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -96,7 +106,7 @@ export const CategoryModal = ({
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-6 space-y-5">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="flex-1 overflow-y-auto p-6 space-y-5">
           {/* Nombre */}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -105,11 +115,10 @@ export const CategoryModal = ({
             <input
               {...register("nombre")}
               placeholder="Ej: Alimentos, Juguetes, Farmacia..."
-              className={`w-full px-4 py-2.5 rounded-xl border ${
-                errors.nombre 
-                  ? "border-red-500 focus:ring-red-200" 
-                  : "border-slate-200 dark:border-slate-700 focus:ring-primary/20 focus:border-primary"
-              } bg-white dark:bg-slate-950 dark:text-white outline-none focus:ring-4 transition-all`}
+              className={`w-full px-4 py-2.5 rounded-xl border ${errors.nombre
+                ? "border-red-500 focus:ring-red-200"
+                : "border-slate-200 dark:border-slate-700 focus:ring-primary/20 focus:border-primary"
+                } bg-white dark:bg-slate-950 dark:text-white outline-none focus:ring-4 transition-all`}
             />
             {errors.nombre && (
               <p className="text-xs text-red-500 font-medium ml-1">{errors.nombre.message}</p>
@@ -196,7 +205,7 @@ export const CategoryModal = ({
             Cancelar
           </Button>
           <Button
-            onClick={handleSubmit(onSubmit)}
+            onClick={handleSubmit(onFormSubmit)}
             className="flex-1 rounded-xl h-11 shadow-md shadow-primary/20 items-center justify-center gap-2"
             disabled={isLoading}
           >
