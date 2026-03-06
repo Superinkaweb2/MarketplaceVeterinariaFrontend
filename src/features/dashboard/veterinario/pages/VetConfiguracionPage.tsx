@@ -63,6 +63,18 @@ export const VetConfiguracionPage = () => {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // [NUEVO] Validaciones básicas
+        if (formData.aniosExperiencia < 0) {
+            Swal.fire("Error", "Los años de experiencia no pueden ser negativos", "error");
+            return;
+        }
+
+        if (formData.numeroColegiatura && !/^\d+$/.test(formData.numeroColegiatura)) {
+            Swal.fire("Error", "El número de colegiatura debe ser numérico", "error");
+            return;
+        }
+
         setIsSaving(true);
         try {
             const updatedProfile = await vetService.updateProfile(formData);

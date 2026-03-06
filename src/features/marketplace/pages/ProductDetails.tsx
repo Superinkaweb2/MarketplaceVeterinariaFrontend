@@ -54,6 +54,7 @@ export const ProductDetails = () => {
                         categoriaNombre: "Adopción",
                         empresaId: data.publicadoPorId,
                         empresaNombre: data.publicadoPorNombre || "Dueño Particular",
+                        empresaTipoServicio: data.publicadoPorTipoServicio,
                         badge: { text: "Adopción", style: "adoption" },
                         itemType: 'product'
                     };
@@ -76,6 +77,7 @@ export const ProductDetails = () => {
                         empresaNombre: data.veterinarioId
                             ? `${data.veterinarioNombres} ${data.veterinarioApellidos}`
                             : (data.empresaNombre || "Veterinario"),
+                        empresaTipoServicio: data.empresaTipoServicio || data.veterinarioEspecialidad,
                         mpPublicKey: data.mpPublicKey,
                         badge: { text: data.modalidad || "Servicio", style: "service" },
                         itemType: 'service'
@@ -172,6 +174,11 @@ export const ProductDetails = () => {
                                 <span className="font-semibold text-slate-700 dark:text-slate-300">
                                     {product.empresaNombre}
                                 </span>
+                                {product.empresaTipoServicio && (
+                                    <span className="ml-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs border border-slate-200 dark:border-slate-700">
+                                        {product.empresaTipoServicio}
+                                    </span>
+                                )}
                             </p>
                         </div>
 

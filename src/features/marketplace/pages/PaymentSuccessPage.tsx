@@ -1,13 +1,30 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useEffect } from "react";
+import { marketplaceService } from "../services/marketplaceService";
 
 export const PaymentSuccessPage = () => {
     const { clearCart } = useCart();
+    const [searchParams] = useSearchParams();
 
     useEffect(() => {
-        clearCart();
-    }, [clearCart]);
+        const syncOrder = async () => {
+            const paymentId = searchParams.get("payment_id");
+            const status = searchParams.get("status");
+            const externalReference = searchParams.get("external_reference");
+
+            if (paymentId && status === "approved" && externalReference) {
+                try {
+                    await marketplaceService.syncPayment(paymentId, externalReference);
+                } catch (error) {
+                    console.error("Error sincronizando pago como fallback:", error);
+                }
+            }
+            clearCart();
+        };
+
+        syncOrder();
+    }, [clearCart, searchParams]);
 
     return (
         <div className="w-full bg-slate-50 dark:bg-slate-950 min-h-screen flex items-center justify-center p-4">

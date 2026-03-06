@@ -18,6 +18,7 @@ export interface Product {
   categoriaNombre: string;
   empresaId: number;
   empresaNombre: string;
+  empresaTipoServicio?: string;
   mpPublicKey?: string;
   badge?: { text: string; style: 'rx' | 'service' | 'approved' | 'adoption' };
   itemType?: 'product' | 'service';

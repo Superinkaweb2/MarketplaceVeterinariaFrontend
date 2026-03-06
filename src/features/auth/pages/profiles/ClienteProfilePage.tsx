@@ -12,7 +12,7 @@ import Swal from "sweetalert2";
 const clienteSchema = z.object({
   nombres: z.string().min(2, "Los nombres son requeridos"),
   apellidos: z.string().min(2, "Los apellidos son requeridos"),
-  telefono: z.string().min(6, "El teléfono es requerido"),
+  telefono: z.string().min(6, "El teléfono es requerido").regex(/^\d+$/, "Solo números permitidos"),
   direccion: z.string().optional(),
   ciudad: z.string().optional(),
   pais: z.string().optional(),
@@ -44,8 +44,28 @@ export const ClienteProfilePage = () => {
         showConfirmButton: false,
       });
       navigate("/portal/cliente");
-    } catch (error) {
-      Swal.fire({ icon: "error", title: "Error", text: "No se pudo guardar el perfil" });
+    } catch (error: any) {
+      console.error("Error creating profile:", error);
+
+      let message = "No se pudo guardar el perfil";
+      let footer = undefined;
+
+      if (error.response?.data) {
+        const data = error.response.data;
+        message = data.message || message;
+
+        if (data.validationErrors) {
+          const errors = Object.values(data.validationErrors).map(err => `<li>${err}</li>`).join("");
+          footer = `<div class="text-left"><p class="font-bold mb-2">Errores de validación:</p><ul class="list-disc pl-4 space-y-1">${errors}</ul></div>`;
+        }
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: message,
+        footer: footer
+      });
     } finally {
       setIsSubmitting(false);
     }

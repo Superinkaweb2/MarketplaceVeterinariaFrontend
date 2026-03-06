@@ -14,11 +14,15 @@ const empresaSchema = z.object({
   razonSocial: z.string().min(2, "Requerido"),
   ruc: z.string().min(11, "Mínimo 11 dígitos"),
   tipoServicio: z.string().min(2, "Requerido"),
-  telefono: z.string().min(6, "Requerido"),
+  tipoServicioOtro: z.string().optional(),
+  telefono: z.string().min(6, "Requerido").regex(/^\d+$/, "Solo números permitidos"),
   emailContacto: z.string().email("Correo inválido"),
   direccion: z.string().min(5, "Requerido"),
   ciudad: z.string().min(2, "Requerido"),
   descripcion: z.string().optional(),
+}).refine((data) => data.tipoServicio !== "OTRO" || (data.tipoServicioOtro && data.tipoServicioOtro.trim().length > 0), {
+  message: "Debe especificar el tipo de servicio",
+  path: ["tipoServicioOtro"],
 });
 
 type EmpresaFormData = z.infer<typeof empresaSchema>;
@@ -27,16 +31,18 @@ export const EmpresaProfilePage = () => {
   const { setPerfilCompleto } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<EmpresaFormData>({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<EmpresaFormData>({
     resolver: zodResolver(empresaSchema),
     defaultValues: { tipoServicio: "VETERINARIA" }
   });
+
+  const tipoServicio = watch("tipoServicio");
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
     const file = e.target.files?.[0];
@@ -64,11 +70,16 @@ export const EmpresaProfilePage = () => {
   const onSubmit = async (data: EmpresaFormData) => {
     setIsSubmitting(true);
     try {
+      const finalData = {
+        ...data,
+        tipoServicio: data.tipoServicio === "OTRO" ? data.tipoServicioOtro || "OTRO" : data.tipoServicio
+      };
+
       const logoFile = logoInputRef.current?.files?.[0];
       const bannerFile = bannerInputRef.current?.files?.[0];
 
-      console.log("Submitting profile with data:", data);
-      await profileService.createEmpresaProfile(data, logoFile, bannerFile);
+      console.log("Submitting profile with data:", finalData);
+      await profileService.createEmpresaProfile(finalData, logoFile, bannerFile);
       setPerfilCompleto(true);
       Swal.fire({
         toast: true,
@@ -81,15 +92,26 @@ export const EmpresaProfilePage = () => {
       navigate("/portal/empresa");
     } catch (error: any) {
       console.error("Error creating profile:", error);
-      if (error.response) {
-        console.log("Full error response:", error.response);
-        console.dir(error.response.data);
+
+      let message = "Ocurrió un error inesperado al crear el perfil.";
+      let footer = undefined;
+
+      if (error.response?.data) {
+        const data = error.response.data;
+        message = data.message || message;
+
+        if (data.validationErrors) {
+          const errors = Object.values(data.validationErrors).map(err => `<li>${err}</li>`).join("");
+          footer = `<div class="text-left"><p class="font-bold mb-2">Errores de validación:</p><ul class="list-disc pl-4 space-y-1">${errors}</ul></div>`;
+        }
       }
-      const message = error.response?.data?.message || "Ocurrió un error inesperado al crear el perfil.";
-      Swal.fire({ 
-        icon: "error", 
-        title: "Error al crear perfil", 
-        text: message 
+
+      Swal.fire({
+        icon: "error",
+        title: "Error al crear perfil",
+        text: message,
+        html: footer ? undefined : undefined, // fallback to text if no html
+        footer: footer ? footer : undefined
       });
     } finally {
       setIsSubmitting(false);
@@ -106,18 +128,18 @@ export const EmpresaProfilePage = () => {
 
         <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
           <form onSubmit={handleSubmit(onSubmit)} className="p-8 sm:p-10 space-y-8">
-            
+
             {/* ── Subida de Imágenes ── */}
             <div className="space-y-4">
               <h3 className="text-lg font-bold border-b border-slate-100 dark:border-slate-800 pb-2 dark:text-white">Imágenes de Marca</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Logo */}
                 <div className="col-span-1">
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Logo</label>
                   <div className="relative group border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                     <input type="file" accept="image/*" className="hidden" ref={logoInputRef} onChange={(e) => handleImageChange(e, 'logo')} />
-                    
+
                     {logoPreview ? (
                       <>
                         <img src={logoPreview} alt="Logo preview" className="h-full w-full object-contain p-2" />
@@ -139,7 +161,7 @@ export const EmpresaProfilePage = () => {
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Banner (Portada)</label>
                   <div className="relative group border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                     <input type="file" accept="image/*" className="hidden" ref={bannerInputRef} onChange={(e) => handleImageChange(e, 'banner')} />
-                    
+
                     {bannerPreview ? (
                       <>
                         <img src={bannerPreview} alt="Banner preview" className="h-full w-full object-cover" />
@@ -178,7 +200,7 @@ export const EmpresaProfilePage = () => {
             {/* ── Datos Comerciales ── */}
             <div className="space-y-4">
               <h3 className="text-lg font-bold border-b border-slate-100 dark:border-slate-800 pb-2 dark:text-white">Perfil Público</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Nombre Comercial *</label>
@@ -196,8 +218,22 @@ export const EmpresaProfilePage = () => {
                     <option value="PETSHOP">Pet Shop / Tienda</option>
                     <option value="GROOMING">Peluquería / Grooming</option>
                     <option value="HIBRIDO">Servicio Híbrido (Todo junto)</option>
+                    <option value="OTRO">Otros (Especificar)</option>
                   </select>
                 </div>
+
+                {tipoServicio === "OTRO" && (
+                  <div className="animate-in fade-in slide-in-from-top-2">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Especifique el Tipo de Servicio *</label>
+                    <input
+                      type="text"
+                      {...register("tipoServicioOtro", { required: tipoServicio === "OTRO" })}
+                      placeholder="Ej: Guardería, Adiestramiento, etc."
+                      className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 px-4 focus:ring-2 focus:ring-primary dark:text-white"
+                    />
+                    {errors.tipoServicioOtro && <p className="mt-1 text-xs text-red-500">Campo requerido cuando selecciona Otros</p>}
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Teléfono de Contacto *</label>

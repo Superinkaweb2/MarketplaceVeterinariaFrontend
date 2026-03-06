@@ -43,6 +43,15 @@ export const marketplaceService = {
         return data.data;
     },
 
+    syncPayment: async (paymentId: string, externalReference: string): Promise<void> => {
+        await api.get(`/payments/sync`, {
+            params: {
+                payment_id: paymentId,
+                external_reference: externalReference
+            }
+        });
+    },
+
     searchAdoptions: async (page = 0, size = 12) => {
         const { data } = await api.get<ApiResponse<{ content: any[] }>>("/adoptions", {
             params: { page, size }

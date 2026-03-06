@@ -26,9 +26,14 @@ import Swal from "sweetalert2";
 const generalDataSchema = z.object({
     nombreComercial: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
     emailContacto: z.string().email("Email inválido"),
-    telefono: z.string().min(7, "Teléfono inválido"),
+    telefono: z.string().min(7, "Teléfono inválido").regex(/^\d+$/, "Solo números permitidos"),
+    tipoServicio: z.string().min(2, "Requerido"),
+    tipoServicioOtro: z.string().optional(),
     direccion: z.string().min(5, "La dirección es muy corta"),
     descripcion: z.string().optional(),
+}).refine((data) => data.tipoServicio !== "OTRO" || (data.tipoServicioOtro && data.tipoServicioOtro.trim().length > 0), {
+    message: "Debe especificar el tipo de servicio",
+    path: ["tipoServicioOtro"],
 });
 
 type GeneralDataValues = z.infer<typeof generalDataSchema>;
@@ -56,10 +61,13 @@ export const EmpresaConfigPage = () => {
         register: registerGeneral,
         handleSubmit: handleSubmitGeneral,
         reset: resetGeneral,
+        watch: watchGeneral,
         formState: { errors: errorsGeneral },
     } = useForm<GeneralDataValues>({
         resolver: zodResolver(generalDataSchema),
     });
+
+    const tipoServicio = watchGeneral("tipoServicio");
 
     const {
         register: registerMP,
@@ -79,12 +87,17 @@ export const EmpresaConfigPage = () => {
             const response = await api.get("/companies/me");
             const data = response.data.data;
 
+            const knownTypes = ["VETERINARIA", "PETSHOP", "GROOMING", "HIBRIDO"];
+            const isCustom = !knownTypes.includes(data.tipoServicio);
+
             resetGeneral({
                 nombreComercial: data.nombreComercial,
                 emailContacto: data.emailContacto,
                 telefono: data.telefono,
                 direccion: data.direccion,
                 descripcion: data.descripcion || "",
+                tipoServicio: isCustom ? "OTRO" : data.tipoServicio,
+                tipoServicioOtro: isCustom ? data.tipoServicio : "",
             });
 
             if (data.logoUrl) setLogoPreview(data.logoUrl);
@@ -100,9 +113,14 @@ export const EmpresaConfigPage = () => {
     const onUpdateGeneral = async (data: GeneralDataValues) => {
         setIsSaving(true);
         try {
+            const finalData = {
+                ...data,
+                tipoServicio: data.tipoServicio === "OTRO" ? data.tipoServicioOtro || "OTRO" : data.tipoServicio
+            };
+
             const formData = new FormData();
             // El backend espera el objeto DTO en una parte llamada "data" como JSON
-            formData.append("data", new Blob([JSON.stringify(data)], { type: "application/json" }));
+            formData.append("data", new Blob([JSON.stringify(finalData)], { type: "application/json" }));
 
             if (logoFile) {
                 formData.append("logo", logoFile);
@@ -425,6 +443,34 @@ export const EmpresaConfigPage = () => {
                                         </div>
                                         {errorsGeneral.telefono && <p className="text-xs text-red-500">{errorsGeneral.telefono.message}</p>}
                                     </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tipo de Servicio</label>
+                                        <div className="relative group">
+                                            <Settings className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
+                                            <select
+                                                {...registerGeneral("tipoServicio")}
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white appearance-none"
+                                            >
+                                                <option value="VETERINARIA">Veterinaria / Clínica</option>
+                                                <option value="PETSHOP">Pet Shop / Tienda</option>
+                                                <option value="GROOMING">Peluquería / Grooming</option>
+                                                <option value="HIBRIDO">Servicio Híbrido (Todo junto)</option>
+                                                <option value="OTRO">Otros (Especificar)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {tipoServicio === "OTRO" && (
+                                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Especificar Servicio</label>
+                                            <input
+                                                {...registerGeneral("tipoServicioOtro")}
+                                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white"
+                                                placeholder="Ej: Guardería, Adiestramiento..."
+                                            />
+                                        </div>
+                                    )}
 
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Dirección Física</label>
