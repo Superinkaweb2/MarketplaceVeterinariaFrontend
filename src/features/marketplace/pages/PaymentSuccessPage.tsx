@@ -23,7 +23,7 @@ export const PaymentSuccessPage = () => {
 
                 <div className="space-y-4">
                     <Link
-                        to="/portal/cliente"
+                        to="/portal/cliente/compras"
                         className="block w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-2xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
                     >
                         Ver mis pedidos
