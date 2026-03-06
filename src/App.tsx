@@ -45,7 +45,7 @@ import { MySubscriptionPage } from "./features/dashboard/empresa/pages/MySubscri
 import { PaymentSuccessPage as PaymentSuccessPageEmpresa } from "./features/dashboard/empresa/pages/PaymentSuccessPage";
 import { TalentoPage } from "./features/dashboard/empresa/pages/TalentoPage";
 import { PacientesPage as EmpresaPacientesPage } from "./features/dashboard/empresa/pages/PacientesPage";
-
+import { MisCompras } from "./features/dashboard/cliente/components/MisCompras";
 // Portal Admin
 import { EmpresasPage } from "./features/dashboard/admin/pages/EmpresasPage";
 import { UsuariosPage } from "./features/dashboard/admin/pages/UsuariosPage";
@@ -166,6 +166,7 @@ function App() {
                 <Route path="servicios" element={<ClienteMisServiciosPage />} />
                 <Route path="citas" element={<MisCitasPage />} />
                 <Route path="configuracion" element={<ClienteConfigPage />} />
+                <Route path="compras" element={<MisCompras />} />
               </Route>
             </Route>
           </Route>
