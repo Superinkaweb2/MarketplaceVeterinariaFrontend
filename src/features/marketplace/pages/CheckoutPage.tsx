@@ -75,8 +75,11 @@ export const CheckoutPage = () => {
             });
 
             // 1. Create Order
+            const isFirstItemService = group.items[0]?.itemType === 'service' || String(group.items[0]?.id).startsWith('service_');
+
             const orderId = await marketplaceService.createOrder({
-                empresaId,
+                empresaId: !isFirstItemService ? empresaId : null,
+                veterinarioId: isFirstItemService ? empresaId : null,
                 items: orderItems
             });
 

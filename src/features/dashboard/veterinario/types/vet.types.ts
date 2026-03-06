@@ -12,6 +12,8 @@ export interface VetProfile {
   fotoPerfilUrl?: string;
   estadoValidacion: VerificationStatus;
   email: string;
+  mpAccessToken?: string;
+  mpPublicKey?: string;
 }
 
 export interface StaffInvitation {

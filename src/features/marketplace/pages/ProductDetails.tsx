@@ -73,7 +73,10 @@ export const ProductDetails = () => {
                         categoriaId: -2,
                         categoriaNombre: "Cita Médica",
                         empresaId: data.veterinarioId || data.empresaId,
-                        empresaNombre: data.empresaNombre || "Veterinario",
+                        empresaNombre: data.veterinarioId
+                            ? `${data.veterinarioNombres} ${data.veterinarioApellidos}`
+                            : (data.empresaNombre || "Veterinario"),
+                        mpPublicKey: data.mpPublicKey,
                         badge: { text: data.modalidad || "Servicio", style: "service" },
                         itemType: 'service'
                     };
