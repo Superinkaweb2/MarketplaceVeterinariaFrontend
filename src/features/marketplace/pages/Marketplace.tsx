@@ -30,6 +30,7 @@ export const Marketplace = () => {
           categoriaNombre: "Adopción",
           empresaId: a.publicadoPorId,
           empresaNombre: a.publicadoPorNombre || "Dueño Particular",
+          empresaTipoServicio: a.publicadoPorTipoServicio,
           badge: { text: "Adopción", style: "adoption" },
           itemType: 'adoption' as any
         }));
@@ -48,6 +49,7 @@ export const Marketplace = () => {
           categoriaNombre: "Cita Médica",
           empresaId: s.empresaId || s.veterinarioId,
           empresaNombre: s.empresaNombre || `${s.veterinarioNombres} ${s.veterinarioApellidos}`,
+          empresaTipoServicio: s.empresaTipoServicio,
           mpPublicKey: s.mpPublicKey,
           badge: { text: s.modalidad || "Servicio", style: "service" },
           itemType: 'service'
@@ -77,6 +79,7 @@ export const Marketplace = () => {
               categoriaNombre: "Cita Médica",
               empresaId: s.empresaId || s.veterinarioId,
               empresaNombre: s.empresaNombre || `${s.veterinarioNombres} ${s.veterinarioApellidos}`,
+              empresaTipoServicio: s.empresaTipoServicio,
               mpPublicKey: s.mpPublicKey,
               badge: { text: s.modalidad || "Servicio", style: "service" },
               itemType: 'service'

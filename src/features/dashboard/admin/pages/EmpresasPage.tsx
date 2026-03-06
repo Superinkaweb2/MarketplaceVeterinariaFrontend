@@ -166,6 +166,9 @@ export const EmpresasPage = () => {
                             <div className="min-w-0">
                               <p className="text-sm font-bold text-[#2D3E82] dark:text-white tracking-tight truncate group-hover:text-[#1ea59c] transition-colors">{company.nombreComercial}</p>
                               <p className="text-[11px] text-slate-500 dark:text-gray-400 font-medium truncate">{company.emailContacto}</p>
+                              {company.tipoServicio && (
+                                <p className="text-[10px] text-[#1ea59c] font-bold uppercase tracking-wider mt-1">{company.tipoServicio}</p>
+                              )}
                             </div>
                           </div>
                         </td>

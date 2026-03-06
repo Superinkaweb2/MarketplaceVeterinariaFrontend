@@ -1,4 +1,4 @@
-import { X, Globe, Mail, Phone, MapPin, Calendar, HardDrive, ShieldCheck } from "lucide-react";
+import { X, Globe, Mail, Phone, MapPin, Calendar, HardDrive, ShieldCheck, Building2 } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import type { Company } from "../types/admin.types";
 
@@ -59,6 +59,7 @@ export const CompanyDetailModal = ({ isOpen, onClose, company }: CompanyDetailMo
                             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#1ea59c]">Información Corporativa</h3>
 
                             <InfoItem icon={<HardDrive size={18} />} label="RUC / Identificación" value={company.ruc} mono />
+                            <InfoItem icon={<Building2 size={18} />} label="Tipo de Servicio" value={company.tipoServicio || "No especificado"} />
                             <InfoItem icon={<Mail size={18} />} label="Email Corporativo" value={company.emailContacto} />
                             <InfoItem icon={<Phone size={18} />} label="Teléfono Directo" value={company.telefonoContacto} />
                             <InfoItem icon={<ShieldCheck size={18} />} label="Owner Acc" value={company.ownerEmail} />

@@ -41,7 +41,10 @@ export const ProductCard = ({ product }: { product: Product }) => {
       </div>
       <div className="p-4 flex flex-col flex-1">
         <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-1 line-clamp-2 hover:text-blue-600 transition-colors">{product.nombre}</h3>
-        <p className="text-xs text-slate-500 mb-3">{product.empresaNombre}</p>
+        <p className="text-xs text-slate-500 mb-3">
+          {product.empresaNombre}
+          {product.empresaTipoServicio && <span className="opacity-70"> • {product.empresaTipoServicio}</span>}
+        </p>
       </div>
     </>
   );

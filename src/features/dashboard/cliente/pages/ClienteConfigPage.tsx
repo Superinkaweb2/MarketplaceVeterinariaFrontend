@@ -24,7 +24,7 @@ import Swal from "sweetalert2";
 const profileSchema = z.object({
     nombres: z.string().min(2, "Los nombres deben tener al menos 2 caracteres"),
     apellidos: z.string().min(2, "Los apellidos deben tener al menos 2 caracteres"),
-    telefono: z.string().min(6, "El teléfono debe tener un formato válido").max(15, "Teléfono demasiado largo"),
+    telefono: z.string().min(6, "El teléfono debe tener un formato válido").max(15, "Teléfono demasiado largo").regex(/^\d+$/, "Solo números permitidos"),
     direccion: z.string().min(5, "La dirección debe ser más descriptiva").optional().or(z.literal("")),
     fotoPerfilUrl: z.string().optional().or(z.literal("")),
 });

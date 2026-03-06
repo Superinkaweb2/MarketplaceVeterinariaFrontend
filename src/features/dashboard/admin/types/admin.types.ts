@@ -8,6 +8,7 @@ export interface Company {
   ciudad: string;
   pais: string;
   estadoValidacion: 'PENDIENTE' | 'VERIFICADO' | 'RECHAZADO';
+  tipoServicio: string;
   ownerEmail: string;
   createdAt: string;
 }
