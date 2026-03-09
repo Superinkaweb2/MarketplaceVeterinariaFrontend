@@ -45,8 +45,8 @@ export interface CompanyResponse {
   direccion: string;
   ciudad: string;
   pais: string;
-  ubicacionLat?: number;
-  ubicacionLng?: number;
+  latitud?: number;
+  longitud?: number;
   logoUrl: string;
   bannerUrl: string;
   mpPublicKey: string;

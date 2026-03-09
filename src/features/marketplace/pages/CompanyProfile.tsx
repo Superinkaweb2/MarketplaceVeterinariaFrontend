@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { marketplaceService } from "../services/marketplaceService";
 import { ProductCard } from "../components/ProductCard";
+import { MapView } from "../components/MapView";
 import type { Product } from "../types/marketplace";
 
 interface Company {
@@ -25,6 +26,8 @@ interface Company {
     emailContacto: string;
     direccion: string;
     ciudad: string;
+    latitud?: number;
+    longitud?: number;
 }
 
 export const CompanyProfile = () => {
@@ -243,12 +246,21 @@ export const CompanyProfile = () => {
                                     </div>
                                     Sitio Web
                                 </div>
-                                <div className="flex items-center gap-3 text-slate-500 hover:text-blue-500 transition-colors cursor-pointer group text-sm">
-                                    <div className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-colors">
-                                        <MapPin className="w-4 h-4" />
+
+                                {company.latitud && company.longitud && (
+                                    <div className="space-y-4 pt-4">
+                                        <MapView lat={company.latitud} lng={company.longitud} />
+                                        <a
+                                            href={`https://www.google.com/maps/dir/?api=1&destination=${company.latitud},${company.longitud}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-2 w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
+                                        >
+                                            <MapPin className="w-3.5 h-3.5" />
+                                            Cómo llegar
+                                        </a>
                                     </div>
-                                    Indicaciones
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>
