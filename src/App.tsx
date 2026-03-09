@@ -23,6 +23,8 @@ import { CheckoutPage } from "./features/marketplace/pages/CheckoutPage";
 import { PaymentSuccessPage } from "./features/marketplace/pages/PaymentSuccessPage";
 import { CartProvider } from "./features/marketplace/context/CartContext";
 import { CartSidebar } from "./features/marketplace/components/CartSidebar";
+import { CompanyProfile } from "./features/marketplace/pages/CompanyProfile";
+import { CompaniesPage } from "./features/marketplace/pages/CompaniesPage";
 import { Login } from "./features/auth/pages/Login";
 import { Register } from "./features/auth/pages/Register";
 import ForgotPassword from "./features/auth/pages/ForgotPassword";
@@ -175,45 +177,49 @@ function App() {
           <Route
             path="*"
             element={
-              <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
-                <Header />
-                <main className="flex-1 flex flex-col items-center w-full">
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/home" element={<Navigate to="/" replace />} />
-                    <Route path="/sobre-nosotros" element={<SobreNosotros />} />
-                    <Route path="/empleos" element={<Empleos />} />
-                    <Route path="/blog" element={<Blog />} />
-                    <Route path="/contacto" element={<Contacto />} />
-                    <Route path="/privacidad" element={<Privacidad />} />
-                    <Route path="/terminos" element={<Terminos />} />
-                    <Route
-                      path="/marketplace/*"
-                      element={
-                        <CartProvider>
+              <CartProvider>
+                <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+                  <Header />
+                  <main className="flex-1 flex flex-col items-center w-full">
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/home" element={<Navigate to="/" replace />} />
+                      <Route path="/sobre-nosotros" element={<SobreNosotros />} />
+                      <Route path="/empleos" element={<Empleos />} />
+                      <Route path="/blog" element={<Blog />} />
+                      <Route path="/contacto" element={<Contacto />} />
+                      <Route path="/privacidad" element={<Privacidad />} />
+                      <Route path="/terminos" element={<Terminos />} />
+
+                      <Route
+                        path="/marketplace/*"
+                        element={
                           <Routes>
                             <Route index element={<Marketplace />} />
                             <Route path="product/:id" element={<ProductDetails />} />
                             <Route path="checkout" element={<CheckoutPage />} />
                             <Route path="success" element={<PaymentSuccessPage />} />
                           </Routes>
-                          <CartSidebar />
-                        </CartProvider>
-                      }
-                    />
-                    
-                    <Route
-                      path="*"
-                      element={
-                        <div className="p-20 text-center text-slate-500 dark:text-slate-400">
-                          404 — Página no encontrada
-                        </div>
-                      }
-                    />
-                  </Routes>
-                </main>
-                <Footer />
-              </div>
+                        }
+                      />
+
+                      <Route path="/empresas" element={<CompaniesPage />} />
+                      <Route path="/empresa/:id" element={<CompanyProfile />} />
+
+                      <Route
+                        path="*"
+                        element={
+                          <div className="p-20 text-center text-slate-500 dark:text-slate-400">
+                            404 — Página no encontrada
+                          </div>
+                        }
+                      />
+                    </Routes>
+                  </main>
+                  <Footer />
+                  <CartSidebar />
+                </div>
+              </CartProvider>
             }
           />
         </Routes>

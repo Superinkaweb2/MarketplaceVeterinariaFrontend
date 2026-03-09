@@ -10,6 +10,7 @@ export const Header = () => {
 
   const navItems = [
     { name: "Inicio", path: "/" },
+    { name: "Empresas", path: "/empresas" },
     { name: "Marketplace", path: "/marketplace" },
   ];
 
