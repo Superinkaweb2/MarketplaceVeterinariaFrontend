@@ -1,7 +1,7 @@
 import { api } from "../../../shared/http/api";
 import type { ApiResponse, PageResponse } from "../../../shared/types/api";
 import type { Order } from "../../../types/mercadopago";
-import type { Product, Category, MarketplaceFilters } from "../types/marketplace";
+import type { Product, Category, MarketplaceFilters, CompanyResponse } from "../types/marketplace";
 
 export const marketplaceService = {
     searchProducts: async (filters: MarketplaceFilters) => {
@@ -23,6 +23,23 @@ export const marketplaceService = {
 
     getCategories: async (): Promise<Category[]> => {
         const { data } = await api.get<ApiResponse<Category[]>>("/categories");
+        return data.data;
+    },
+
+    getAllCompanies: async (page = 0, size = 12): Promise<PageResponse<CompanyResponse>> => {
+        const { data } = await api.get<ApiResponse<PageResponse<CompanyResponse>>>(`/companies/public?page=${page}&size=${size}`);
+        return data.data;
+    },
+
+    getCompanyById: async (id: number | string): Promise<CompanyResponse> => {
+        const { data } = await api.get<ApiResponse<any>>(`/companies/public/${id}`);
+        return data.data;
+    },
+
+    getProductsByCompany: async (companyId: number, page = 0, size = 10) => {
+        const { data } = await api.get<ApiResponse<{ content: Product[] }>>(`/public/products/company/${companyId}`, {
+            params: { page, size }
+        });
         return data.data;
     },
 
@@ -59,14 +76,21 @@ export const marketplaceService = {
         return data.data;
     },
 
+    getAdoptionsByCompany: async (companyId: number, page = 0, size = 12) => {
+        const { data } = await api.get<ApiResponse<{ content: any[] }>>(`/adoptions/public/company/${companyId}`, {
+            params: { page, size }
+        });
+        return data.data;
+    },
+
     getAdoptionById: async (id: number): Promise<any> => {
         const { data } = await api.get<ApiResponse<any>>(`/adoptions/${id}`);
         return data.data;
     },
 
-    searchServices: async (page = 0, size = 12, q?: string) => {
+    searchServices: async (page = 0, size = 12, q?: string, empresaId?: number) => {
         const { data } = await api.get<ApiResponse<{ content: any[] }>>("/services", {
-            params: { page, size, q }
+            params: { page, size, q, empresaId }
         });
         return data.data;
     },

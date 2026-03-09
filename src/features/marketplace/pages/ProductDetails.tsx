@@ -15,6 +15,7 @@ export const ProductDetails = () => {
     const [rawAdoption, setRawAdoption] = useState<AdoptionResponse | null>(null);
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [quantity, setQuantity] = useState(1);
     const { addToCart, items } = useCart();
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
@@ -25,7 +26,7 @@ export const ProductDetails = () => {
             navigate(`/login?next=${encodeURIComponent(location.pathname)}`);
             return;
         }
-        if (product) addToCart(product);
+        if (product) addToCart(product, 1); // Services always 1
     };
 
     const isService = product?.categoriaId === -2;
@@ -186,11 +187,11 @@ export const ProductDetails = () => {
                             <div className="mb-8 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                                 <div className="flex items-baseline gap-4 mb-2">
                                     <span className={`text-4xl font-black ${isService ? "text-purple-700 dark:text-purple-400" : "text-slate-900 dark:text-white"}`}>
-                                        ${product.precioActual.toFixed(2)}
+                                        S/.{product.precioActual.toFixed(2)}
                                     </span>
                                     {product.precioOferta && (
                                         <span className="text-xl text-slate-400 line-through font-medium">
-                                            ${product.precio.toFixed(2)}
+                                            S/. {product.precio.toFixed(2)}
                                         </span>
                                     )}
                                 </div>
@@ -205,6 +206,41 @@ export const ProductDetails = () => {
                             </div>
                         )}
 
+                        {!isAdoption && !isService && (
+                            <div className="mb-8">
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wider">Cantidad</h3>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 border border-slate-200 dark:border-slate-700">
+                                        <button
+                                            onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                                            className="w-12 h-12 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 rounded-xl transition-all font-bold text-xl"
+                                        >
+                                            −
+                                        </button>
+                                        <input
+                                            type="number"
+                                            value={quantity}
+                                            onChange={(e) => {
+                                                const val = parseInt(e.target.value);
+                                                if (!isNaN(val)) {
+                                                    setQuantity(Math.max(1, Math.min(val, product.stock)));
+                                                }
+                                            }}
+                                            className="w-12 text-center bg-transparent font-black text-lg text-slate-900 dark:text-white focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        />
+                                        <button
+                                            onClick={() => setQuantity(prev => Math.min(product.stock, prev + 1))}
+                                            className="w-12 h-12 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 rounded-xl transition-all font-bold text-xl"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                    <span className="text-xs text-slate-500 font-medium">
+                                        {product.stock} disponibles
+                                    </span>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="mb-10">
                             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
@@ -225,7 +261,6 @@ export const ProductDetails = () => {
                                     <span className="material-symbols-outlined">pets</span>
                                     Solicitar Adopción
                                 </button>
-
                             ) : isService ? (
                                 <button
                                     onClick={handleReservar}
@@ -240,10 +275,9 @@ export const ProductDetails = () => {
                                     </span>
                                     {isServiceInCart ? "Servicio ya reservado" : !isAuthenticated ? "Iniciar sesión para reservar" : "Reservar Turno"}
                                 </button>
-
                             ) : (
                                 <button
-                                    onClick={() => addToCart(product)}
+                                    onClick={() => addToCart(product, quantity)}
                                     className="flex-1 bg-blue-600 text-white font-bold py-4 px-8 rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                                 >
                                     <span className="material-symbols-outlined">add_shopping_cart</span>
@@ -251,7 +285,6 @@ export const ProductDetails = () => {
                                 </button>
                             )}
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -262,6 +295,5 @@ export const ProductDetails = () => {
                 adopcion={rawAdoption}
             />
         </div>
-
     );
 };

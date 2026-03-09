@@ -70,7 +70,6 @@ export const MarketplaceSidebar = ({ selectedCategory, onSelectCategory }: Marke
             Servicios Médicos
           </button>
         </nav>
-
       </div>
     </aside>
   );

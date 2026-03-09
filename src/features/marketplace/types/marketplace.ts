@@ -31,3 +31,24 @@ export interface MarketplaceFilters {
   size?: number;
   sort?: 'asc' | 'desc';
 }
+
+export interface CompanyResponse {
+  id: number;
+  usuarioPropietarioId: number;
+  nombreComercial: string;
+  razonSocial: string;
+  ruc: string;
+  descripcion: string;
+  tipoServicio: string;
+  telefonoContacto: string;
+  emailContacto: string;
+  direccion: string;
+  ciudad: string;
+  pais: string;
+  latitud?: number;
+  longitud?: number;
+  logoUrl: string;
+  bannerUrl: string;
+  mpPublicKey: string;
+  estadoValidacion: string;
+}

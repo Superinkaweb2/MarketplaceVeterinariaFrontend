@@ -22,6 +22,7 @@ import { api } from "../../../../shared/http/api";
 import { useAuth } from "../../../auth/context/useAuth";
 import { authService } from "../../../auth/services/authService";
 import Swal from "sweetalert2";
+import { MapPicker } from "../components/MapPicker";
 
 const generalDataSchema = z.object({
     nombreComercial: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
@@ -31,6 +32,8 @@ const generalDataSchema = z.object({
     tipoServicioOtro: z.string().optional(),
     direccion: z.string().min(5, "La dirección es muy corta"),
     descripcion: z.string().optional(),
+    latitud: z.number().optional().nullable(),
+    longitud: z.number().optional().nullable(),
 }).refine((data) => data.tipoServicio !== "OTRO" || (data.tipoServicioOtro && data.tipoServicioOtro.trim().length > 0), {
     message: "Debe especificar el tipo de servicio",
     path: ["tipoServicioOtro"],
@@ -62,12 +65,15 @@ export const EmpresaConfigPage = () => {
         handleSubmit: handleSubmitGeneral,
         reset: resetGeneral,
         watch: watchGeneral,
+        setValue: setGeneralValue,
         formState: { errors: errorsGeneral },
     } = useForm<GeneralDataValues>({
         resolver: zodResolver(generalDataSchema),
     });
 
     const tipoServicio = watchGeneral("tipoServicio");
+    const latitud = watchGeneral("latitud");
+    const longitud = watchGeneral("longitud");
 
     const {
         register: registerMP,
@@ -98,6 +104,8 @@ export const EmpresaConfigPage = () => {
                 descripcion: data.descripcion || "",
                 tipoServicio: isCustom ? "OTRO" : data.tipoServicio,
                 tipoServicioOtro: isCustom ? data.tipoServicio : "",
+                latitud: data.latitud,
+                longitud: data.longitud
             });
 
             if (data.logoUrl) setLogoPreview(data.logoUrl);
@@ -115,7 +123,9 @@ export const EmpresaConfigPage = () => {
         try {
             const finalData = {
                 ...data,
-                tipoServicio: data.tipoServicio === "OTRO" ? data.tipoServicioOtro || "OTRO" : data.tipoServicio
+                tipoServicio: data.tipoServicio === "OTRO" ? data.tipoServicioOtro || "OTRO" : data.tipoServicio,
+                latitud: data.latitud,
+                longitud: data.longitud
             };
 
             const formData = new FormData();
@@ -482,6 +492,25 @@ export const EmpresaConfigPage = () => {
                                             />
                                         </div>
                                         {errorsGeneral.direccion && <p className="text-xs text-red-500">{errorsGeneral.direccion.message}</p>}
+                                    </div>
+
+                                    <div className="md:col-span-2 space-y-2">
+                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ubicación en el Mapa</label>
+                                        <p className="text-xs text-slate-500">Mueve el marcador o haz clic en el mapa para indicar dónde se encuentra tu local.</p>
+                                        <MapPicker
+                                            lat={latitud || 0}
+                                            lng={longitud || 0}
+                                            onChange={(lat, lng) => {
+                                                setGeneralValue("latitud", lat);
+                                                setGeneralValue("longitud", lng);
+                                            }}
+                                        />
+                                        {(latitud && longitud) && (
+                                            <div className="flex gap-4 text-[10px] text-slate-400 font-mono">
+                                                <span>LAT: {latitud.toFixed(6)}</span>
+                                                <span>LNG: {longitud.toFixed(6)}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
