@@ -8,7 +8,7 @@ interface CartItem extends Product {
 interface CartContextType {
     items: CartItem[];
     isOpen: boolean;
-    addToCart: (product: Product) => void;
+    addToCart: (product: Product, quantity?: number) => void;
     removeFromCart: (productId: number | string) => void;
     updateQuantity: (productId: number | string, quantity: number) => void;
     clearCart: () => void;
@@ -42,8 +42,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('vetsaas_cart', JSON.stringify(items));
     }, [items]);
 
-    const addToCart = useCallback((product: Product) => {
+    const addToCart = useCallback((product: Product, quantity: number = 1) => {
         const isService = product.itemType === 'service' || String(product.id).startsWith('service_');
+        const finalQuantity = isService ? 1 : quantity;
+
+        // SANITIZACIÓN: Evita que un null o undefined rompa el Math.min
+        const safeStock = (product.stock !== undefined && product.stock !== null) 
+            ? Number(product.stock) 
+            : 99; // Límite por defecto si no hay stock declarado
 
         setItems(currentItems => {
             const existingItem = currentItems.find(item => item.id === product.id);
@@ -53,13 +59,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (isService) return currentItems;
 
                 // Don't exceed stock
-                if (existingItem.quantity >= product.stock) return currentItems;
+                const newQuantity = Math.min(existingItem.quantity + finalQuantity, safeStock);
 
                 return currentItems.map(item =>
-                    item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+                    item.id === product.id ? { ...item, quantity: newQuantity } : item
                 );
             }
-            return [...currentItems, { ...product, quantity: 1 }];
+            return [...currentItems, { ...product, quantity: finalQuantity }];
         });
         setIsOpen(true);
     }, []);
@@ -84,8 +90,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // Services always stay at 1
                 if (isService) return item;
 
+                // SANITIZACIÓN: Evita que null/undefined en localStorage rompa el carrito
+                const safeStock = (item.stock !== undefined && item.stock !== null) 
+                    ? Number(item.stock) 
+                    : 99;
+                    
                 // Clamp to available stock
-                const clampedQty = Math.min(quantity, item.stock);
+                const clampedQty = Math.min(quantity, safeStock);
                 return { ...item, quantity: clampedQty };
             })
         );
