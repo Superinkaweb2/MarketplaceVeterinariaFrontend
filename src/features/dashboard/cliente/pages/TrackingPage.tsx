@@ -5,7 +5,8 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import {
   Package, Truck, Store, Navigation, CheckCircle, Search,
-  Phone, ArrowLeft, Clock, MapPin, ShieldCheck, AlertCircle, XCircle, Route, Trash2
+  ArrowLeft, Clock, MapPin, ShieldCheck, AlertCircle, XCircle, Route, Trash2,
+  MessageCircle
 } from "lucide-react";
 import { DeliveryMap } from "../components/DeliveryMap";
 import Swal from "sweetalert2";
@@ -291,10 +292,13 @@ export const TrackingPage = () => {
             </div>
             {delivery.repartidorTelefono && (
               <a
-                href={`tel:${delivery.repartidorTelefono}`}
-                className="p-3 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-xl hover:bg-green-200 transition-colors"
+                href={`https://wa.me/${delivery.repartidorTelefono.replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-xl hover:bg-green-200 transition-colors flex items-center justify-center gap-2"
+                title="Escribir por WhatsApp"
               >
-                <Phone className="w-5 h-5" />
+                <MessageCircle className="w-5 h-5" />
               </a>
             )}
           </div>
