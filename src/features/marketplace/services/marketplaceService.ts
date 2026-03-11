@@ -44,7 +44,16 @@ export const marketplaceService = {
         return data.data;
     },
 
-    createOrder: async (orderData: { empresaId: number | null; veterinarioId: number | null; items: { productoId: number | null; servicioId: number | null; cantidad: number }[] }): Promise<number> => {
+    createOrder: async (orderData: { 
+        empresaId: number | null; 
+        veterinarioId: number | null; 
+        costoEnvio?: number;
+        destinoLat?: number;
+        destinoLng?: number;
+        destinoDireccion?: string;
+        destinoReferencia?: string;
+        items: { productoId: number | null; servicioId: number | null; cantidad: number }[] 
+    }): Promise<number> => {
         const { data } = await api.post<ApiResponse<number>>("/orders", orderData);
         return data.data;
     },

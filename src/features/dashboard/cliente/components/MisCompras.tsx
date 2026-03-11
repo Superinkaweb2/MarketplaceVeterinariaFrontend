@@ -1,14 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { marketplaceService } from "../../../marketplace/services/marketplaceService";
 import type { Order } from "../types/order.types";
 import {
   Package, X,
   ChevronLeft, ChevronRight, CreditCard, ExternalLink,
-  Calendar
+  Calendar, Truck
 } from "lucide-react";
 import Swal from "sweetalert2";
 
 export const MisCompras = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPaying, setIsPaying] = useState<number | null>(null);
@@ -183,6 +185,14 @@ export const MisCompras = () => {
                             {isPaying === order.id ? "Procesando..." : (
                               <>Pagar Ahora <ExternalLink size={16} /></>
                             )}
+                          </button>
+                        )}
+                        {order.estado === 'PAGADO' && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); navigate(`/portal/cliente/tracking/${order.id}`); }}
+                            className="flex-1 md:flex-none px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Truck size={16} /> Rastrear Envío
                           </button>
                         )}
                         <button className="flex-1 md:flex-none px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">

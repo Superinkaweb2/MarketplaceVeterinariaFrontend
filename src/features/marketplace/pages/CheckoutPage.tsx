@@ -11,6 +11,17 @@ export const CheckoutPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Estados de Envío
+    const [deliveryMode, setDeliveryMode] = useState<'pickup' | 'delivery'>('pickup');
+    const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
+    const [address, setAddress] = useState("");
+    const [reference, setReference] = useState("");
+    const [locationLoading, setLocationLoading] = useState(false);
+
+    // Costo de envío (Ejemplo: S/ 10 base si es delivery)
+    const shippingCost = deliveryMode === 'delivery' ? 10.00 : 0;
+    const finalTotal = cartTotal + shippingCost;
+
     // Detect sandbox mode from the first item's mpPublicKey
     const isSandboxMode = useMemo(() => {
         if (items.length === 0) return false;
@@ -30,6 +41,30 @@ export const CheckoutPage = () => {
         acc[empresaId].items.push(item);
         return acc;
     }, {} as Record<number, { empresaNombre: string; items: any[] }>);
+
+    const handleGetLocation = () => {
+        if (!navigator.geolocation) {
+            setError("Tu navegador no soporta geolocalización");
+            return;
+        }
+
+        setLocationLoading(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setLocation({
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                });
+                setLocationLoading(false);
+                setError(null);
+            },
+            () => {
+                setLocationLoading(false);
+                setError("No pudimos obtener tu ubicación. Por favor, asegúrate de dar los permisos e inténtalo de nuevo.");
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    };
 
     const handleCheckout = async () => {
         if (!isAuthenticated) {
@@ -74,12 +109,31 @@ export const CheckoutPage = () => {
                 };
             });
 
+            // Validar campos de envío
+            if (deliveryMode === 'delivery') {
+                if (!location) {
+                    setError("Necesitas compartir tu ubicación para el envío a domicilio");
+                    setLoading(false);
+                    return;
+                }
+                if (!address.trim()) {
+                    setError("Necesitas ingresar una dirección para el envío");
+                    setLoading(false);
+                    return;
+                }
+            }
+
             // 1. Create Order
             const isFirstItemService = group.items[0]?.itemType === 'service' || String(group.items[0]?.id).startsWith('service_');
 
             const orderId = await marketplaceService.createOrder({
                 empresaId: !isFirstItemService ? empresaId : null,
                 veterinarioId: isFirstItemService ? empresaId : null,
+                costoEnvio: shippingCost,
+                destinoLat: deliveryMode === 'delivery' && location ? location.lat : undefined,
+                destinoLng: deliveryMode === 'delivery' && location ? location.lng : undefined,
+                destinoDireccion: deliveryMode === 'delivery' ? address : undefined,
+                destinoReferencia: deliveryMode === 'delivery' ? reference : undefined,
                 items: orderItems
             });
 
@@ -142,6 +196,77 @@ export const CheckoutPage = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Resumen */}
                     <div className="lg:col-span-2 space-y-6">
+
+                        {/* SECCIÓN DE ENVÍO */}
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-blue-500">local_shipping</span>
+                                Entrega
+                            </h2>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <label className={`border rounded-xl p-4 cursor-pointer transition-all ${deliveryMode === 'pickup' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700 hover:border-blue-300'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <input type="radio" className="w-4 h-4 text-blue-600" checked={deliveryMode === 'pickup'} onChange={() => setDeliveryMode('pickup')} />
+                                        <div>
+                                            <p className="font-bold text-slate-900 dark:text-white">Retiro en Tienda</p>
+                                            <p className="text-xs text-slate-500">Gratis</p>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label className={`border rounded-xl p-4 cursor-pointer transition-all ${deliveryMode === 'delivery' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700 hover:border-blue-300'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <input type="radio" className="w-4 h-4 text-blue-600" checked={deliveryMode === 'delivery'} onChange={() => setDeliveryMode('delivery')} />
+                                        <div>
+                                            <p className="font-bold text-slate-900 dark:text-white">Envío a Domicilio</p>
+                                            <p className="text-xs text-slate-500">S/ 10.00</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {deliveryMode === 'delivery' && (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
+                                    <button 
+                                        type="button"
+                                        onClick={handleGetLocation}
+                                        disabled={locationLoading}
+                                        className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-medium py-3 px-4 rounded-xl transition-colors"
+                                    >
+                                        {locationLoading ? (
+                                            <div className="w-5 h-5 border-2 border-slate-400 border-t-slate-800 dark:border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            <span className={`material-symbols-outlined ${location ? 'text-green-500' : 'text-slate-500'}`}>my_location</span>
+                                        )}
+                                        {location ? "Ubicación GPS capturada" : "Obtener mi ubicación exacta"}
+                                    </button>
+
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Dirección de Entrega</label>
+                                            <input 
+                                                type="text" 
+                                                value={address}
+                                                onChange={(e) => setAddress(e.target.value)}
+                                                placeholder="Ej. Av. Larco 123, Miraflores"
+                                                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 placeholder:text-slate-400 outline-none focus:border-blue-500 transition-colors"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Referencia (Opcional)</label>
+                                            <input 
+                                                type="text" 
+                                                value={reference}
+                                                onChange={(e) => setReference(e.target.value)}
+                                                placeholder="Frente a la farmacia, portón negro"
+                                                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 placeholder:text-slate-400 outline-none focus:border-blue-500 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         {Object.entries(groupedItems).map(([empresaId, group]) => (
                             <div key={empresaId} className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
                                 <h2 className="text-sm font-bold uppercase text-slate-400 mb-4 flex items-center gap-2">
@@ -180,11 +305,15 @@ export const CheckoutPage = () => {
                                 </div>
                                 <div className="flex justify-between text-slate-600 dark:text-slate-400">
                                     <span>Envío</span>
-                                    <span className="text-green-500 font-medium">Gratis</span>
+                                    {shippingCost === 0 ? (
+                                        <span className="text-green-500 font-medium">Gratis (Retiro)</span>
+                                    ) : (
+                                        <span className="text-slate-900 dark:text-white font-medium">S/{shippingCost.toFixed(2)}</span>
+                                    )}
                                 </div>
                                 <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between text-xl font-black text-slate-900 dark:text-white">
                                     <span>Total</span>
-                                    <span>S/{cartTotal.toFixed(2)}</span>
+                                    <span>S/{finalTotal.toFixed(2)}</span>
                                 </div>
                             </div>
 

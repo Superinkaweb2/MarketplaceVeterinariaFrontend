@@ -48,6 +48,7 @@ import { PaymentSuccessPage as PaymentSuccessPageEmpresa } from "./features/dash
 import { TalentoPage } from "./features/dashboard/empresa/pages/TalentoPage";
 import { PacientesPage as EmpresaPacientesPage } from "./features/dashboard/empresa/pages/PacientesPage";
 import { MisCompras } from "./features/dashboard/cliente/components/MisCompras";
+import { TrackingPage } from "./features/dashboard/cliente/pages/TrackingPage";
 // Portal Admin
 import { EmpresasPage } from "./features/dashboard/admin/pages/EmpresasPage";
 import { UsuariosPage } from "./features/dashboard/admin/pages/UsuariosPage";
@@ -75,6 +76,8 @@ import { VetConfiguracionPage } from "./features/dashboard/veterinario/pages/Vet
 import { VetCitasPage } from "./features/dashboard/veterinario/pages/VetCitasPage";
 import { VetPacientesPage } from "./features/dashboard/veterinario/pages/VetPacientesPage";
 
+// Portal Repartidor
+import { RepartidorDashboard } from "./features/dashboard/repartidor/components/RepartidorDashboard";
 
 function App() {
   useTheme();
@@ -169,8 +172,14 @@ function App() {
                 <Route path="citas" element={<MisCitasPage />} />
                 <Route path="configuracion" element={<ClienteConfigPage />} />
                 <Route path="compras" element={<MisCompras />} />
+                <Route path="tracking/:ordenId" element={<TrackingPage />} />
               </Route>
             </Route>
+          </Route>
+
+          {/* Rutas protegidas: REPARTIDOR */}
+          <Route element={<ProtectedRoute allowedRoles={["REPARTIDOR"]} />}>
+            <Route path="/portal/repartidor" element={<RepartidorDashboard />} />
           </Route>
 
           {/* Rutas públicas con Layout (Header + Footer) */}
