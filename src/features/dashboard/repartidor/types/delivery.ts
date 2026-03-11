@@ -29,6 +29,8 @@ export interface DeliveryResponseDTO {
     idDelivery: number;
     ordenId: number;
     estado: DeliveryStatus;
+    clienteNombre?: string;
+    clienteTelefono?: string;
     origenDireccion: string;
     destinoDireccion: string;
     costoDelivery: number;

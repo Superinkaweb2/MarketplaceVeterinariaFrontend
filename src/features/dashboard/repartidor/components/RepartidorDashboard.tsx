@@ -4,7 +4,7 @@ import { useGeolocation } from '../hooks/useGeolocation';
 import { useStompClient } from '../hooks/useStompClient';
 import Swal from 'sweetalert2';
 import { repartidorService } from '../services/repartidorService';
-import { MapPin, Store, Navigation, CheckCircle, Package, AlertCircle, Power, User, Map, Bike, Car, Truck, ShoppingBag } from 'lucide-react';
+import { MapPin, Store, Navigation, CheckCircle, Package, AlertCircle, Power, User, Map, Bike, Car, Truck, ShoppingBag, MessageCircle } from 'lucide-react';
 import type { DeliveryResponseDTO } from '../types/delivery';
 
 export const RepartidorDashboard: React.FC = () => {
@@ -273,6 +273,29 @@ export const RepartidorDashboard: React.FC = () => {
                                 <div className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-black uppercase tracking-wider rounded-lg border border-blue-100">
                                     {deliveryActivo.estado.replace('_', ' ')}
                                 </div>
+                            </div>
+
+                            {/* Info Cliente & Contacto */}
+                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-4 mb-6 flex items-center justify-between border border-gray-100 dark:border-gray-800">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                                        <User className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cliente</p>
+                                        <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{deliveryActivo.clienteNombre || 'Cliente'}</p>
+                                    </div>
+                                </div>
+                                {deliveryActivo.clienteTelefono && (
+                                    <a 
+                                        href={`https://wa.me/${deliveryActivo.clienteTelefono.replace(/\D/g, '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-green-500/20 active:scale-95"
+                                    >
+                                        <MessageCircle className="w-4 h-4" /> WhatsApp
+                                    </a>
+                                )}
                             </div>
                             
                             {/* Ruta vertical */}

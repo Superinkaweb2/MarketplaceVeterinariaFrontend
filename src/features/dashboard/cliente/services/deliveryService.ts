@@ -5,6 +5,8 @@ export interface DeliveryTrackingDTO {
     idDelivery: number;
     ordenId: number;
     estado: string;
+    clienteNombre?: string;
+    clienteTelefono?: string;
 
     // Repartidor
     repartidorId: number | null;
