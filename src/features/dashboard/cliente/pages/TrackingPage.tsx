@@ -6,9 +6,10 @@ import SockJS from "sockjs-client";
 import {
   Package, Truck, Store, Navigation, CheckCircle, Search,
   ArrowLeft, Clock, MapPin, ShieldCheck, AlertCircle, XCircle, Route, Trash2,
-  MessageCircle
+  MessageCircle, Star
 } from "lucide-react";
 import { DeliveryMap } from "../components/DeliveryMap";
+import { RatingModal } from "../components/RatingModal";
 import Swal from "sweetalert2";
 
 const STOMP_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
@@ -29,6 +30,7 @@ export const TrackingPage = () => {
   const [delivery, setDelivery] = useState<DeliveryTrackingDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const stompRef = useRef<Client | null>(null);
 
   // Fetch inicial del delivery
@@ -109,6 +111,20 @@ export const TrackingPage = () => {
       } catch (err: any) {
         Swal.fire('Error', err.response?.data?.message || 'No se pudo cancelar el envío.', 'error');
       }
+    }
+  };
+
+  const handleRatingSubmit = async (data: any) => {
+    if (!delivery) return;
+    try {
+      await deliveryService.calificar(delivery.idDelivery, data);
+      Swal.fire('¡Gracias!', 'Tu calificación ha sido enviada.', 'success');
+      // Recargar datos para ocultar el botón
+      const res = await deliveryService.getByOrden(Number(ordenId));
+      setDelivery(res.data);
+    } catch (err: any) {
+      Swal.fire('Error', err.response?.data?.message || 'No se pudo enviar la calificación.', 'error');
+      throw err;
     }
   };
 
@@ -288,6 +304,14 @@ export const TrackingPage = () => {
                     🏍️ {delivery.repartidorVehiculo}
                   </span>
                 )}
+                {delivery.repartidorCalificacionPromedio && (
+                  <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-lg border border-amber-100 dark:border-amber-800/50">
+                    <Star size={12} className="text-amber-500 fill-amber-500" />
+                    <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
+                      {Number(delivery.repartidorCalificacionPromedio).toFixed(1)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             {delivery.repartidorTelefono && (
@@ -408,8 +432,41 @@ export const TrackingPage = () => {
           <p className="text-sm text-green-600/70 dark:text-green-400/70 mt-1">
             Tu pedido fue entregado exitosamente. ¡Gracias por tu compra!
           </p>
+          
+          {/* Botón para Calificar */}
+          {delivery.calificacionRepartidor === null && (
+            <button
+              onClick={() => setIsRatingModalOpen(true)}
+              className="mt-6 bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-green-600/20 transition-all active:scale-95 flex items-center justify-center gap-2 mx-auto"
+            >
+              <Star className="w-5 h-5 fill-white" /> Calificar Experiencia
+            </button>
+          )}
+
+          {delivery.calificacionRepartidor !== null && (
+            <div className="mt-6 flex flex-col items-center gap-1 opacity-60">
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map(s => (
+                  <Star 
+                    key={s} 
+                    size={16} 
+                    className={s <= (delivery.calificacionRepartidor || 0) ? 'text-amber-500 fill-amber-500' : 'text-gray-300'} 
+                  />
+                ))}
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-green-800/40">Calificado satisfactoriamente</p>
+            </div>
+          )}
         </div>
       )}
+
+      {/* Modal de Calificación */}
+      <RatingModal
+        isOpen={isRatingModalOpen}
+        onClose={() => setIsRatingModalOpen(false)}
+        onSubmit={handleRatingSubmit}
+        repartidorNombre={delivery.repartidorNombre || undefined}
+      />
     </div>
   );
 };

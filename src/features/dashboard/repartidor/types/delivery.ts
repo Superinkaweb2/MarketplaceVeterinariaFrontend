@@ -31,6 +31,7 @@ export interface DeliveryResponseDTO {
     estado: DeliveryStatus;
     clienteNombre?: string;
     clienteTelefono?: string;
+    repartidorCalificacionPromedio?: number;
     origenDireccion: string;
     destinoDireccion: string;
     costoDelivery: number;

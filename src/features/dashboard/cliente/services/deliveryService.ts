@@ -14,6 +14,7 @@ export interface DeliveryTrackingDTO {
     repartidorFoto: string | null;
     repartidorTelefono: string | null;
     repartidorVehiculo: string | null;
+    repartidorCalificacionPromedio: number | null;
     repartidorLat: number | null;
     repartidorLng: number | null;
 
@@ -43,7 +44,20 @@ export interface DeliveryTrackingDTO {
     asignadoAt: string | null;
     recogidoAt: string | null;
     entregadoAt: string | null;
+    // Calificaciones
+    calificacionRepartidor: number | null;
+    comentarioRepartidor: string | null;
+    calificacionProducto: number | null;
+    comentarioProducto: string | null;
+
     createdAt: string | null;
+}
+
+export interface CalificacionDTO {
+    calificacionRepartidor: number;
+    comentarioRepartidor?: string;
+    calificacionProducto: number;
+    comentarioProducto?: string;
 }
 
 export const deliveryService = {
@@ -52,4 +66,7 @@ export const deliveryService = {
 
     cancelarDelivery: (deliveryId: number): Promise<AxiosResponse<DeliveryTrackingDTO>> =>
         api.post(`/deliveries/${deliveryId}/cancelar`),
+
+    calificar: (deliveryId: number, dto: CalificacionDTO): Promise<AxiosResponse<void>> =>
+        api.post(`/deliveries/${deliveryId}/calificar`, dto),
 };

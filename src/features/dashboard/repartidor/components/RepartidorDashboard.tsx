@@ -4,7 +4,7 @@ import { useGeolocation } from '../hooks/useGeolocation';
 import { useStompClient } from '../hooks/useStompClient';
 import Swal from 'sweetalert2';
 import { repartidorService } from '../services/repartidorService';
-import { MapPin, Store, Navigation, CheckCircle, Package, AlertCircle, Power, User, Map, Bike, Car, Truck, ShoppingBag, MessageCircle } from 'lucide-react';
+import { MapPin, Store, Navigation, CheckCircle, Package, AlertCircle, Power, User, Map, Bike, Car, Truck, ShoppingBag, MessageCircle, Star, Camera } from 'lucide-react';
 import type { DeliveryResponseDTO } from '../types/delivery';
 
 export const RepartidorDashboard: React.FC = () => {
@@ -12,6 +12,8 @@ export const RepartidorDashboard: React.FC = () => {
     const [otp, setOtp] = useState<string>("");
     const [disponibles, setDisponibles] = useState<DeliveryResponseDTO[]>([]);
     const [aceptandoId, setAceptandoId] = useState<number | null>(null);
+    const [cargandoFoto, setCargandoFoto] = useState(false);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const isDisponible = perfil?.estadoActual === 'DISPONIBLE';
     const isOcupado = perfil?.estadoActual === 'OCUPADO' || deliveryActivo !== null;
@@ -87,6 +89,28 @@ export const RepartidorDashboard: React.FC = () => {
         }
     };
 
+    const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !deliveryActivo) return;
+
+        try {
+            setCargandoFoto(true);
+            await repartidorService.confirmarFoto(deliveryActivo.idDelivery, file);
+            Swal.fire({
+                title: '¡Entrega confirmada!',
+                text: 'La evidencia fotográfica se guardó correctamente.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            recargarDatos();
+        } catch (err: any) {
+            Swal.fire('Error', err.response?.data?.message || 'No se pudo subir la foto', 'error');
+        } finally {
+            setCargandoFoto(false);
+        }
+    };
+
     const handleLocationUpdate = (lat: number, lng: number) => {
         if (deliveryActivo && isConnected) {
              sendLocation(lat, lng, deliveryActivo.idDelivery);
@@ -146,6 +170,20 @@ export const RepartidorDashboard: React.FC = () => {
                             <div className="flex items-center gap-1 mt-0.5 text-xs text-gray-500 font-medium bg-gray-100/80 px-2 py-0.5 rounded-full w-max">
                                 <VehicleIcon /> <span>{perfil.placaVehiculo}</span>
                             </div>
+                        </div>
+                    </div>
+                    {/* Estadísticas Rápidas (Estrellas) */}
+                    <div className="flex items-center gap-4 border-l border-gray-100 pl-4 py-1">
+                        <div className="text-center">
+                            <div className="flex items-center gap-1 text-amber-500">
+                                <Star className="w-5 h-5 fill-amber-500" />
+                                <span className="text-lg font-black">{Number(perfil.calificacionPromedio || 5).toFixed(1)}</span>
+                            </div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Rating</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-lg font-black text-blue-600">{perfil.totalEntregas || 0}</p>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Entregas</p>
                         </div>
                     </div>
                 </div>
@@ -360,6 +398,38 @@ export const RepartidorDashboard: React.FC = () => {
                                             disabled={otp.length !== 4}
                                         >
                                             Entregar Pedido
+                                        </button>
+
+                                        <div className="relative my-6">
+                                            <div className="absolute inset-0 flex items-center">
+                                                <span className="w-full border-t border-gray-200"></span>
+                                            </div>
+                                            <div className="relative flex justify-center text-xs uppercase">
+                                                <span className="bg-gray-50 px-2 text-gray-500 font-bold">O mediante foto</span>
+                                            </div>
+                                        </div>
+
+                                        <input 
+                                            type="file" 
+                                            accept="image/*" 
+                                            capture="environment" 
+                                            className="hidden" 
+                                            ref={fileInputRef}
+                                            onChange={handleFotoChange}
+                                        />
+                                        <button 
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={cargandoFoto}
+                                            className="w-full bg-white border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 text-gray-600 py-4 rounded-xl flex flex-col items-center justify-center gap-1 transition-all group"
+                                        >
+                                            {cargandoFoto ? (
+                                                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                            ) : (
+                                                <>
+                                                    <Camera className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                                                    <span className="text-xs font-bold text-gray-500 group-hover:text-blue-600">Tomar Foto de Evidencia</span>
+                                                </>
+                                            )}
                                         </button>
                                     </div>
                                 )}
