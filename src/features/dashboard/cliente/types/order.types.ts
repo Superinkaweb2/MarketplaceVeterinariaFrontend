@@ -26,3 +26,13 @@ export interface Order {
   createdAt: string;
   items: OrderItem[];
 }
+
+export interface PageResponseOrders<T> {
+    content: T[];
+    page: {
+        size: number;
+        number: number;
+        totalElements: number;
+        totalPages: number;
+    };
+}
