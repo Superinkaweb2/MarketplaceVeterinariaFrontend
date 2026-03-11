@@ -6,5 +6,24 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss()],
+    tailwindcss()
+  ],
+  define: {
+    global: 'window'
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-ui': ['sweetalert2', 'react-confetti', 'react-use'],
+          'vendor-charts': ['recharts'],
+          'vendor-maps': ['leaflet', 'react-leaflet'],
+          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'vendor-utils': ['axios', 'jwt-decode', '@stomp/stompjs', 'sockjs-client']
+        }
+      }
+    }
+  }
 })

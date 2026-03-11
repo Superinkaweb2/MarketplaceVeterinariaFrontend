@@ -10,7 +10,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   correo: string;
   password: string;
-  rol: "CLIENTE" | "VETERINARIO" | "EMPRESA";
+  rol: "CLIENTE" | "VETERINARIO" | "EMPRESA" | "REPARTIDOR";
 }
 
 /** Response unificada de /auth/login y /auth/register */
@@ -78,4 +78,13 @@ export interface EmpresaProfileRequest {
   descripcion?: string;
   latitud?: number;
   longitud?: number;
+}
+
+/** POST /api/v1/repartidores/me — multipart/form-data */
+export interface RepartidorProfileRequest {
+  nombres: string;
+  apellidos: string;
+  telefono: string;
+  tipoVehiculo: string;
+  placaVehiculo: string;
 }

@@ -16,6 +16,7 @@ const checkPerfilByRole = async (role: string): Promise<boolean> => {
     if (role === "CLIENTE") response = await profileService.getClienteProfile();
     else if (role === "VETERINARIO") response = await profileService.getVeterinarioProfile();
     else if (role === "EMPRESA") response = await profileService.getEmpresaProfile();
+    else if (role === "REPARTIDOR") response = await profileService.getRepartidorProfile();
     else return true; // ADMIN siempre tiene acceso directo
 
     // El backend devuelve: { success: true, message: "...", data: {...} | null }

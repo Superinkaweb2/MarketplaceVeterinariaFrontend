@@ -21,7 +21,7 @@ export const productService = {
     images?: File[]
   ): Promise<Product> => {
     const formData = new FormData();
-    
+
     // El backend espera la parte "data" como un JSON Blob
     formData.append(
       "data",
@@ -51,6 +51,7 @@ export const productService = {
    * Actualiza un producto incluyendo imágenes (PATCH Multipart)
    * @param replaceImages Si es true, reemplaza todas las imágenes previas. Si es false, añade las nuevas.
    */
+  // En updateProductMultipart
   updateProductMultipart: async (
     id: number,
     data: UpdateProductRequest,
@@ -58,21 +59,26 @@ export const productService = {
     replaceImages = false
   ): Promise<Product> => {
     const formData = new FormData();
-    
+
     formData.append(
       "data",
-      new Blob([JSON.stringify(data)], { type: "application/json" }),
-      "product_update.json"
+      new Blob([JSON.stringify(data)], { type: "application/json" })
     );
 
     if (images && images.length > 0) {
       images.forEach((image) => {
+        // Importante: No uses "images[]", usa "images" 
+        // tal cual lo espera el @RequestPart del backend
         formData.append("images", image);
       });
     }
 
     const { data: response } = await api.patch<ApiResponse<Product>>(`/products/${id}`, formData, {
-      params: { replaceImages }
+      params: { replaceImages },
+      // Forzamos el multipart para evitar errores de serialización JSON accidental
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return response.data;
   },

@@ -5,6 +5,7 @@ import {
   TrendingUp,
   AlertCircle,
   Loader2,
+  Star,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { dashboardService } from "../../services/dashboardService";
@@ -164,7 +165,73 @@ export const DashboardHome = () => {
             trendLabel="Pagadas"
           />
         </div>
+
+        {/* Feedback Section */}
+        <FeedbackSection />
       </div>
     </div >
+  );
+};
+
+const FeedbackSection = () => {
+  const [ratings, setRatings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    import("../../services/deliveryEmpresaService").then(m => {
+        m.deliveryEmpresaService.getRatings()
+            .then((res: any) => setRatings(res.data))
+            .catch((err: any) => console.error("Error loading ratings:", err))
+            .finally(() => setLoading(false));
+    });
+  }, []);
+
+  if (loading) return null;
+  if (ratings.length === 0) return null;
+
+  return (
+    <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+            <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Star className="text-amber-500 fill-amber-500" size={20} />
+                Feedback Reciente de Clientes
+            </h3>
+        </div>
+        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {ratings.slice(0, 5).map(rating => (
+                <div key={rating.idDelivery} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-2">
+                            <div className="flex text-amber-500">
+                                {[...Array(5)].map((_, i) => (
+                                    <Star 
+                                        key={i} 
+                                        size={14} 
+                                        className={i < (rating.calificacionProducto || 0) ? "fill-amber-500" : "text-slate-200 dark:text-slate-700"} 
+                                    />
+                                ))}
+                            </div>
+                            <span className="text-sm font-bold text-slate-900 dark:text-white">
+                                {rating.clienteNombre || 'Cliente'}
+                            </span>
+                        </div>
+                        <span className="text-xs text-slate-400">
+                            {rating.entregadoAt ? new Date(rating.entregadoAt).toLocaleDateString() : ''}
+                        </span>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 italic">
+                        "{rating.comentarioProducto || 'Sin comentario'}"
+                    </p>
+                    <div className="mt-3 flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Entrega:</span>
+                        <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full">
+                            <Star size={10} className="text-blue-500 fill-blue-500" />
+                            <span className="text-[10px] font-bold text-blue-600">{rating.calificacionRepartidor}</span>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
   );
 };
