@@ -37,4 +37,7 @@ export interface DeliveryResponseDTO {
     costoDelivery: number;
     distanciaKm?: number;
     tiempoEstimadoMin?: number;
+    createdAt?: string;
+    asignadoAt?: string;
+    entregadoAt?: string;
 }

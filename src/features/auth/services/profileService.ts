@@ -3,6 +3,7 @@ import type {
   ClienteProfileRequest,
   VeterinarioProfileRequest,
   EmpresaProfileRequest,
+  RepartidorProfileRequest,
 } from "../types/auth";
 
 /**
@@ -80,6 +81,35 @@ export const profileService = {
    */
   getEmpresaProfile: async () => {
     const { data } = await api.get("/companies/me");
+    return data;
+  },
+
+  /**
+   * POST /api/v1/repartidores/me — Registro inicial (Multipart)
+   * Req: Bearer token con rol REPARTIDOR
+   */
+  createRepartidorProfile: async (data: RepartidorProfileRequest, fotoPerfil?: File) => {
+    const formData = new FormData();
+    
+    formData.append(
+      "data",
+      new Blob([JSON.stringify(data)], { type: "application/json" }),
+      "blob.json"
+    );
+
+    if (fotoPerfil) {
+      formData.append("fotoPerfil", fotoPerfil);
+    }
+
+    const { data: response } = await api.post("/repartidores/me", formData);
+    return response;
+  },
+
+  /**
+   * GET /api/v1/repartidores/me
+   */
+  getRepartidorProfile: async () => {
+    const { data } = await api.get("/repartidores/me");
     return data;
   },
 };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, ArrowRight, Building2, User, Heart } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, ArrowRight, Building2, User, Heart, Truck } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -23,7 +23,7 @@ const registerSchema = z
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
-type RoleType = "CLIENTE" | "VETERINARIO" | "EMPRESA";
+type RoleType = "CLIENTE" | "VETERINARIO" | "EMPRESA" | "REPARTIDOR";
 
 const ROLES = [
   {
@@ -49,6 +49,14 @@ const ROLES = [
     icon: Building2,
     color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400",
     border: "border-indigo-200 dark:border-indigo-800",
+  },
+  {
+    id: "REPARTIDOR",
+    title: "Soy Repartidor(a)",
+    description: "Para gestionar entregas, ver rutas y ganar dinero por cada envío.",
+    icon: Truck,
+    color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
+    border: "border-emerald-200 dark:border-emerald-800",
   },
 ] as const;
 

@@ -33,5 +33,8 @@ export const repartidorService = {
         api.get("/deliveries/disponibles"),
 
     aceptarPedido: (deliveryId: number): Promise<AxiosResponse<DeliveryResponseDTO>> => 
-        api.post(`/deliveries/${deliveryId}/aceptar`)
+        api.post(`/deliveries/${deliveryId}/aceptar`),
+
+    getHistorial: (): Promise<AxiosResponse<DeliveryResponseDTO[]>> =>
+        api.get("/repartidores/me/historial")
 };

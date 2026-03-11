@@ -4,11 +4,27 @@ import { useGeolocation } from '../hooks/useGeolocation';
 import { useStompClient } from '../hooks/useStompClient';
 import Swal from 'sweetalert2';
 import { repartidorService } from '../services/repartidorService';
-import { MapPin, Store, Navigation, CheckCircle, Package, AlertCircle, Power, User, Map, Bike, Car, Truck, ShoppingBag, MessageCircle, Star, Camera } from 'lucide-react';
+import { 
+    MapPin, Store, Navigation, CheckCircle, Package, AlertCircle, 
+    Power, User, Bike, Car, Truck, ShoppingBag, 
+    MessageCircle, Star, Camera, History, Home, CreditCard,
+    ChevronRight, Calendar, DollarSign, ArrowUpRight
+} from 'lucide-react';
 import type { DeliveryResponseDTO } from '../types/delivery';
 
 export const RepartidorDashboard: React.FC = () => {
-    const { perfil, deliveryActivo, loading, toggleDisponibilidad, avanzarEstado, entregarConOTP, recargarDatos } = useRepartidor();
+    const { 
+        perfil, 
+        deliveryActivo, 
+        historial,
+        loading, 
+        toggleDisponibilidad, 
+        avanzarEstado, 
+        entregarConOTP, 
+        recargarDatos 
+    } = useRepartidor();
+    
+    const [activeTab, setActiveTab] = useState<'home' | 'history' | 'profile'>('home');
     const [otp, setOtp] = useState<string>("");
     const [disponibles, setDisponibles] = useState<DeliveryResponseDTO[]>([]);
     const [aceptandoId, setAceptandoId] = useState<number | null>(null);
@@ -17,6 +33,10 @@ export const RepartidorDashboard: React.FC = () => {
 
     const isDisponible = perfil?.estadoActual === 'DISPONIBLE';
     const isOcupado = perfil?.estadoActual === 'OCUPADO' || deliveryActivo !== null;
+
+    // Calcular ganancias totales del historial
+    const gananciasTotales = historial.reduce((acc, curr) => acc + (curr.costoDelivery || 0), 0);
+    const entregasCompletadas = historial.length;
 
     // Cargar pedidos iniciales
     useEffect(() => {
@@ -30,7 +50,6 @@ export const RepartidorDashboard: React.FC = () => {
     const { isConnected, sendLocation, stompClient } = useStompClient({
         repartidorId: perfil?.idRepartidor,
         onNewOrder: (pedido) => {
-            // Este es para asignación directa (si se usara), pero ahora usamos el pool
             console.log("Pedido asignado directamente:", pedido);
             recargarDatos();
         }
@@ -41,9 +60,11 @@ export const RepartidorDashboard: React.FC = () => {
         if (stompClient && isConnected && isDisponible) {
             const sub = stompClient.subscribe('/topic/pedidos-disponibles', (msg) => {
                 const nuevo = JSON.parse(msg.body) as DeliveryResponseDTO;
-                setDisponibles(prev => [nuevo, ...prev]);
+                setDisponibles(prev => {
+                    if (prev.find(p => p.idDelivery === nuevo.idDelivery)) return prev;
+                    return [nuevo, ...prev];
+                });
                 
-                // Notificación sutil (Toast)
                 const Toast = Swal.mixin({
                     toast: true,
                     position: 'top-end',
@@ -53,7 +74,7 @@ export const RepartidorDashboard: React.FC = () => {
                 });
                 Toast.fire({
                     icon: 'info',
-                    title: '¡Nuevo pedido disponible en el pool!'
+                    title: '¡Nuevo pedido disponible!'
                 });
             });
 
@@ -119,7 +140,7 @@ export const RepartidorDashboard: React.FC = () => {
         }
     };
 
-    const { location, error: gpsError } = useGeolocation(isDisponible || isOcupado, handleLocationUpdate);
+    useGeolocation(isDisponible || isOcupado, handleLocationUpdate);
 
     if (loading) {
         return (
@@ -131,15 +152,23 @@ export const RepartidorDashboard: React.FC = () => {
 
     if (!perfil) {
         return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
-                <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-                <h2 className="text-2xl font-bold text-gray-800">Error de Perfil</h2>
-                <p className="text-gray-500 mt-2">No se pudo cargar tu información. Intenta recargar la página.</p>
+            <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6 text-amber-600">
+                    <AlertCircle className="w-10 h-10" />
+                </div>
+                <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Perfil no encontrado</h2>
+                <p className="text-gray-500 mt-3 max-w-xs mx-auto">
+                    No hemos podido encontrar tu información de repartidor.
+                </p>
+                <div className="mt-8 flex flex-col gap-3 w-full max-w-xs">
+                    <a href="/register/perfil/repartidor" className="bg-blue-600 text-white font-bold py-4 px-6 rounded-2xl">
+                        Completar mi Perfil
+                    </a>
+                </div>
             </div>
         );
     }
 
-    // Helper para ícono de vehículo
     const VehicleIcon = () => {
         if (!perfil.tipoVehiculo) return <Bike className="w-5 h-5" />;
         const type = perfil.tipoVehiculo.toLowerCase();
@@ -148,295 +177,381 @@ export const RepartidorDashboard: React.FC = () => {
         return <Bike className="w-5 h-5" />;
     };
 
+    const renderHome = () => (
+        <div className="space-y-6 pb-24">
+            {/* Control de Disponibilidad */}
+            <div className="bg-white/70 backdrop-blur-lg p-5 rounded-3xl shadow-sm border border-white/60">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h3 className="text-sm font-bold text-gray-800">
+                            {isDisponible ? 'En línea' : isOcupado ? 'Ocupado' : 'Desconectado'}
+                        </h3>
+                        <p className="text-[10px] text-gray-500 mt-0.5">
+                            {isConnected ? '⚡ GPS Activo' : '⏳ Conectando...'}
+                        </p>
+                    </div>
+                    <button 
+                        onClick={() => toggleDisponibilidad(!isDisponible)}
+                        disabled={isOcupado}
+                        className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all ${
+                            isOcupado ? 'bg-gray-200 text-gray-400' : 
+                            isDisponible ? 'bg-red-500 text-white shadow-red-200' : 'bg-green-500 text-white shadow-green-200'
+                        }`}
+                    >
+                        <Power className="w-5 h-5" />
+                    </button>
+                </div>
+            </div>
+
+            {/* Resumen de Ganancias y Estadísticas */}
+            <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-5 rounded-3xl text-white shadow-lg shadow-blue-200">
+                    <div className="flex justify-between items-start mb-2">
+                        <DollarSign className="w-5 h-5 opacity-80" />
+                        <ArrowUpRight className="w-4 h-4 opacity-60" />
+                    </div>
+                    <p className="text-[10px] font-bold opacity-80 uppercase tracking-wider">Ganancias</p>
+                    <p className="text-xl font-black">S/ {gananciasTotales.toFixed(2)}</p>
+                </div>
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
+                    <div className="flex justify-between items-start mb-2 text-blue-600">
+                        <CheckCircle className="w-5 h-5 opacity-80" />
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Completados</p>
+                    <p className="text-xl font-black text-gray-800">{entregasCompletadas}</p>
+                </div>
+            </div>
+
+            {/* Área de Delivery Activo o Disponibles */}
+            {!deliveryActivo ? (
+                <div className="space-y-4">
+                    {isDisponible ? (
+                        <>
+                            <div className="flex items-center justify-between px-1">
+                                <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                                    <ShoppingBag className="w-4 h-4 text-blue-600" />
+                                    Pedidos Disponibles
+                                </h3>
+                                <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-black">
+                                    {disponibles.length}
+                                </span>
+                            </div>
+                            
+                            {disponibles.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center p-12 bg-white/40 backdrop-blur-md rounded-3xl border-2 border-dashed border-gray-200">
+                                    <div className="relative">
+                                        <div className="absolute inset-0 bg-blue-400 rounded-full animate-ping opacity-20"></div>
+                                        <div className="bg-blue-100 p-4 rounded-full text-blue-600 relative z-10">
+                                            <MapPin className="w-8 h-8 animate-bounce" />
+                                        </div>
+                                    </div>
+                                    <h3 className="mt-6 text-sm font-bold text-gray-600">Buscando...</h3>
+                                    <p className="text-[10px] text-gray-400 mt-1">Mantente cerca de zonas comerciales.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {disponibles.map(pedido => (
+                                        <div key={pedido.idDelivery} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <div className="bg-blue-50 text-blue-600 p-2 rounded-xl">
+                                                    <Package className="w-4 h-4" />
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-[10px] text-gray-400 font-bold">GANANCIA</p>
+                                                    <p className="text-base font-black text-blue-600">S/ {pedido.costoDelivery.toFixed(2)}</p>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2 mb-4 relative before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+                                                <div className="flex items-center gap-3 pl-4 relative">
+                                                    <div className="absolute left-0 w-3 h-3 rounded-full bg-blue-100 border-2 border-blue-500"></div>
+                                                    <p className="text-xs text-gray-700 font-medium truncate">{pedido.origenDireccion}</p>
+                                                </div>
+                                                <div className="flex items-center gap-3 pl-4 relative">
+                                                    <div className="absolute left-0 w-3 h-3 rounded-full bg-red-100 border-2 border-red-500"></div>
+                                                    <p className="text-xs text-gray-700 font-medium truncate">{pedido.destinoDireccion}</p>
+                                                </div>
+                                            </div>
+                                            <button 
+                                                onClick={() => handleAceptarPedido(pedido.idDelivery)}
+                                                disabled={aceptandoId === pedido.idDelivery}
+                                                className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-md transition-all active:scale-95 disabled:bg-gray-300"
+                                            >
+                                                {aceptandoId === pedido.idDelivery ? 'ACEPTANDO...' : 'TOMAR PEDIDO'}
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center p-12 bg-white/40 backdrop-blur-md rounded-3xl border-2 border-dashed border-gray-200">
+                            <Power className="w-8 h-8 text-gray-300" />
+                            <h3 className="mt-4 text-sm font-bold text-gray-800">Desconectado</h3>
+                            <p className="text-[10px] text-gray-500 mt-1">Conéctate para recibir pedidos.</p>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                /* Viaje Activo */
+                <div className="bg-white rounded-3xl p-6 shadow-xl border border-blue-100 overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
+                    
+                    <div className="relative z-10">
+                        <div className="flex justify-between items-center mb-6">
+                            <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                                {deliveryActivo.estado.replace('_', ' ')}
+                            </span>
+                            <div className="text-right">
+                                <p className="text-[10px] text-gray-400 font-bold uppercase">Pago</p>
+                                <p className="text-lg font-black text-blue-600">S/ {deliveryActivo.costoDelivery.toFixed(2)}</p>
+                            </div>
+                        </div>
+
+                        {/* Info Cliente */}
+                        <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold uppercase">
+                                    {deliveryActivo.clienteNombre?.charAt(0) || 'C'}
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-gray-400 font-bold uppercase">Cliente</p>
+                                    <p className="text-sm font-bold text-gray-800 truncate max-w-[120px]">{deliveryActivo.clienteNombre}</p>
+                                </div>
+                            </div>
+                            {deliveryActivo.clienteTelefono && (
+                                <a 
+                                    href={`https://wa.me/${deliveryActivo.clienteTelefono.replace(/\D/g, '')}`} 
+                                    target="_blank" 
+                                    className="bg-green-500 text-white p-2.5 rounded-xl shadow-lg shadow-green-100"
+                                >
+                                    <MessageCircle className="w-5 h-5" />
+                                </a>
+                            )}
+                        </div>
+
+                        {/* Ruta */}
+                        <div className="space-y-6 mb-8 relative before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+                            <div className="relative pl-8">
+                                <div className="absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-blue-500 flex items-center justify-center">
+                                    <Store className="w-2.5 h-2.5 text-blue-500" />
+                                </div>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase">Origen</p>
+                                <p className="text-xs font-bold text-gray-800 leading-snug">{deliveryActivo.origenDireccion}</p>
+                            </div>
+                            <div className="relative pl-8">
+                                <div className="absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-red-500 flex items-center justify-center">
+                                    <Navigation className="w-2.5 h-2.5 text-red-500" />
+                                </div>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase">Destino</p>
+                                <p className="text-xs font-bold text-gray-800 leading-snug">{deliveryActivo.destinoDireccion}</p>
+                            </div>
+                        </div>
+
+                        {/* Acciones */}
+                        {deliveryActivo.estado === 'REPARTIDOR_ASIGNADO' && (
+                            <button onClick={() => avanzarEstado(deliveryActivo.idDelivery, 'EN_TIENDA')} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200">
+                                LLEGUÉ A LA TIENDA
+                            </button>
+                        )}
+                        {deliveryActivo.estado === 'EN_TIENDA' && (
+                            <button onClick={() => avanzarEstado(deliveryActivo.idDelivery, 'RECOGIDO')} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200">
+                                PRODUCTO RECOGIDO
+                            </button>
+                        )}
+                        {deliveryActivo.estado === 'RECOGIDO' && (
+                            <button onClick={() => avanzarEstado(deliveryActivo.idDelivery, 'EN_CAMINO')} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200">
+                                INICIAR ENTREGA
+                            </button>
+                        )}
+                        {(deliveryActivo.estado === 'EN_CAMINO' || deliveryActivo.estado === 'CERCA') && (
+                            <div className="space-y-4">
+                                <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                    <p className="text-center text-[10px] font-bold text-gray-400 uppercase mb-3">Confirmación de Entrega</p>
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text" 
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                                            placeholder="CÓDIGO PIN"
+                                            className="flex-1 bg-white border border-gray-200 rounded-xl px-4 text-center font-black tracking-[0.3em] outline-none focus:border-blue-500"
+                                        />
+                                        <button 
+                                            onClick={() => { entregarConOTP(deliveryActivo.idDelivery, otp); setOtp(''); }}
+                                            disabled={otp.length !== 4}
+                                            className="bg-green-500 text-white px-6 py-4 rounded-xl font-bold disabled:opacity-50"
+                                        >
+                                            ENTREGAR
+                                        </button>
+                                    </div>
+                                    <div className="mt-4">
+                                        <input type="file" accept="image/*" capture="environment" className="hidden" ref={fileInputRef} onChange={handleFotoChange} />
+                                        <button 
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={cargandoFoto}
+                                            className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-[10px] font-bold text-gray-500 flex items-center justify-center gap-2"
+                                        >
+                                            <Camera className="w-4 h-4" /> {cargandoFoto ? 'SUBIENDO...' : 'O SUBIR FOTO DE EVIDENCIA'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
+    const renderHistory = () => (
+        <div className="space-y-6 pb-24">
+            <div className="flex items-center justify-between px-2">
+                <h2 className="text-xl font-bold text-gray-800">Mi Historial</h2>
+                <div className="bg-white px-3 py-1 rounded-full text-[10px] font-black text-blue-600 border border-blue-50 shadow-sm">
+                    {entregasCompletadas} TOTAL
+                </div>
+            </div>
+
+            {historial.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-20 text-center">
+                    <History className="w-12 h-12 text-gray-200 mb-4" />
+                    <p className="text-sm font-bold text-gray-400">Aún no tienes entregas completadas.</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {historial.map(item => (
+                        <div key={item.idDelivery} className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="bg-green-50 text-green-600 p-2 rounded-xl">
+                                    <CheckCircle className="w-4 h-4" />
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] text-gray-400 font-bold">GANANCIA</p>
+                                    <p className="text-sm font-black text-green-600">S/ {item.costoDelivery.toFixed(2)}</p>
+                                </div>
+                            </div>
+                            <div className="space-y-1 mb-4">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase">Destino</p>
+                                <p className="text-xs font-bold text-gray-700 truncate">{item.destinoDireccion}</p>
+                            </div>
+                            <div className="flex justify-between items-center text-[10px] font-bold text-gray-500 bg-gray-50 px-3 py-2 rounded-xl">
+                                <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" /> 
+                                    {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A'}
+                                </div>
+                                <div className="text-blue-600">PEDIDO #{item.idDelivery}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+
+    const renderProfile = () => (
+        <div className="space-y-6 pb-24">
+            <h2 className="text-xl font-bold text-gray-800 px-2">Mi Perfil</h2>
+            
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center">
+                <div className="relative w-24 h-24 mx-auto mb-4">
+                    {perfil.fotoPerfil ? (
+                        <img src={perfil.fotoPerfil} alt="Perfil" className="w-full h-full rounded-3xl object-cover border-4 border-blue-50" />
+                    ) : (
+                        <div className="w-full h-full rounded-3xl bg-blue-50 flex items-center justify-center text-blue-300">
+                            <User className="w-10 h-10" />
+                        </div>
+                    )}
+                    <button className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-2 rounded-xl shadow-lg">
+                        <Camera className="w-4 h-4" />
+                    </button>
+                </div>
+                <h3 className="text-lg font-black text-gray-800">{perfil.nombres} {perfil.apellidos}</h3>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Repartidor Verificado</p>
+            </div>
+
+            <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
+                <div className="p-4 border-b border-gray-50 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-amber-50 text-amber-500 rounded-xl"><VehicleIcon /></div>
+                        <div>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Vehículo</p>
+                            <p className="text-xs font-bold text-gray-700">{perfil.tipoVehiculo} - {perfil.placaVehiculo}</p>
+                        </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                </div>
+                <div className="p-4 border-b border-gray-50 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-50 text-blue-500 rounded-xl"><CreditCard className="w-4 h-4"/></div>
+                        <div>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Billetera / Pagos</p>
+                            <p className="text-xs font-bold text-gray-700">Configurar cuenta bancaria</p>
+                        </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                </div>
+            </div>
+
+            <button 
+                onClick={() => { localStorage.clear(); window.location.href='/login'; }}
+                className="w-full py-4 text-red-500 font-bold text-sm bg-red-50 rounded-2xl border border-red-100 active:scale-95 transition-all"
+            >
+                Cerrar Sesión
+            </button>
+        </div>
+    );
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 pb-20">
+        <div className="min-h-screen bg-[#F8FAFC]">
             {/* Cabecera / Header Premium */}
             <div className="bg-white/80 backdrop-blur-xl border-b border-white shadow-sm sticky top-0 z-50">
                 <div className="max-w-md mx-auto px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="relative">
-                            {perfil.fotoPerfil ? (
-                                <img src={perfil.fotoPerfil} alt="Perfil" className="w-14 h-14 rounded-full object-cover shadow-md border-2 border-white" />
-                            ) : (
-                                <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center shadow-md border-2 border-white text-blue-600">
-                                    <User className="w-6 h-6" />
-                                </div>
-                            )}
-                            {/* Indicador de Estado (Circulo verde radiante) */}
-                            <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${isDisponible || isOcupado ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-400'}`}></div>
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                            <Truck className="w-5 h-5" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-gray-800 tracking-tight leading-tight">Hola, {perfil.nombres}</h1>
-                            <div className="flex items-center gap-1 mt-0.5 text-xs text-gray-500 font-medium bg-gray-100/80 px-2 py-0.5 rounded-full w-max">
-                                <VehicleIcon /> <span>{perfil.placaVehiculo}</span>
-                            </div>
+                            <h1 className="text-sm font-black text-gray-800 tracking-tight leading-tight uppercase">Dashboard</h1>
+                            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-tighter">Marketplace Delivery</p>
                         </div>
                     </div>
-                    {/* Estadísticas Rápidas (Estrellas) */}
-                    <div className="flex items-center gap-4 border-l border-gray-100 pl-4 py-1">
-                        <div className="text-center">
-                            <div className="flex items-center gap-1 text-amber-500">
-                                <Star className="w-5 h-5 fill-amber-500" />
-                                <span className="text-lg font-black">{Number(perfil.calificacionPromedio || 5).toFixed(1)}</span>
-                            </div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Rating</p>
-                        </div>
-                        <div className="text-center">
-                            <p className="text-lg font-black text-blue-600">{perfil.totalEntregas || 0}</p>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Entregas</p>
-                        </div>
+                    <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-100">
+                        <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                        <span className="text-xs font-black text-amber-700">{Number(perfil.calificacionPromedio || 5).toFixed(1)}</span>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-md mx-auto px-4 mt-6 space-y-6">
-                
-                {/* Control de Disponibilidad */}
-                <div className="bg-white/70 backdrop-blur-lg p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h3 className="text-sm font-semibold text-gray-800">
-                                {isDisponible ? 'Estás conectado y visible' : isOcupado ? 'Estás en un viaje activo' : 'Estás desconectado'}
-                            </h3>
-                            <p className="text-xs text-gray-500 mt-1">
-                                {isConnected ? '⚡ Conectado a Tracking WS' : '⏳ Esperando conexión...'}
-                            </p>
-                            {location && (
-                                <p className="text-[10px] text-blue-500 mt-1 flex items-center gap-1 font-mono bg-blue-50 w-max px-2 py-0.5 rounded-full">
-                                    <Map className="w-3 h-3" /> {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
-                                </p>
-                            )}
-                        </div>
-                        <button 
-                            onClick={() => toggleDisponibilidad(!isDisponible)}
-                            disabled={isOcupado}
-                            className={`relative flex items-center justify-center w-14 h-14 rounded-2xl transition-all duration-300 shadow-lg ${
-                                isOcupado ? 'bg-gray-300 cursor-not-allowed opacity-50' : 
-                                isDisponible ? 'bg-gradient-to-tr from-red-500 to-red-400 hover:shadow-red-500/40 text-white' : 'bg-gradient-to-tr from-green-500 to-green-400 hover:shadow-green-500/40 text-white'
-                            }`}
-                        >
-                            <Power className="w-6 h-6" />
-                        </button>
-                    </div>
-                    {gpsError && (
-                        <div className="mt-4 flex items-start gap-2 bg-red-50 text-red-600 p-3 rounded-xl text-xs font-semibold border border-red-100">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
-                            <span>{gpsError}</span>
-                        </div>
-                    )}
+            <div className="max-w-md mx-auto px-4 mt-6">
+                {activeTab === 'home' && renderHome()}
+                {activeTab === 'history' && renderHistory()}
+                {activeTab === 'profile' && renderProfile()}
+            </div>
+
+            {/* Bottom Navigation */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100 pt-3 pb-8 px-8 z-50">
+                <div className="max-w-md mx-auto flex justify-between items-center">
+                    <button 
+                        onClick={() => setActiveTab('home')}
+                        className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'home' ? 'text-blue-600 scale-110' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                        <Home className={`w-6 h-6 ${activeTab === 'home' ? 'fill-blue-50' : ''}`} />
+                        <span className="text-[10px] font-black uppercase tracking-tighter">Inicio</span>
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('history')}
+                        className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'history' ? 'text-blue-600 scale-110' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                        <History className={`w-6 h-6 ${activeTab === 'history' ? 'fill-blue-50' : ''}`} />
+                        <span className="text-[10px] font-black uppercase tracking-tighter">Historial</span>
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('profile')}
+                        className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'profile' ? 'text-blue-600 scale-110' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                        <User className={`w-6 h-6 ${activeTab === 'profile' ? 'fill-blue-50' : ''}`} />
+                        <span className="text-[10px] font-black uppercase tracking-tighter">Perfil</span>
+                    </button>
                 </div>
-
-                {/* Área de Delivery */}
-                {!deliveryActivo ? (
-                    <div className="space-y-4">
-                        {isDisponible ? (
-                            <>
-                                <div className="flex items-center gap-2 px-2">
-                                    <ShoppingBag className="w-5 h-5 text-blue-600" />
-                                    <h3 className="font-bold text-gray-800">Pedidos Disponibles ({disponibles.length})</h3>
-                                </div>
-                                
-                                {disponibles.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center p-10 bg-white/40 backdrop-blur-md rounded-3xl border-2 border-dashed border-gray-200 min-h-[200px]">
-                                        <div className="relative">
-                                            <div className="absolute inset-0 bg-blue-400 rounded-full animate-ping opacity-20"></div>
-                                            <div className="bg-blue-100 p-4 rounded-full text-blue-600 relative z-10">
-                                                <MapPin className="w-8 h-8 animate-bounce" />
-                                            </div>
-                                        </div>
-                                        <h3 className="mt-6 text-sm font-bold text-gray-600">Buscando pedidos...</h3>
-                                        <p className="text-[10px] text-gray-400 text-center mt-1">Te avisaremos cuando haya algo cerca.</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {disponibles.map(pedido => (
-                                            <div key={pedido.idDelivery} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:border-blue-200 transition-colors">
-                                                <div className="flex justify-between items-start mb-3">
-                                                    <div className="bg-blue-50 text-blue-600 p-2 rounded-lg">
-                                                        <Package className="w-5 h-5" />
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="text-xs text-gray-400 font-bold">GANANCIA</p>
-                                                        <p className="text-lg font-black text-blue-600">S/ {pedido.costoDelivery.toFixed(2)}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-2 mb-4">
-                                                    <div className="flex items-start gap-2">
-                                                        <Store className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
-                                                        <p className="text-xs text-gray-700 font-medium line-clamp-1">{pedido.origenDireccion}</p>
-                                                    </div>
-                                                    <div className="flex items-start gap-2">
-                                                        <Navigation className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
-                                                        <p className="text-xs text-gray-700 font-medium line-clamp-1">{pedido.destinoDireccion}</p>
-                                                    </div>
-                                                </div>
-                                                <button 
-                                                    onClick={() => handleAceptarPedido(pedido.idDelivery)}
-                                                    disabled={aceptandoId === pedido.idDelivery}
-                                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition-all active:scale-95 disabled:bg-gray-300 flex items-center justify-center gap-2"
-                                                >
-                                                    {aceptandoId === pedido.idDelivery ? (
-                                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                                    ) : 'ACEPTAR PEDIDO'}
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center p-10 bg-white/40 backdrop-blur-md rounded-3xl border-2 border-dashed border-gray-200 min-h-[300px]">
-                                <div className="bg-gray-100 p-4 rounded-full text-gray-400">
-                                    <Power className="w-8 h-8" />
-                                </div>
-                                <h3 className="mt-6 text-lg font-bold text-gray-800">Desconectado</h3>
-                                <p className="text-sm text-gray-500 text-center mt-2">Ponte en línea para ver los pedidos disponibles en tu zona.</p>
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    <div className="bg-gradient-to-b from-blue-600 to-blue-800 p-1 rounded-3xl shadow-xl shadow-blue-900/20 relative overflow-hidden">
-                        {/* Decoración de fondo */}
-                        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-                        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-
-                        <div className="bg-white rounded-[22px] p-6 relative z-10">
-                            <div className="flex justify-between items-center mb-6">
-                                <div className="flex items-center gap-2">
-                                    <div className="bg-blue-100 p-2 rounded-xl text-blue-600">
-                                        <Package className="w-5 h-5" />
-                                    </div>
-                                    <h3 className="font-bold text-lg text-gray-800">Viaje en curso</h3>
-                                </div>
-                                <div className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-black uppercase tracking-wider rounded-lg border border-blue-100">
-                                    {deliveryActivo.estado.replace('_', ' ')}
-                                </div>
-                            </div>
-
-                            {/* Info Cliente & Contacto */}
-                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-4 mb-6 flex items-center justify-between border border-gray-100 dark:border-gray-800">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-                                        <User className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cliente</p>
-                                        <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{deliveryActivo.clienteNombre || 'Cliente'}</p>
-                                    </div>
-                                </div>
-                                {deliveryActivo.clienteTelefono && (
-                                    <a 
-                                        href={`https://wa.me/${deliveryActivo.clienteTelefono.replace(/\D/g, '')}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-green-500/20 active:scale-95"
-                                    >
-                                        <MessageCircle className="w-4 h-4" /> WhatsApp
-                                    </a>
-                                )}
-                            </div>
-                            
-                            {/* Ruta vertical */}
-                            <div className="relative pl-6 space-y-8 mb-8 before:absolute before:inset-y-2 before:left-[11px] before:w-0.5 before:bg-gradient-to-b before:from-blue-200 before:to-gray-200">
-                                <div className="relative">
-                                    <div className="absolute -left-6 bg-white p-0.5 rounded-full border-2 border-blue-500 text-blue-500">
-                                        <Store className="w-3 h-3" />
-                                    </div>
-                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Punto de Recojo</p>
-                                    <p className="text-sm font-bold text-gray-800 mt-1 leading-snug">{deliveryActivo.origenDireccion}</p>
-                                </div>
-                                <div className="relative border-t border-dashed border-gray-100 pt-6">
-                                    <div className="absolute -left-6 top-6 bg-white p-0.5 rounded-full border-2 border-gray-300 text-gray-400">
-                                        <Navigation className="w-3 h-3" />
-                                    </div>
-                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Punto de Entrega</p>
-                                    <p className="text-sm font-bold text-gray-800 mt-1 leading-snug">{deliveryActivo.destinoDireccion}</p>
-                                </div>
-                            </div>
-
-                            {/* Botones de Acción */}
-                            <div className="pt-2">
-                                {deliveryActivo.estado === 'REPARTIDOR_ASIGNADO' && (
-                                    <button onClick={() => avanzarEstado(deliveryActivo.idDelivery, 'EN_TIENDA')} className="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/30 flex justify-center items-center gap-2 text-lg">
-                                        <Store className="w-5 h-5" /> Ya llegué a la tienda
-                                    </button>
-                                )}
-                                {deliveryActivo.estado === 'EN_TIENDA' && (
-                                    <button onClick={() => avanzarEstado(deliveryActivo.idDelivery, 'RECOGIDO')} className="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/30 flex justify-center items-center gap-2 text-lg">
-                                        <Package className="w-5 h-5" /> Ya tengo el producto
-                                    </button>
-                                )}
-                                {deliveryActivo.estado === 'RECOGIDO' && (
-                                    <button onClick={() => avanzarEstado(deliveryActivo.idDelivery, 'EN_CAMINO')} className="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/30 flex justify-center items-center gap-2 text-lg">
-                                        <Navigation className="w-5 h-5" /> Iniciar viaje al cliente
-                                    </button>
-                                )}
-                                
-                                {(deliveryActivo.estado === 'EN_CAMINO' || deliveryActivo.estado === 'CERCA') && (
-                                    <div className="mt-2 bg-gray-50 border border-gray-200 p-5 rounded-2xl">
-                                        <div className="flex items-center gap-2 mb-4 justify-center text-gray-700">
-                                            <CheckCircle className="w-5 h-5 text-green-500" />
-                                            <p className="text-sm font-bold">Confirmar PIN de entrega</p>
-                                        </div>
-                                        <input 
-                                            type="text" 
-                                            placeholder="• • • •" 
-                                            className="w-full text-center text-3xl tracking-[0.75em] font-mono font-bold text-gray-800 bg-white border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 rounded-xl py-3 outline-none transition-all placeholder:text-gray-300"
-                                            value={otp}
-                                            onChange={(e) => {
-                                                const val = e.target.value.replace(/[^0-9]/g, '');
-                                                if (val.length <= 4) setOtp(val);
-                                            }}
-                                            maxLength={4}
-                                        />
-                                        <button 
-                                            onClick={() => {
-                                                entregarConOTP(deliveryActivo.idDelivery, otp);
-                                                setOtp('');
-                                            }} 
-                                            className="mt-4 w-full bg-green-500 hover:bg-green-600 active:scale-[0.98] transition-all text-white font-bold py-4 rounded-xl shadow-lg shadow-green-500/30 disabled:opacity-50 disabled:shadow-none flex justify-center items-center text-lg"
-                                            disabled={otp.length !== 4}
-                                        >
-                                            Entregar Pedido
-                                        </button>
-
-                                        <div className="relative my-6">
-                                            <div className="absolute inset-0 flex items-center">
-                                                <span className="w-full border-t border-gray-200"></span>
-                                            </div>
-                                            <div className="relative flex justify-center text-xs uppercase">
-                                                <span className="bg-gray-50 px-2 text-gray-500 font-bold">O mediante foto</span>
-                                            </div>
-                                        </div>
-
-                                        <input 
-                                            type="file" 
-                                            accept="image/*" 
-                                            capture="environment" 
-                                            className="hidden" 
-                                            ref={fileInputRef}
-                                            onChange={handleFotoChange}
-                                        />
-                                        <button 
-                                            onClick={() => fileInputRef.current?.click()}
-                                            disabled={cargandoFoto}
-                                            className="w-full bg-white border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 text-gray-600 py-4 rounded-xl flex flex-col items-center justify-center gap-1 transition-all group"
-                                        >
-                                            {cargandoFoto ? (
-                                                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                            ) : (
-                                                <>
-                                                    <Camera className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                                                    <span className="text-xs font-bold text-gray-500 group-hover:text-blue-600">Tomar Foto de Evidencia</span>
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

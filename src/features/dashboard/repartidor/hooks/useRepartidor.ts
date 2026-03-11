@@ -6,17 +6,25 @@ import type { RepartidorResponseDTO, DeliveryResponseDTO, DeliveryStatus } from 
 export const useRepartidor = () => {
     const [perfil, setPerfil] = useState<RepartidorResponseDTO | null>(null);
     const [deliveryActivo, setDeliveryActivo] = useState<DeliveryResponseDTO | null>(null);
+    const [historial, setHistorial] = useState<DeliveryResponseDTO[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
     const cargarDatos = useCallback(async () => {
         setLoading(true);
         try {
-            const [perfilRes, deliveryRes] = await Promise.all([
-                repartidorService.getPerfil(),
-                repartidorService.getDeliveryActivo().catch(() => ({ data: null }))
+            const [perfilRes, deliveryRes, historialRes] = await Promise.all([
+                repartidorService.getPerfil().catch(err => {
+                    if (err.response?.status === 404) {
+                        console.warn("⚠️ Perfil de repartidor no encontrado (404). Posible error de ruta en backend o perfil no creado.");
+                    }
+                    throw err;
+                }),
+                repartidorService.getDeliveryActivo().catch(() => ({ data: null })),
+                repartidorService.getHistorial().catch(() => ({ data: [] }))
             ]);
             setPerfil(perfilRes.data);
             setDeliveryActivo(deliveryRes.data || null);
+            setHistorial(historialRes.data || []);
         } catch (error) {
             console.error("Error cargando datos del repartidor", error);
             Swal.fire("Error", "No se pudo cargar la información", "error");
@@ -63,6 +71,7 @@ export const useRepartidor = () => {
     return {
         perfil,
         deliveryActivo,
+        historial,
         loading,
         toggleDisponibilidad,
         avanzarEstado,

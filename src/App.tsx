@@ -43,6 +43,7 @@ const VerifyEmail = lazy(() => import("./features/auth/pages/VerifyEmail").then(
 const ClienteProfilePage = lazy(() => import("./features/auth/pages/profiles/ClienteProfilePage").then(m => ({ default: (m as any).ClienteProfilePage || (m as any).default })));
 const VeterinarioProfilePage = lazy(() => import("./features/auth/pages/profiles/VeterinarioProfilePage").then(m => ({ default: (m as any).VeterinarioProfilePage || (m as any).default })));
 const EmpresaProfilePage = lazy(() => import("./features/auth/pages/profiles/EmpresaProfilePage").then(m => ({ default: (m as any).EmpresaProfilePage || (m as any).default })));
+const RepartidorProfilePage = lazy(() => import("./features/auth/pages/profiles/RepartidorProfilePage").then(m => ({ default: (m as any).RepartidorProfilePage || (m as any).default })));
 
 // Admin Pages
 const AdminPortal = lazy(() => import("./features/dashboard/admin/pages/AdminPortal").then(m => ({ default: (m as any).default || (m as any).AdminPortal })));
@@ -130,6 +131,10 @@ function App() {
               <Route path="/register/perfil/empresa" element={<EmpresaProfilePage />} />
             </Route>
 
+            <Route element={<ProtectedRoute allowedRoles={["REPARTIDOR"]} />}>
+              <Route path="/register/perfil/repartidor" element={<RepartidorProfilePage />} />
+            </Route>
+
             {/* Rutas protegidas: Admin (Requiere Perfil Completo) */}
             <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
               <Route element={<RequiresProfile />}>
@@ -202,7 +207,9 @@ function App() {
 
             {/* Rutas protegidas: REPARTIDOR */}
             <Route element={<ProtectedRoute allowedRoles={["REPARTIDOR"]} />}>
-              <Route path="/portal/repartidor" element={<RepartidorDashboard />} />
+              <Route element={<RequiresProfile />}>
+                <Route path="/portal/repartidor" element={<RepartidorDashboard />} />
+              </Route>
             </Route>
 
             {/* Rutas públicas con Layout (Header + Footer) */}
