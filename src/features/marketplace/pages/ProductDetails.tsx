@@ -113,7 +113,7 @@ const ProductHeader = ({ product }: { product: Product }) => (
 );
 
 // --- PRECIO ---
-const ProductPrice = ({ product, isService }: { product: Product, isService: boolean }) => {
+const ProductPrice = ({ product }: { product: Product, isService: boolean }) => {
     const hasDiscount = product.precio > product.precioActual;
     const discountPercent = hasDiscount ? Math.round(((product.precio - product.precioActual) / product.precio) * 100) : 0;
 
