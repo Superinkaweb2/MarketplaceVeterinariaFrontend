@@ -14,6 +14,7 @@ export interface AdoptionResponse {
   estado: EstadoAdopcion;
   publicadoPorId: number;
   publicadoPorNombre: string;
+  publicadoPorTipoServicio: string;
   fechaPublicacion: string;
 }
 
