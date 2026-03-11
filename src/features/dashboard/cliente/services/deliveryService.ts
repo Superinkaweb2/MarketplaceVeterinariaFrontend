@@ -47,4 +47,7 @@ export interface DeliveryTrackingDTO {
 export const deliveryService = {
     getByOrden: (ordenId: number): Promise<AxiosResponse<DeliveryTrackingDTO>> =>
         api.get(`/deliveries/orden/${ordenId}`),
+
+    cancelarDelivery: (deliveryId: number): Promise<AxiosResponse<DeliveryTrackingDTO>> =>
+        api.post(`/deliveries/${deliveryId}/cancelar`),
 };

@@ -5,9 +5,10 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import {
   Package, Truck, Store, Navigation, CheckCircle, Search,
-  Phone, ArrowLeft, Clock, MapPin, ShieldCheck, AlertCircle, XCircle, Route
+  Phone, ArrowLeft, Clock, MapPin, ShieldCheck, AlertCircle, XCircle, Route, Trash2
 } from "lucide-react";
 import { DeliveryMap } from "../components/DeliveryMap";
+import Swal from "sweetalert2";
 
 const STOMP_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
@@ -83,6 +84,32 @@ export const TrackingPage = () => {
       stompRef.current = null;
     };
   }, [delivery?.idDelivery, ordenId]);
+
+  const handleCancelar = async () => {
+    if (!delivery) return;
+
+    const result = await Swal.fire({
+      title: '¿Cancelar envío?',
+      text: "Esta acción no se puede deshacer. Podrás rastrearlo nuevamente si lo pides otra vez.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#EF4444',
+      cancelButtonColor: '#64748B',
+      confirmButtonText: 'Sí, cancelar envío',
+      cancelButtonText: 'No, esperar',
+      reverseButtons: true
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deliveryService.cancelarDelivery(delivery.idDelivery);
+        Swal.fire('Cancelado', 'Tu envío ha sido cancelado exitosamente.', 'success');
+        // El WebSocket actualizará el estado automáticamente
+      } catch (err: any) {
+        Swal.fire('Error', err.response?.data?.message || 'No se pudo cancelar el envío.', 'error');
+      }
+    }
+  };
 
   // Index del paso actual en el stepper
   const currentStepIndex = delivery
@@ -316,6 +343,21 @@ export const TrackingPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Botón de Cancelación (Solo si no ha sido recogido) */}
+      {!isFinal && delivery.estado !== 'RECOGIDO' && delivery.estado !== 'EN_CAMINO' && delivery.estado !== 'CERCA' && (
+        <div className="mb-6">
+          <button
+            onClick={handleCancelar}
+            className="w-full flex items-center justify-center gap-2 p-4 text-red-600 dark:text-red-400 font-bold bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-all active:scale-[0.98]"
+          >
+            <Trash2 size={20} /> Cancelar Pedido de Envío
+          </button>
+          <p className="text-[10px] text-gray-400 text-center mt-2 uppercase tracking-widest font-bold">
+            Solo puedes cancelar antes de que el repartidor recoja el producto
+          </p>
+        </div>
+      )}
 
       {/* Info adicional */}
       <div className="grid grid-cols-3 gap-4 mb-6">

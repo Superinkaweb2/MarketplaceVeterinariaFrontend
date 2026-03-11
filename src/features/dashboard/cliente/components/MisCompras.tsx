@@ -5,9 +5,10 @@ import type { Order } from "../types/order.types";
 import {
   Package, X,
   ChevronLeft, ChevronRight, CreditCard, ExternalLink,
-  Calendar, Truck
+  Calendar, Truck, FileText
 } from "lucide-react";
 import Swal from "sweetalert2";
+import { InvoiceModal } from "./InvoiceModal";
 
 export const MisCompras = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export const MisCompras = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isPaying, setIsPaying] = useState<number | null>(null);
   const [openOrder, setOpenOrder] = useState<number | null>(null);
+  const [selectedOrderForInvoice, setSelectedOrderForInvoice] = useState<Order | null>(null);
 
   // Estados para paginación y filtros
   const [page, setPage] = useState(0);
@@ -195,9 +197,12 @@ export const MisCompras = () => {
                             <Truck size={16} /> Rastrear Envío
                           </button>
                         )}
-                        <button className="flex-1 md:flex-none px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                          Ver Factura
-                        </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setSelectedOrderForInvoice(order); }}
+                            className="flex-1 md:flex-none px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <FileText size={16} /> Ver Factura
+                          </button>
                       </div>
                     </div>
                   </div>
@@ -246,6 +251,15 @@ export const MisCompras = () => {
             </button>
           </nav>
         </div>
+      )}
+
+      {/* Modal de Factura */}
+      {selectedOrderForInvoice && (
+        <InvoiceModal 
+          order={selectedOrderForInvoice}
+          isOpen={!!selectedOrderForInvoice}
+          onClose={() => setSelectedOrderForInvoice(null)}
+        />
       )}
     </div>
   );
