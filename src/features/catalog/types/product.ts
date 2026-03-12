@@ -48,4 +48,5 @@ export interface UpdateProductRequest {
     categoriaId?: number;
     visible?: boolean;
     estado?: string;
+    actualizarOferta?: boolean;
 }

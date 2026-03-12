@@ -15,6 +15,7 @@ import {
   Search,
   PawPrint,
   Calendar,
+  Award,
 } from "lucide-react";
 
 
@@ -131,6 +132,11 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 icon={<Zap size={20} />}
                 label="Mi Suscripción"
                 to="/portal/empresa/suscripcion"
+              />
+              <NavItem
+                icon={<Award size={20} />}
+                label="Recompensas"
+                to="/portal/empresa/recompensas"
               />
               <NavItem
                 icon={<CreditCard size={20} />}

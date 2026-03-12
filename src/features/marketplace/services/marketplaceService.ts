@@ -52,6 +52,7 @@ export const marketplaceService = {
         destinoLng?: number;
         destinoDireccion?: string;
         destinoReferencia?: string;
+        canjeRecompensaId?: number;
         items: { productoId: number | null; servicioId: number | null; cantidad: number }[] 
     }): Promise<number> => {
         const { data } = await api.post<ApiResponse<number>>("/orders", orderData);

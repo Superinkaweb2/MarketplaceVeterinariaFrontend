@@ -3,10 +3,16 @@ import { Button } from "../ui/Button";
 import { ThemeToggle } from "../ui/ThemeToggle";
 import { useAuth } from "../../features/auth/context/useAuth";
 import { UserDropdown } from "../UserDropdown";
+import { useClientPointsDashboard } from "../../features/dashboard/gamification/hooks/useGamification";
+import { Gift } from "lucide-react";
 
 export const Header = () => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, role } = useAuth();
+  
+  // Solo cargamos los puntos si es un cliente autenticado
+  const isCliente = role === 'CLIENTE';
+  const { data: pointsData } = useClientPointsDashboard(isAuthenticated && isCliente);
 
   const navItems = [
     { name: "Inicio", path: "/" },
@@ -68,6 +74,18 @@ export const Header = () => {
             </>
           ) : (
             <div className="flex items-center gap-4">
+              {isCliente && pointsData && (
+                <Link 
+                  to="/portal/cliente/puntos" 
+                  className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/30 rounded-full hover:bg-yellow-100 transition-colors group"
+                  title="Tus puntos Huella360"
+                >
+                  <Gift className="w-4 h-4 text-yellow-600 dark:text-yellow-500 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-bold text-yellow-700 dark:text-yellow-400">
+                    {pointsData.totalPuntos} pts
+                  </span>
+                </Link>
+              )}
               <UserDropdown />
             </div>
           )}

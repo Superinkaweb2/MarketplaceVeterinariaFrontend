@@ -7,12 +7,14 @@ import {
     MapPin,
     Mail,
     Info,
-    Navigation
+    Navigation,
+    Gift
 } from "lucide-react";
 import { marketplaceService } from "../services/marketplaceService";
 import { ProductCard } from "../components/ProductCard";
 import { MapView } from "../components/MapView";
 import type { Product } from "../types/marketplace";
+import { RewardsStore } from "../../dashboard/gamification/components/client/RewardsStore";
 
 interface Company {
     id: number;
@@ -29,7 +31,7 @@ interface Company {
     longitud?: number;
 }
 
-type TabType = 'products' | 'services' | 'adoptions';
+type TabType = 'products' | 'services' | 'adoptions' | 'rewards';
 
 export const CompanyProfile = () => {
     const { id } = useParams<{ id: string }>();
@@ -148,7 +150,8 @@ export const CompanyProfile = () => {
     const tabs = [
         { id: 'products', label: 'Productos', icon: Store, count: products.length },
         { id: 'services', label: 'Servicios', icon: Stethoscope, count: services.length },
-        { id: 'adoptions', label: 'En Adopción', icon: Heart, count: adoptions.length }
+        { id: 'adoptions', label: 'En Adopción', icon: Heart, count: adoptions.length },
+        { id: 'rewards', label: 'Recompensas', icon: Gift, count: null }
     ] as const;
 
     const renderContent = () => {
@@ -156,6 +159,10 @@ export const CompanyProfile = () => {
         const emptyMessage = activeTab === 'products' ? "No hay productos disponibles en este momento." :
                              activeTab === 'services' ? "No hay servicios disponibles en este momento." : 
                              "No hay mascotas en adopción en este momento.";
+
+        if (activeTab === 'rewards') {
+            return <RewardsStore empresaId={company.id} />;
+        }
 
         if (items.length === 0) {
             return (

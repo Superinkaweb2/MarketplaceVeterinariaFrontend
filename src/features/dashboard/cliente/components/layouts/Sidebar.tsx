@@ -11,7 +11,8 @@ import {
   Heart,
   Calendar,
   CalendarCheck,
-  Package
+  Package,
+  Award
 } from "lucide-react";
 import { useAuth } from "../../../../auth/context/useAuth";
 
@@ -24,6 +25,7 @@ const MENU_ITEMS = [
   { label: "Mis Citas", icon: CalendarCheck, href: "/portal/cliente/citas" },
   { label: "Marketplace", icon: ShoppingBag, href: "/marketplace" },
   { label: "Mis Pedidos", icon: Package, href: "/portal/cliente/compras" },
+  { label: "Mis Puntos", icon: Award, href: "/portal/cliente/puntos" },
 ];
 
 interface SidebarProps {
