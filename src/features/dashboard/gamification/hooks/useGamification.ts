@@ -109,6 +109,21 @@ export const useCreateCompanyReward = () => {
   });
 };
 
+export const useUpdateCompanyReward = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reward }: { id: number; reward: Partial<Reward> }) => 
+      gamificationService.updateCompanyReward(id, reward),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['companyRewards'] });
+      toast.success('Recompensa actualizada exitosamente');
+    },
+    onError: () => {
+      toast.error('Error al actualizar la recompensa');
+    },
+  });
+};
+
 export const useDeactivateCompanyReward = () => {
   const queryClient = useQueryClient();
   return useMutation({

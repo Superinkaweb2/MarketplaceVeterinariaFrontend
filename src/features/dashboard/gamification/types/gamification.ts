@@ -16,6 +16,7 @@ export interface Reward {
   valorDescuento: number;
   aplicaACiertosProductos: boolean;
   activo: boolean;
+  totalCanjes?: number;
   productosAplicablesIds: number[];
 }
 

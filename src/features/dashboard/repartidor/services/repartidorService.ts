@@ -1,27 +1,28 @@
 import { api } from "../../../../shared/http/api"; // Ajusta a la ruta de tu axios
 import type { AxiosResponse } from "axios";
 import type { RepartidorResponseDTO, DeliveryResponseDTO, DeliveryStatus } from "../types/delivery";
+import type { ApiResponse } from "../../../../shared/types/api";
 
 export const repartidorService = {
-    getPerfil: (): Promise<AxiosResponse<RepartidorResponseDTO>> => 
+    getPerfil: (): Promise<AxiosResponse<ApiResponse<RepartidorResponseDTO>>> => 
         api.get("/repartidores/me"),
 
-    actualizarUbicacion: (lat: number, lng: number): Promise<AxiosResponse<void>> => 
+    actualizarUbicacion: (lat: number, lng: number): Promise<AxiosResponse<ApiResponse<void>>> => 
         api.patch(`/repartidores/me/ubicacion`, { lat, lng }),
         
-    cambiarDisponibilidad: (disponible: boolean): Promise<AxiosResponse<void>> => 
+    cambiarDisponibilidad: (disponible: boolean): Promise<AxiosResponse<ApiResponse<void>>> => 
         api.patch(`/repartidores/me/disponibilidad?disponible=${disponible}`),
     
-    getDeliveryActivo: (): Promise<AxiosResponse<DeliveryResponseDTO>> => 
+    getDeliveryActivo: (): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO>>> => 
         api.get("/repartidores/me/delivery-activo"),
     
-    cambiarEstado: (deliveryId: number, nuevoEstado: DeliveryStatus, descripcion: string = ""): Promise<AxiosResponse<DeliveryResponseDTO>> => 
+    cambiarEstado: (deliveryId: number, nuevoEstado: DeliveryStatus, descripcion: string = ""): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO>>> => 
         api.patch(`/deliveries/${deliveryId}/estado`, { nuevoEstado, descripcion }),
     
-    confirmarOTP: (deliveryId: number, codigo: string): Promise<AxiosResponse<void>> => 
+    confirmarOTP: (deliveryId: number, codigo: string): Promise<AxiosResponse<ApiResponse<void>>> => 
         api.post(`/deliveries/${deliveryId}/confirmar-otp`, { codigo }),
         
-    confirmarFoto: (deliveryId: number, fotoFile: File): Promise<AxiosResponse<void>> => {
+    confirmarFoto: (deliveryId: number, fotoFile: File): Promise<AxiosResponse<ApiResponse<void>>> => {
         const formData = new FormData();
         formData.append("foto", fotoFile);
         return api.post(`/deliveries/${deliveryId}/confirmar-foto`, formData, {
@@ -29,12 +30,12 @@ export const repartidorService = {
         });
     },
 
-    getPedidosDisponibles: (): Promise<AxiosResponse<DeliveryResponseDTO[]>> => 
+    getPedidosDisponibles: (): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO[]>>> => 
         api.get("/deliveries/disponibles"),
 
-    aceptarPedido: (deliveryId: number): Promise<AxiosResponse<DeliveryResponseDTO>> => 
+    aceptarPedido: (deliveryId: number): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO>>> => 
         api.post(`/deliveries/${deliveryId}/aceptar`),
 
-    getHistorial: (): Promise<AxiosResponse<DeliveryResponseDTO[]>> =>
+    getHistorial: (): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO[]>>> =>
         api.get("/repartidores/me/historial")
 };

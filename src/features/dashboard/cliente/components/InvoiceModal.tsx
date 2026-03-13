@@ -99,6 +99,15 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, isOpen, onClo
               </div>
               <span className="font-medium text-slate-900 dark:text-white">S/ {order.costoEnvio.toFixed(2)}</span>
             </div>
+            {order.descuento > 0 && (
+              <div className="flex justify-between text-sm text-green-600 font-medium">
+                <div className="flex items-center gap-2">
+                  <Package size={14} />
+                  <span>Descuento (Cupón de Recompensa)</span>
+                </div>
+                <span>-S/ {order.descuento.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-sm">
               <div className="flex items-center gap-2">
                 <ShieldCheck size={14} className="text-indigo-500" />

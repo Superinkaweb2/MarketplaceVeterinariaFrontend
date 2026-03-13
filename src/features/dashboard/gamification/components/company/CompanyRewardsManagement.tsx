@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useCompanyRewards, useCreateCompanyReward, useDeactivateCompanyReward } from '../../hooks/useGamification';
+import { useCompanyRewards, useCreateCompanyReward, useDeactivateCompanyReward, useUpdateCompanyReward } from '../../hooks/useGamification';
 import type { Reward } from '../../types/gamification';
-import { Plus, Tag, Trash2, X, AlertCircle } from 'lucide-react';
+import { Plus, Tag, Trash2, X, AlertCircle, Edit2 } from 'lucide-react';
 import { useProductosEmpresa } from '../../../empresa/hooks/useCatalog';
 import { useAuth } from '../../../../auth/context/AuthContext';
 
@@ -10,9 +10,11 @@ export const CompanyRewardsManagement = () => {
   const [page] = useState(0);
   const { data: rewardsPage, isLoading } = useCompanyRewards(page, 10);
   const { mutate: createReward, isPending: isCreating } = useCreateCompanyReward();
+  const { mutate: updateReward, isPending: isUpdating } = useUpdateCompanyReward();
   const { mutate: deactivateReward } = useDeactivateCompanyReward();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingReward, setEditingReward] = useState<Reward | null>(null);
   const [formData, setFormData] = useState<Partial<Reward>>({
     titulo: '',
     descripcion: '',
@@ -28,20 +30,44 @@ export const CompanyRewardsManagement = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createReward(formData, {
-      onSuccess: () => {
-        setIsModalOpen(false);
-        setFormData({
-            titulo: '',
-            descripcion: '',
-            costoPuntos: 0,
-            tipoDescuento: 'PORCENTAJE',
-            valorDescuento: 0,
-            aplicaACiertosProductos: false,
-            productosAplicablesIds: []
-        });
-      }
+    
+    const onActionSuccess = () => {
+      setIsModalOpen(false);
+      setEditingReward(null);
+      setFormData({
+        titulo: '',
+        descripcion: '',
+        costoPuntos: 0,
+        tipoDescuento: 'PORCENTAJE',
+        valorDescuento: 0,
+        aplicaACiertosProductos: false,
+        productosAplicablesIds: []
+      });
+    };
+
+    if (editingReward) {
+      updateReward({ id: editingReward.id, reward: formData }, {
+        onSuccess: onActionSuccess
+      });
+    } else {
+      createReward(formData, {
+        onSuccess: onActionSuccess
+      });
+    }
+  };
+
+  const handleEdit = (reward: Reward) => {
+    setEditingReward(reward);
+    setFormData({
+      titulo: reward.titulo,
+      descripcion: reward.descripcion,
+      costoPuntos: reward.costoPuntos,
+      tipoDescuento: reward.tipoDescuento,
+      valorDescuento: reward.valorDescuento,
+      aplicaACiertosProductos: reward.aplicaACiertosProductos,
+      productosAplicablesIds: reward.productosAplicablesIds || []
     });
+    setIsModalOpen(true);
   };
 
   const handleDelete = (id: number) => {
@@ -58,7 +84,19 @@ export const CompanyRewardsManagement = () => {
           <p className="text-gray-500 mt-1">Crea ofertas y descuentos para fidelizar a tus clientes.</p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setEditingReward(null);
+            setFormData({
+                titulo: '',
+                descripcion: '',
+                costoPuntos: 0,
+                tipoDescuento: 'PORCENTAJE',
+                valorDescuento: 0,
+                aplicaACiertosProductos: false,
+                productosAplicablesIds: []
+            });
+            setIsModalOpen(true);
+          }}
           className="flex items-center space-x-2 bg-[#1a1060] text-white px-4 py-2 rounded-lg hover:bg-[#2a1b80] transition-colors shadow-sm"
         >
           <Plus className="w-5 h-5" />
@@ -80,6 +118,7 @@ export const CompanyRewardsManagement = () => {
                   <th className="px-6 py-4">Costo (Pts)</th>
                   <th className="px-6 py-4">Descuento</th>
                   <th className="px-6 py-4">Alcance</th>
+                  <th className="px-6 py-4">Canjes</th>
                   <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
@@ -104,14 +143,29 @@ export const CompanyRewardsManagement = () => {
                       <td className="px-6 py-4">
                         {reward.aplicaACiertosProductos ? 'Productos Seleccionados' : 'Todo el Catálogo'}
                       </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-1.5">
+                           <span className="font-bold text-gray-900">{reward.totalCanjes || 0}</span>
+                           <span className="text-xs text-gray-400">veces</span>
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => handleDelete(reward.id)}
-                          className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                          title="Desactivar Recompensa"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
+                        <div className="flex justify-end space-x-2">
+                          <button
+                            onClick={() => handleEdit(reward)}
+                            className="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                            title="Editar Recompensa"
+                          >
+                            <Edit2 className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(reward.id)}
+                            className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                            title="Desactivar Recompensa"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -137,7 +191,7 @@ export const CompanyRewardsManagement = () => {
             <div className="flex justify-between items-center p-6 border-b border-gray-100 sticky top-0 bg-white/95 backdrop-blur z-10">
               <h3 className="text-xl font-bold text-gray-900 flex items-center">
                 <Tag className="w-5 h-5 mr-2 text-[#1a1060]" />
-                Crear Nueva Recompensa
+                {editingReward ? 'Editar Recompensa' : 'Crear Nueva Recompensa'}
               </h3>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -269,17 +323,20 @@ export const CompanyRewardsManagement = () => {
               <div className="flex justify-end space-x-4 pt-6 border-t border-gray-100 mt-6">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setEditingReward(null);
+                  }}
                   className="px-6 py-2.5 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={isCreating}
+                  disabled={isCreating || isUpdating}
                   className="px-6 py-2.5 bg-[#1a1060] hover:bg-[#2a1b80] text-white rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center"
                 >
-                  {isCreating ? 'Guardando...' : 'Crear Recompensa'}
+                  {isCreating || isUpdating ? 'Guardando...' : (editingReward ? 'Actualizar Recompensa' : 'Crear Recompensa')}
                 </button>
               </div>
             </form>

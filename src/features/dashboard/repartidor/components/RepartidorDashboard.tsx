@@ -42,7 +42,7 @@ export const RepartidorDashboard: React.FC = () => {
     useEffect(() => {
         if (isDisponible && !deliveryActivo) {
             repartidorService.getPedidosDisponibles()
-                .then(res => setDisponibles(res.data))
+                .then(res => setDisponibles(res.data.data))
                 .catch(err => console.error("Error cargando disponibles:", err));
         }
     }, [isDisponible, deliveryActivo]);
