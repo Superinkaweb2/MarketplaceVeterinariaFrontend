@@ -3,6 +3,7 @@ import { useCart } from "../context/CartContext";
 import { marketplaceService } from "../services/marketplaceService";
 import { useState, useMemo } from "react";
 import { useAuth } from "../../auth/context/useAuth";
+import { useAvailableCheckoutRewards } from "../../dashboard/gamification/hooks/useGamification";
 
 export const CheckoutPage = () => {
     const { items, cartTotal } = useCart();
@@ -18,9 +19,36 @@ export const CheckoutPage = () => {
     const [reference, setReference] = useState("");
     const [locationLoading, setLocationLoading] = useState(false);
 
+    // Reward state
+    const [selectedRewardId, setSelectedRewardId] = useState<number | null>(null);
+
     // Costo de envío (Ejemplo: S/ 10 base si es delivery)
     const shippingCost = deliveryMode === 'delivery' ? 10.00 : 0;
-    const finalTotal = cartTotal + shippingCost;
+
+    // Determine the single empresaId for rewards
+    const currentEmpresaId = useMemo(() => {
+        if (items.length === 0) return 0;
+        return items[0]?.empresaId || 0;
+    }, [items]);
+
+    // Fetch available redeemed rewards for this company
+    const { data: availableRewards } = useAvailableCheckoutRewards(currentEmpresaId);
+
+    // Calculate discount from selected reward
+    const rewardDiscount = useMemo(() => {
+        if (!selectedRewardId || !availableRewards) return 0;
+        const reward = availableRewards.find((r: any) => r.id === selectedRewardId);
+        if (!reward) return 0;
+
+        if (reward.tipoDescuento === 'PORCENTAJE') {
+            return (cartTotal * reward.valorDescuento) / 100;
+        } else if (reward.tipoDescuento === 'MONTO_FIJO') {
+            return Math.min(reward.valorDescuento, cartTotal);
+        }
+        return 0;
+    }, [selectedRewardId, availableRewards, cartTotal]);
+
+    const finalTotal = cartTotal + shippingCost - rewardDiscount;
 
     // Detect sandbox mode from the first item's mpPublicKey
     const isSandboxMode = useMemo(() => {
@@ -134,6 +162,7 @@ export const CheckoutPage = () => {
                 destinoLng: deliveryMode === 'delivery' && location ? location.lng : undefined,
                 destinoDireccion: deliveryMode === 'delivery' ? address : undefined,
                 destinoReferencia: deliveryMode === 'delivery' ? reference : undefined,
+                canjeRecompensaId: selectedRewardId || undefined,
                 items: orderItems
             });
 
@@ -267,6 +296,69 @@ export const CheckoutPage = () => {
                             )}
                         </div>
 
+                        {/* SECCIÓN DE RECOMPENSAS */}
+                        {isAuthenticated && availableRewards && availableRewards.length > 0 && (
+                            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+                                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-amber-500">loyalty</span>
+                                    Cupones Disponibles
+                                </h2>
+                                <p className="text-sm text-slate-500 mb-4">Selecciona un cupón canjeado para aplicar descuento.</p>
+                                <div className="space-y-3">
+                                    <label
+                                        className={`block border rounded-xl p-4 cursor-pointer transition-all ${
+                                            selectedRewardId === null
+                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                                : 'border-slate-200 dark:border-slate-700 hover:border-blue-300'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="radio"
+                                                className="w-4 h-4 text-blue-600"
+                                                checked={selectedRewardId === null}
+                                                onChange={() => setSelectedRewardId(null)}
+                                            />
+                                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">No usar cupón</span>
+                                        </div>
+                                    </label>
+                                    {availableRewards.map((reward: any) => (
+                                        <label
+                                            key={reward.id}
+                                            className={`block border rounded-xl p-4 cursor-pointer transition-all ${
+                                                selectedRewardId === reward.id
+                                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                                    : 'border-slate-200 dark:border-slate-700 hover:border-blue-300'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <input
+                                                    type="radio"
+                                                    className="w-4 h-4 text-blue-600"
+                                                    checked={selectedRewardId === reward.id}
+                                                    onChange={() => setSelectedRewardId(reward.id)}
+                                                />
+                                                <div className="flex-1">
+                                                    <p className="font-bold text-slate-900 dark:text-white">{reward.recompensaTitulo}</p>
+                                                    <p className="text-xs text-slate-500 mt-0.5">
+                                                        {reward.tipoDescuento === 'PORCENTAJE'
+                                                            ? `${reward.valorDescuento}% de descuento`
+                                                            : `S/${reward.valorDescuento.toFixed(2)} de descuento`}
+                                                    </p>
+                                                </div>
+                                                <span className="text-green-600 font-bold text-sm">
+                                                    -S/{reward.tipoDescuento === 'PORCENTAJE'
+                                                        ? ((cartTotal * reward.valorDescuento) / 100).toFixed(2)
+                                                        : Math.min(reward.valorDescuento, cartTotal).toFixed(2)
+                                                    }
+                                                </span>
+                                            </div>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {Object.entries(groupedItems).map(([empresaId, group]) => (
                             <div key={empresaId} className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
                                 <h2 className="text-sm font-bold uppercase text-slate-400 mb-4 flex items-center gap-2">
@@ -311,6 +403,15 @@ export const CheckoutPage = () => {
                                         <span className="text-slate-900 dark:text-white font-medium">S/{shippingCost.toFixed(2)}</span>
                                     )}
                                 </div>
+                                {rewardDiscount > 0 && (
+                                    <div className="flex justify-between text-green-600 font-medium">
+                                        <span className="flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-sm">loyalty</span>
+                                            Descuento
+                                        </span>
+                                        <span>-S/{rewardDiscount.toFixed(2)}</span>
+                                    </div>
+                                )}
                                 <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between text-xl font-black text-slate-900 dark:text-white">
                                     <span>Total</span>
                                     <span>S/{finalTotal.toFixed(2)}</span>

@@ -54,6 +54,7 @@ const CategoriasPage = lazy(() => import("./features/dashboard/admin/pages/Categ
 const VeterinariosPage = lazy(() => import("./features/dashboard/admin/pages/VeterinariosPage").then(m => ({ default: (m as any).VeterinariosPage || (m as any).default })));
 const SubscriptionAdminPage = lazy(() => import("./features/dashboard/admin/pages/SubscriptionAdminPage").then(m => ({ default: (m as any).SubscriptionAdminPage || (m as any).default })));
 const AdminComingSoon = lazy(() => import("./features/dashboard/admin/components/AdminComingSoon").then(m => ({ default: (m as any).AdminComingSoon || (m as any).default })));
+const PointsConfigAdmin = lazy(() => import("./features/dashboard/gamification/components/admin/PointsConfigAdmin").then(m => ({ default: (m as any).PointsConfigAdmin || (m as any).default })));
 
 // Empresa Pages
 const DashboardEmpresa = lazy(() => import("./features/dashboard/empresa/pages/DashboardEmpresa").then(m => ({ default: (m as any).default || (m as any).DashboardEmpresa })));
@@ -69,6 +70,7 @@ const EmpresaCitasPage = lazy(() => import("./features/dashboard/empresa/pages/E
 const EmpresaConfigPage = lazy(() => import("./features/dashboard/empresa/pages/EmpresaConfigPage").then(m => ({ default: (m as any).EmpresaConfigPage || (m as any).default })));
 const OAuthCallbackPage = lazy(() => import("./features/dashboard/empresa/pages/OAuthCallbackPage").then(m => ({ default: (m as any).OAuthCallbackPage || (m as any).default })));
 const PaymentSuccessPageEmpresa = lazy(() => import("./features/dashboard/empresa/pages/PaymentSuccessPage").then(m => ({ default: (m as any).PaymentSuccessPage || (m as any).default })));
+const CompanyRewardsManagement = lazy(() => import("./features/dashboard/gamification/components/company/CompanyRewardsManagement").then(m => ({ default: (m as any).CompanyRewardsManagement || (m as any).default })));
 
 // Cliente Pages
 const DashboardCliente = lazy(() => import("./features/dashboard/cliente/components/layouts/DashboardCliente").then(m => ({ default: (m as any).DashboardCliente || (m as any).default })));
@@ -79,6 +81,7 @@ const ClienteConfigPage = lazy(() => import("./features/dashboard/cliente/pages/
 const ClienteMisServiciosPage = lazy(() => import("./features/dashboard/cliente/pages/MisServiciosPage").then(m => ({ default: (m as any).MisServiciosPage || (m as any).default })));
 const MisCitasPage = lazy(() => import("./features/dashboard/cliente/pages/MisCitasPage").then(m => ({ default: (m as any).MisCitasPage || (m as any).default })));
 const MisSolicitudesPage = lazy(() => import("./features/dashboard/cliente/pages/MisSolicitudesPage").then(m => ({ default: (m as any).MisSolicitudesPage || (m as any).default })));
+const ClientPointsDashboard = lazy(() => import("./features/dashboard/gamification/components/client/ClientPointsDashboard").then(m => ({ default: (m as any).ClientPointsDashboard || (m as any).default })));
 
 // Shared / Other
 const AdopcionesPage = lazy(() => import("./features/dashboard/shared/adopciones/pages/AdopcionesPage").then(m => ({ default: (m as any).AdopcionesPage || (m as any).default })));
@@ -146,6 +149,7 @@ function App() {
                   <Route path="veterinarios" element={<VeterinariosPage />} />
                   <Route path="marketplace" element={<AdminComingSoon {...({ title: "Marketplace", description: "Control global de productos, servicios y transacciones.", icon: ShoppingBag } as any)} />} />
                   <Route path="suscripciones" element={<SubscriptionAdminPage />} />
+                  <Route path="gamificacion" element={<PointsConfigAdmin />} />
                   <Route path="reportes" element={<AdminComingSoon {...({ title: "Reportes", description: "Análisis avanzado de datos e inteligencia de negocio.", icon: BarChart3 } as any)} />} />
                 </Route>
               </Route>
@@ -167,6 +171,7 @@ function App() {
                   <Route path="talento" element={<TalentoPage />} />
                   <Route path="pacientes" element={<EmpresaPacientesPage />} />
                   <Route path="citas" element={<EmpresaCitasPage />} />
+                  <Route path="recompensas" element={<CompanyRewardsManagement />} />
                   <Route path="oauth/mercadopago" element={<OAuthCallbackPage />} />
                   <Route path="pago-exitoso" element={<PaymentSuccessPageEmpresa />} />
                 </Route>
@@ -200,6 +205,7 @@ function App() {
                   <Route path="citas" element={<MisCitasPage />} />
                   <Route path="configuracion" element={<ClienteConfigPage />} />
                   <Route path="compras" element={<MisCompras />} />
+                  <Route path="puntos" element={<ClientPointsDashboard />} />
                   <Route path="tracking/:ordenId" element={<TrackingPage />} />
                 </Route>
               </Route>

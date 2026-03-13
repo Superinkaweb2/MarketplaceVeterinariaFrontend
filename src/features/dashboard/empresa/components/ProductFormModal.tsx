@@ -21,6 +21,14 @@ const productSchema = z.object({
   sku: z.string().min(3, "El SKU debe tener al menos 3 caracteres"),
   categoriaId: z.number().positive("Selecciona una categoría"),
   visible: z.boolean(),
+}).refine((data) => {
+  if (data.precioOferta !== null && data.precioOferta !== undefined && data.precioOferta >= data.precio) {
+    return false;
+  }
+  return true;
+}, {
+  message: "El precio de oferta debe ser menor al precio base",
+  path: ["precioOferta"],
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -137,6 +145,7 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
         ofertaFin: showOffer && data.ofertaFin
           ? (data.ofertaFin.length === 16 ? `${data.ofertaFin}:00` : data.ofertaFin)
           : null,
+        actualizarOferta: true,
       };
 
       if (product) {
@@ -249,7 +258,13 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
             <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 transition-opacity ${showOffer ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1.5">Precio de Oferta</label>
-                <input type="number" step="0.01" {...register("precioOferta", { valueAsNumber: true })} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-sm text-white" />
+                <input 
+                  type="number" 
+                  step="0.01" 
+                  {...register("precioOferta", { valueAsNumber: true })} 
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 outline-none" 
+                />
+                {errors.precioOferta && <p className="text-[10px] text-red-500 mt-1">{errors.precioOferta.message}</p>}
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1.5">Vigencia (Inicio - Fin)</label>

@@ -20,6 +20,7 @@ const MENU_ITEMS = [
 
 const MANAGEMENT_ITEMS = [
   { label: "Suscripciones", icon: "CreditCard", href: "/portal/admin/suscripciones" },
+  { label: "Gamificación", icon: "Award", href: "/portal/admin/gamificacion" },
 ];
 
 export const Sidebar = () => {
