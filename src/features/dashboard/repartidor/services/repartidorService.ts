@@ -25,9 +25,7 @@ export const repartidorService = {
     confirmarFoto: (deliveryId: number, fotoFile: File): Promise<AxiosResponse<ApiResponse<void>>> => {
         const formData = new FormData();
         formData.append("foto", fotoFile);
-        return api.post(`/deliveries/${deliveryId}/confirmar-foto`, formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-        });
+        return api.post(`/deliveries/${deliveryId}/confirmar-foto`, formData);
     },
 
     getPedidosDisponibles: (): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO[]>>> => 
@@ -35,6 +33,18 @@ export const repartidorService = {
 
     aceptarPedido: (deliveryId: number): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO>>> => 
         api.post(`/deliveries/${deliveryId}/aceptar`),
+
+    reportarIncidencia: (deliveryId: number, motivo: string, descripcion: string, foto?: File): Promise<AxiosResponse<ApiResponse<void>>> => {
+        const formData = new FormData();
+        
+        // Empaquetar datos en un JSON Blob como lo espera el @RequestPart del backend
+        const data = { motivo, descripcion };
+        formData.append("data", new Blob([JSON.stringify(data)], { type: "application/json" }), "blob.json");
+        
+        if (foto) formData.append("foto", foto);
+        
+        return api.post(`/deliveries/${deliveryId}/incidencia`, formData);
+    },
 
     getHistorial: (): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO[]>>> =>
         api.get("/repartidores/me/historial")

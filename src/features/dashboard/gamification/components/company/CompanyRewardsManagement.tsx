@@ -18,7 +18,7 @@ export const CompanyRewardsManagement = () => {
   const [formData, setFormData] = useState<Partial<Reward>>({
     titulo: '',
     descripcion: '',
-    costoPuntos: 0,
+    costoPuntos: 1, // Satisfacer @Min(1)
     tipoDescuento: 'PORCENTAJE',
     valorDescuento: 0,
     aplicaACiertosProductos: false,
@@ -37,7 +37,7 @@ export const CompanyRewardsManagement = () => {
       setFormData({
         titulo: '',
         descripcion: '',
-        costoPuntos: 0,
+        costoPuntos: 1,
         tipoDescuento: 'PORCENTAJE',
         valorDescuento: 0,
         aplicaACiertosProductos: false,
@@ -45,12 +45,23 @@ export const CompanyRewardsManagement = () => {
       });
     };
 
+    // Limpiar el objeto para enviar solo lo que CreateRewardDto espera
+    const payload = {
+      titulo: formData.titulo,
+      descripcion: formData.descripcion,
+      costoPuntos: formData.costoPuntos,
+      tipoDescuento: formData.tipoDescuento,
+      valorDescuento: formData.valorDescuento,
+      aplicaACiertosProductos: formData.aplicaACiertosProductos,
+      productosAplicablesIds: formData.productosAplicablesIds
+    };
+
     if (editingReward) {
-      updateReward({ id: editingReward.id, reward: formData }, {
+      updateReward({ id: editingReward.id, reward: payload }, {
         onSuccess: onActionSuccess
       });
     } else {
-      createReward(formData, {
+      createReward(payload, {
         onSuccess: onActionSuccess
       });
     }
@@ -89,7 +100,7 @@ export const CompanyRewardsManagement = () => {
             setFormData({
                 titulo: '',
                 descripcion: '',
-                costoPuntos: 0,
+                costoPuntos: 1,
                 tipoDescuento: 'PORCENTAJE',
                 valorDescuento: 0,
                 aplicaACiertosProductos: false,

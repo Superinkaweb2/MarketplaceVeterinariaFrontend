@@ -13,9 +13,13 @@ export const billingService = {
    * Endpoint esperado: GET /orders/me?page={page}&size={size}
    * Respuesta esperada: ApiResponse<PageResponse<OrderSummary>>
    */
-  getMyOrders: async (page = 0, size = 20): Promise<PageResponse<OrderSummary>> => {
+  getMyOrders: async (
+    page = 0, 
+    size = 20, 
+    filters: { estado?: string; codigoOrden?: string; startDate?: string; endDate?: string } = {}
+  ): Promise<PageResponse<OrderSummary>> => {
     const { data } = await api.get<ApiResponse<PageResponse<OrderSummary>>>("/orders/me", {
-      params: { page, size },
+      params: { page, size, ...filters },
     });
     return data.data;
   },

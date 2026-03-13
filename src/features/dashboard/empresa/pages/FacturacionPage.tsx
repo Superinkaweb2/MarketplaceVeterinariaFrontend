@@ -7,9 +7,15 @@ import {
     CreditCard,
     DollarSign,
     Package,
+    Calendar,
+    Filter,
+    ChevronLeft,
+    ChevronRight,
+    RefreshCw,
 } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { billingService } from "../services/billingService";
+import { deliveryEmpresaService } from "../services/deliveryEmpresaService";
 import type { OrderSummary, EstadoOrden } from "../types/billing.types";
 import Swal from "sweetalert2";
 
@@ -30,15 +36,26 @@ const ESTADO_CONFIG: Record<EstadoOrden, { label: string; color: string }> = {
 export const FacturacionPage = () => {
     const [orders, setOrders] = useState<OrderSummary[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalElements, setTotalElements] = useState(0);
     const [searchTerm, setSearchTerm] = useState("");
+    const [searchStatus, setSearchStatus] = useState<string>("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
 
     const fetchOrders = async () => {
         setIsLoading(true);
         try {
-            // TODO: Backend pendiente — Este endpoint aún no existe en el backend.
-            // Cuando se implemente GET /orders/me en el OrderController, esto funcionará.
-            const data = await billingService.getMyOrders(0, 50);
+            const data = await billingService.getMyOrders(page, 15, {
+                estado: searchStatus || undefined,
+                codigoOrden: searchTerm || undefined,
+                startDate: startDate || undefined,
+                endDate: endDate || undefined
+            });
             setOrders(data.content);
+            setTotalPages(data.totalPages);
+            setTotalElements(data.totalElements);
         } catch (error: any) {
             console.error("Error fetching orders:", error);
             // Mock data temporal solo si da 404 (endpoint no encontrado)
@@ -55,7 +72,43 @@ export const FacturacionPage = () => {
 
     useEffect(() => {
         fetchOrders();
-    }, []);
+    }, [page, searchStatus, startDate, endDate]);
+
+    // Búsqueda con debounce o manual (por ahora manual al presionar Enter o perder foco, o simplemente al cambiar si no es muy pesado)
+    // Para el searchTerm (código de orden), mejor usar un botón de buscar o useEffect con delay
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setPage(0);
+            fetchOrders();
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    const handleResetDelivery = async (orderId: number) => {
+        const result = await Swal.fire({
+            title: '¿Re-enviar pedido?',
+            text: "Esto buscará un nuevo repartidor para este pedido.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, re-enviar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                // El deliveryId suele ser el mismo que orderId o está relacionado, 
+                // pero el endpoint espera el ID del delivery.
+                // En este sistema, un pedido tiene un delivery.
+                await deliveryEmpresaService.reintentarDelivery(orderId);
+                Swal.fire('¡Listo!', 'El pedido ha sido reseteado y está buscando repartidor.', 'success');
+                fetchOrders();
+            } catch (error: any) {
+                Swal.fire('Error', error.response?.data?.message || 'No se pudo resetear el pedido.', 'error');
+            }
+        }
+    };
 
     const handleGenerateCheckout = async (orderId: number) => {
         try {
@@ -66,10 +119,8 @@ export const FacturacionPage = () => {
         }
     };
 
-    const filteredOrders = orders.filter((o) =>
-        o.codigoOrden.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        o.clienteNombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Filtro local eliminado a favor de filtro en el backend
+    const filteredOrders = orders;
 
     return (
         <div className="h-full flex flex-col p-4 md:p-6 gap-4 md:gap-6 overflow-hidden">
@@ -112,15 +163,54 @@ export const FacturacionPage = () => {
                         <Receipt size={20} className="text-primary" />
                         Historial de Órdenes
                     </h2>
-                    <div className="relative group sm:w-72">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Buscar por código o cliente..."
-                            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary dark:text-white transition-all outline-none placeholder:text-slate-400 text-sm"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="relative group min-w-[180px]">
+                            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={16} />
+                            <select
+                                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary dark:text-white transition-all outline-none appearance-none text-sm"
+                                value={searchStatus}
+                                onChange={(e) => { setSearchStatus(e.target.value); setPage(0); }}
+                            >
+                                <option value="">Todos los estados</option>
+                                {Object.entries(ESTADO_CONFIG).map(([key, { label }]) => (
+                                    <option key={key} value={key}>{label}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <div className="relative group">
+                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                                <input
+                                    type="date"
+                                    className="pl-8 pr-3 py-1.5 bg-transparent border-none focus:ring-0 text-xs dark:text-white outline-none cursor-pointer"
+                                    value={startDate}
+                                    onChange={(e) => { setStartDate(e.target.value); setPage(0); }}
+                                    placeholder="Desde"
+                                />
+                            </div>
+                            <span className="text-slate-400 text-xs">-</span>
+                            <div className="relative group">
+                                <input
+                                    type="date"
+                                    className="px-3 py-1.5 bg-transparent border-none focus:ring-0 text-xs dark:text-white outline-none cursor-pointer"
+                                    value={endDate}
+                                    onChange={(e) => { setEndDate(e.target.value); setPage(0); }}
+                                    placeholder="Hasta"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="relative group sm:w-64">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={16} />
+                            <input
+                                type="text"
+                                placeholder="N° de Orden..."
+                                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary dark:text-white transition-all outline-none placeholder:text-slate-400 text-sm"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -188,6 +278,15 @@ export const FacturacionPage = () => {
                                                             <LinkIcon size={16} />
                                                         </button>
                                                     )}
+                                                    {(order.estado === "FALLIDO" || (order as any).estado === "INCIDENCIA") && (
+                                                        <button
+                                                            onClick={() => handleResetDelivery(order.id)}
+                                                            title="Re-enviar pedido (Cargar nuevamente)"
+                                                            className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:text-amber-400 rounded-md transition-colors"
+                                                        >
+                                                            <RefreshCw size={16} />
+                                                        </button>
+                                                    )}
                                                     <button
                                                         title="Descargar Comprobante"
                                                         className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 rounded-md transition-colors"
@@ -233,6 +332,11 @@ export const FacturacionPage = () => {
                                                 <LinkIcon size={14} /> Link Pago
                                             </Button>
                                         )}
+                                        {(order.estado === "FALLIDO" || (order as any).estado === "INCIDENCIA") && (
+                                            <Button variant="outline" onClick={() => handleResetDelivery(order.id)} className="flex-1 text-xs py-1.5 gap-1.5 shadow-sm bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400">
+                                                <RefreshCw size={14} /> Re-enviar
+                                            </Button>
+                                        )}
                                         <Button variant="outline" className="flex-1 text-xs py-1.5 gap-1.5 shadow-sm">
                                             <Download size={14} /> PDF
                                         </Button>
@@ -244,10 +348,33 @@ export const FacturacionPage = () => {
                 </div>
 
                 {/* Footer */}
-                <div className="shrink-0 px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center z-10">
+                <div className="shrink-0 px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 z-10">
                     <span className="text-sm font-medium text-slate-500">
-                        Mostrando {filteredOrders.length} órdenes
+                        Mostrando {filteredOrders.length} de {totalElements} órdenes
                     </span>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(p => Math.max(0, p - 1))}
+                            disabled={page === 0 || isLoading}
+                            className="h-9 px-3 gap-1.5"
+                        >
+                            <ChevronLeft size={16} />
+                            Anterior
+                        </Button>
+                        <div className="flex items-center px-4 h-9 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            Página {page + 1} de {totalPages || 1}
+                        </div>
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                            disabled={page >= totalPages - 1 || isLoading}
+                            className="h-9 px-3 gap-1.5"
+                        >
+                            Siguiente
+                            <ChevronRight size={16} />
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>

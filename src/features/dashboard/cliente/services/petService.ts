@@ -33,11 +33,7 @@ export const petService = {
       formData.append("foto", foto);
     }
 
-    const { data } = await api.put<ApiResponse<Pet>>(`/pets/${id}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const { data } = await api.put<ApiResponse<Pet>>(`/pets/${id}`, formData);
     return data.data;
   },
 
