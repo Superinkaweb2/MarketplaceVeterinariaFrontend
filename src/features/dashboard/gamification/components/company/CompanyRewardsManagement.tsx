@@ -24,11 +24,7 @@ export const CompanyRewardsManagement = () => {
   });
 
   // Solo se necesita si van a aplicar a ciertos productos (para seleccionarlos en el modal)
-  const { data: productosPage, isLoading: isLoadingProducts, error: productsError } = useProductosEmpresa(empresaId || 0, 0, 50);
-
-  console.log('Gamification - EmpresaId:', empresaId);
-  console.log('Gamification - ProductosPage:', productosPage);
-  if (productsError) console.error('Gamification - Error fetching products:', productsError);
+  const { data: productosPage, isLoading: isLoadingProducts } = useProductosEmpresa(empresaId || 0, 0, 50);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
