@@ -61,8 +61,8 @@ export const FacturacionPage = () => {
             // Mock data temporal solo si da 404 (endpoint no encontrado)
             if (error.response?.status === 404 || error.response?.status === 403) {
                 setOrders([
-                    { id: 1, codigoOrden: "ORD-2026-0001", clienteNombre: "Juan Pérez", subtotal: 100, costoEnvio: 10, comisionPlataforma: 5, total: 110, estado: "PAGADO", metodoPago: "visa", createdAt: new Date().toISOString() },
-                    { id: 2, codigoOrden: "ORD-2026-0002", clienteNombre: "María López", subtotal: 250, costoEnvio: 0, comisionPlataforma: 12.5, total: 250, estado: "PENDIENTE", createdAt: new Date(Date.now() - 86400000).toISOString() },
+                    { id: 1, codigoOrden: "ORD-2026-0001", clienteNombre: "Juan Pérez", subtotal: 100, costoEnvio: 10, comisionPlataforma: 5, descuento: 0, total: 110, estado: "PAGADO", metodoPago: "visa", createdAt: new Date().toISOString() },
+                    { id: 2, codigoOrden: "ORD-2026-0002", clienteNombre: "María López", subtotal: 250, costoEnvio: 0, comisionPlataforma: 12.5, descuento: 0, total: 250, estado: "PENDIENTE", createdAt: new Date(Date.now() - 86400000).toISOString() },
                 ]);
             }
         } finally {
