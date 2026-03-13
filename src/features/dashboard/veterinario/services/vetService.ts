@@ -69,9 +69,7 @@ export const vetService = {
     formData.append("imagen", imagen);
 
     // QUITA el objeto de headers, deja solo formData
-    const { data } = await api.post<ApiResponse<Service>>("/services", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const { data } = await api.post<ApiResponse<Service>>("/services", formData);
 
     return data.data;
   },
@@ -88,9 +86,7 @@ export const vetService = {
     }
 
     // QUITA el objeto de headers
-    const { data } = await api.patch<ApiResponse<Service>>(`/services/${id}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const { data } = await api.patch<ApiResponse<Service>>(`/services/${id}`, formData);
 
     return data.data;
   },

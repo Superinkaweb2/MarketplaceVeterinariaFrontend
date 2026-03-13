@@ -74,11 +74,7 @@ export const productService = {
     }
 
     const { data: response } = await api.patch<ApiResponse<Product>>(`/products/${id}`, formData, {
-      params: { replaceImages },
-      // Forzamos el multipart para evitar errores de serialización JSON accidental
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      params: { replaceImages }
     });
     return response.data;
   },

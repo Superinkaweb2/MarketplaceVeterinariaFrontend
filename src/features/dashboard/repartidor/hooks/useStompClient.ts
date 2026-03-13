@@ -31,19 +31,13 @@ export const useStompClient = ({ repartidorId, onNewOrder }: UseStompClientProps
                 Authorization: token ? `Bearer ${token}` : "",
             },
             
-            // Logs en consola útiles para depuración
-            debug: (str) => {
-                console.log('[STOMP]', str);
-            },
-            
             // Auto-reconexión si el server se cae o hay pérdida de red
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
         });
 
-        client.onConnect = (frame) => {
-            console.log('✅ Conectado a STOMP WebSocket:', frame);
+        client.onConnect = () => {
             setIsConnected(true);
 
             // 1. Suscripción a la cola de alertas de nuevos pedidos
@@ -65,7 +59,6 @@ export const useStompClient = ({ repartidorId, onNewOrder }: UseStompClientProps
         };
 
         client.onWebSocketClose = () => {
-            console.log('🔌 WebSocket Desconectado');
             setIsConnected(false);
         };
 

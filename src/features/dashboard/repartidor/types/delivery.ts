@@ -7,7 +7,8 @@ export type DeliveryStatus =
   | 'CERCA' 
   | 'ENTREGADO' 
   | 'FALLIDO' 
-  | 'CANCELADO';
+  | 'CANCELADO'
+  | 'INCIDENCIA';
 
 export type RepartidorStatus = 'DISPONIBLE' | 'OCUPADO' | 'INACTIVO' | 'OFFLINE';
 

@@ -31,11 +31,7 @@ export const clienteService = {
       formData.append("foto", foto);
     }
 
-    const { data } = await api.put<ApiResponse<ClienteProfile>>("/clients/me", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const { data } = await api.put<ApiResponse<ClienteProfile>>("/clients/me", formData);
     return data.data;
   },
 };

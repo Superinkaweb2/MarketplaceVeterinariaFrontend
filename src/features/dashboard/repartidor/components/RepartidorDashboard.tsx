@@ -31,6 +31,13 @@ export const RepartidorDashboard: React.FC = () => {
     const [cargandoFoto, setCargandoFoto] = useState(false);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+    // Estado para Incidencias
+    const [showIncidenciaModal, setShowIncidenciaModal] = useState(false);
+    const [motivoIncidencia, setMotivoIncidencia] = useState("");
+    const [descIncidencia, setDescIncidencia] = useState("");
+    const [fotoIncidencia, setFotoIncidencia] = useState<File | null>(null);
+    const [enviandoIncidencia, setEnviandoIncidencia] = useState(false);
+
     const isDisponible = perfil?.estadoActual === 'DISPONIBLE';
     const isOcupado = perfil?.estadoActual === 'OCUPADO' || deliveryActivo !== null;
 
@@ -42,7 +49,7 @@ export const RepartidorDashboard: React.FC = () => {
     useEffect(() => {
         if (isDisponible && !deliveryActivo) {
             repartidorService.getPedidosDisponibles()
-                .then(res => setDisponibles(res.data))
+                .then(res => setDisponibles(res.data.data))
                 .catch(err => console.error("Error cargando disponibles:", err));
         }
     }, [isDisponible, deliveryActivo]);
@@ -137,6 +144,36 @@ export const RepartidorDashboard: React.FC = () => {
              sendLocation(lat, lng, deliveryActivo.idDelivery);
         } else {
              repartidorService.actualizarUbicacion(lat, lng).catch(console.error);
+        }
+    };
+
+    const handleReportarIncidencia = async () => {
+        if (!deliveryActivo || !motivoIncidencia || !descIncidencia) return;
+
+        try {
+            setEnviandoIncidencia(true);
+            await repartidorService.reportarIncidencia(
+                deliveryActivo.idDelivery,
+                motivoIncidencia,
+                descIncidencia,
+                fotoIncidencia || undefined
+            );
+
+            Swal.fire({
+                title: 'Reporte Enviado',
+                text: 'La incidencia ha sido registrada. El pedido ha sido actualizado.',
+                icon: 'success'
+            });
+
+            setShowIncidenciaModal(false);
+            setMotivoIncidencia("");
+            setDescIncidencia("");
+            setFotoIncidencia(null);
+            recargarDatos();
+        } catch (err: any) {
+            Swal.fire('Error', err.response?.data?.message || 'No se pudo enviar el reporte', 'error');
+        } finally {
+            setEnviandoIncidencia(false);
         }
     };
 
@@ -393,9 +430,96 @@ export const RepartidorDashboard: React.FC = () => {
                                             <Camera className="w-4 h-4" /> {cargandoFoto ? 'SUBIENDO...' : 'O SUBIR FOTO DE EVIDENCIA'}
                                         </button>
                                     </div>
+                                    <div className="mt-4">
+                                        <button 
+                                            onClick={() => setShowIncidenciaModal(true)}
+                                            className="w-full py-3 text-[10px] font-bold text-red-500 flex items-center justify-center gap-2 hover:bg-red-50 rounded-xl transition-all"
+                                        >
+                                            <AlertCircle className="w-4 h-4" /> REPORTAR PROBLEMA / ACCIDENTE
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Incidencia */}
+            {showIncidenciaModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+                        <div className="p-6">
+                            <h3 className="text-lg font-black text-gray-800 text-center mb-1">Reportar Incidencia</h3>
+                            <p className="text-[10px] text-gray-400 text-center mb-6 uppercase tracking-widest font-bold">Información de Seguridad</p>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase mb-2 block">Motivo</label>
+                                    <select 
+                                        value={motivoIncidencia}
+                                        onChange={(e) => setMotivoIncidencia(e.target.value)}
+                                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-bold text-gray-700 outline-none focus:border-blue-500"
+                                    >
+                                        <option value="">Selecciona un motivo</option>
+                                        <option value="ACCIDENTE">Tuve un accidente</option>
+                                        <option value="ROBO">Fui víctima de un robo</option>
+                                        <option value="FALLA_MECANICA">Falla mecánica del vehículo</option>
+                                        <option value="EMERGENCIA_PERSONAL">Emergencia personal</option>
+                                        <option value="OTRO">Otro problema</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase mb-2 block">Descripción</label>
+                                    <textarea 
+                                        value={descIncidencia}
+                                        onChange={(e) => setDescIncidencia(e.target.value)}
+                                        placeholder="Cuéntanos brevemente qué ocurrió..."
+                                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm font-medium text-gray-700 outline-none focus:border-blue-500 min-h-[100px] resize-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase mb-2 block">Evidencia (Opcional)</label>
+                                    <div className="relative">
+                                        <input 
+                                            type="file" 
+                                            accept="image/*" 
+                                            capture="environment"
+                                            className="hidden" 
+                                            id="incidencia-file"
+                                            onChange={(e) => setFotoIncidencia(e.target.files?.[0] || null)}
+                                        />
+                                        <label 
+                                            htmlFor="incidencia-file"
+                                            className="w-full py-4 border-2 border-dashed border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 transition-all"
+                                        >
+                                            <Camera className="w-5 h-5 text-gray-300" />
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase">
+                                                {fotoIncidencia ? 'Foto seleccionada ✅' : 'Tomar Foto de Evidencia'}
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-8 flex gap-3">
+                                <button 
+                                    onClick={() => setShowIncidenciaModal(false)}
+                                    className="flex-1 py-4 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    CANCELAR
+                                </button>
+                                <button 
+                                    onClick={handleReportarIncidencia}
+                                    disabled={enviandoIncidencia || !motivoIncidencia || !descIncidencia}
+                                    className="flex-[2] bg-red-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-red-100 transition-all active:scale-95 disabled:bg-gray-200"
+                                >
+                                    {enviandoIncidencia ? 'ENVIANDO...' : 'ENVIAR REPORTE'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

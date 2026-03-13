@@ -19,12 +19,12 @@ export const useRepartidor = () => {
                     }
                     throw err;
                 }),
-                repartidorService.getDeliveryActivo().catch(() => ({ data: null })),
-                repartidorService.getHistorial().catch(() => ({ data: [] }))
+                repartidorService.getDeliveryActivo().catch(() => ({ data: { data: null } as any })),
+                repartidorService.getHistorial().catch(() => ({ data: { data: [] } as any }))
             ]);
-            setPerfil(perfilRes.data);
-            setDeliveryActivo(deliveryRes.data || null);
-            setHistorial(historialRes.data || []);
+            setPerfil(perfilRes.data.data);
+            setDeliveryActivo(deliveryRes.data?.data || null);
+            setHistorial(historialRes.data?.data || []);
         } catch (error) {
             console.error("Error cargando datos del repartidor", error);
             Swal.fire("Error", "No se pudo cargar la información", "error");
@@ -50,7 +50,7 @@ export const useRepartidor = () => {
     const avanzarEstado = async (deliveryId: number, nuevoEstado: DeliveryStatus) => {
         try {
             const res = await repartidorService.cambiarEstado(deliveryId, nuevoEstado);
-            setDeliveryActivo(res.data);
+            setDeliveryActivo(res.data.data);
             Swal.fire("Estado actualizado", `El pedido ahora está: ${nuevoEstado}`, "success");
         } catch (error: any) {
             Swal.fire("Error", error.response?.data?.message || "No se pudo actualizar el estado", "error");

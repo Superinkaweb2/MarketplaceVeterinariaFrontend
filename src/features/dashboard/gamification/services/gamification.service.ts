@@ -71,6 +71,11 @@ export const gamificationService = {
     return data.data!;
   },
 
+  async updateCompanyReward(id: number, reward: Partial<Reward>): Promise<Reward> {
+    const { data } = await api.put<ApiResponse<Reward>>(`/gamification/rewards/company/${id}`, reward);
+    return data.data!;
+  },
+
   async deactivateCompanyReward(id: number): Promise<void> {
     await api.delete(`/gamification/rewards/company/${id}`);
   }

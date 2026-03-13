@@ -1,8 +1,12 @@
 import { api } from "../../../../shared/http/api";
-import type { AxiosResponse } from "axios";
-import type { DeliveryTrackingDTO } from "../../cliente/services/deliveryService";
+import type { ApiResponse } from "../../../../shared/types/api";
 
 export const deliveryEmpresaService = {
-    getRatings: (): Promise<AxiosResponse<DeliveryTrackingDTO[]>> => 
-        api.get("/deliveries/empresa/ratings"),
+    getRatings: async (): Promise<any[]> => {
+        const { data } = await api.get<ApiResponse<any[]>>("/deliveries/empresa/ratings");
+        return data.data || [];
+    },
+    reintentarDelivery: async (orderId: number): Promise<void> => {
+        await api.post(`/deliveries/orden/${orderId}/reintentar`);
+    },
 };

@@ -180,7 +180,7 @@ const FeedbackSection = () => {
   useEffect(() => {
     import("../../services/deliveryEmpresaService").then(m => {
         m.deliveryEmpresaService.getRatings()
-            .then((res: any) => setRatings(res.data))
+            .then((data: any[]) => setRatings(data))
             .catch((err: any) => console.error("Error loading ratings:", err))
             .finally(() => setLoading(false));
     });

@@ -28,6 +28,7 @@ export interface Order {
     subtotal: number;
     costoEnvio: number;
     comisionPlataforma: number;
+    descuento: number;
     total: number;
     estado: EstadoOrden;
     metodoPago: string;
