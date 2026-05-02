@@ -1,73 +1,59 @@
-# React + TypeScript + Vite
+# Huella360 - Frontend Marketplace & SaaS Veterinario
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Huella360 es una plataforma integral diseñada para digitalizar la gestión veterinaria y conectar a clínicas, profesionales y dueños de mascotas a través de un ecosistema digital moderno.
 
-Currently, two official plugins are available:
+## 🚀 Tecnologías Principales
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Framework**: React 19 con TypeScript.
+- **Build Tool**: Vite.
+- **Estilos**: Tailwind CSS 4 (Custom Themes).
+- **Estado y Datos**: TanStack React Query v5, Context API.
+- **Formularios**: React Hook Form + Zod.
+- **Comunicación**: Axios (REST), StompJS/SockJS (WebSockets).
+- **UI/UX**: Lucide Icons, Recharts, Leaflet, SweetAlert2, React Hot Toast.
 
-## React Compiler
+## 📦 Instalación
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+1. Clona el repositorio.
+2. Instala las dependencias:
+   ```bash
+   npm install
+   ```
+3. Crea un archivo `.env` basado en `.env.example` y configura:
+   - `VITE_API_URL`: URL base de tu backend.
+   - `VITE_MP_PUBLIC_KEY`: Clave pública de Mercado Pago.
+   - `VITE_MP_CLIENT_ID`: ID de cliente de Mercado Pago (para OAuth).
+4. Inicia el servidor de desarrollo:
+   ```bash
+   npm run dev
+   ```
 
-## Expanding the ESLint configuration
+## 🏗️ Estructura del Proyecto
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+El proyecto utiliza una arquitectura **Feature-First**:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- `src/features/`: Módulos de negocio (auth, marketplace, dashboard, etc.).
+- `src/shared/`: Componentes, hooks y utilidades compartidas.
+- `src/components/`: Layouts y componentes UI globales.
+- `src/pages/`: Páginas estáticas y públicas.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 👥 Roles del Sistema
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **Admin**: Gestión global de la plataforma.
+- **Empresa**: Gestión de servicios, productos y suscripción SaaS.
+- **Veterinario**: Gestión de citas y pacientes.
+- **Cliente**: Marketplace y cuidado de mascotas.
+- **Repartidor**: Gestión de logística y entregas.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📚 Documentación Adicional
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Para más detalles, consulta los archivos en la carpeta `/docs`:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. [Arquitectura y Flujos](./docs/ARCHITECTURE.md)
+2. [Funcionalidades por Rol](./docs/FEATURES.md)
+3. [Stack Técnico Detallado](./docs/TECHNICAL_STACK.md)
+4. [Manual de Usuario](./docs/USER_MANUAL.md)
+
+---
+
+Desarrollado con ❤️ para el ecosistema veterinario.
