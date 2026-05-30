@@ -6,7 +6,7 @@ import { ArrowRight, User, Phone, MapPin } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { profileService } from "../../services/profileService";
 import { useAuth } from "../../context/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const clienteSchema = z.object({
@@ -21,9 +21,13 @@ const clienteSchema = z.object({
 type ClienteFormData = z.infer<typeof clienteSchema>;
 
 export const ClienteProfilePage = () => {
-  const { setPerfilCompleto } = useAuth();
+  const { perfilCompleto, setPerfilCompleto } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (perfilCompleto) {
+    return <Navigate to="/portal/cliente" replace />;
+  }
 
   const { register, handleSubmit, formState: { errors } } = useForm<ClienteFormData>({
     resolver: zodResolver(clienteSchema),

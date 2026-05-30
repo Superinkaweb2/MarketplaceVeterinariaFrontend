@@ -6,7 +6,7 @@ import { ArrowRight, User, Stethoscope, Award, FileText, Clock } from "lucide-re
 import { Button } from "../../../../components/ui/Button";
 import { profileService } from "../../services/profileService";
 import { useAuth } from "../../context/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const veterinarioSchema = z.object({
@@ -21,9 +21,13 @@ const veterinarioSchema = z.object({
 type VeterinarioFormData = z.infer<typeof veterinarioSchema>;
 
 export const VeterinarioProfilePage = () => {
-  const { setPerfilCompleto } = useAuth();
+  const { perfilCompleto, setPerfilCompleto } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (perfilCompleto) {
+    return <Navigate to="/portal/veterinario" replace />;
+  }
 
   const { register, handleSubmit, formState: { errors } } = useForm<VeterinarioFormData>({
     resolver: zodResolver(veterinarioSchema),
