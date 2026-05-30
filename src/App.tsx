@@ -40,6 +40,7 @@ const Register = lazy(() => import("./features/auth/pages/Register").then(m => (
 const ForgotPassword = lazy(() => import("./features/auth/pages/ForgotPassword").then(m => ({ default: (m as any).default || (m as any).ForgotPassword })));
 const ResetPassword = lazy(() => import("./features/auth/pages/ResetPassword").then(m => ({ default: (m as any).default || (m as any).ResetPassword })));
 const VerifyEmail = lazy(() => import("./features/auth/pages/VerifyEmail").then(m => ({ default: (m as any).default || (m as any).VerifyEmail })));
+const RoleSelectionPage = lazy(() => import("./features/auth/pages/RoleSelectionPage").then(m => ({ default: (m as any).RoleSelectionPage || (m as any).default })));
 const ClienteProfilePage = lazy(() => import("./features/auth/pages/profiles/ClienteProfilePage").then(m => ({ default: (m as any).ClienteProfilePage || (m as any).default })));
 const VeterinarioProfilePage = lazy(() => import("./features/auth/pages/profiles/VeterinarioProfilePage").then(m => ({ default: (m as any).VeterinarioProfilePage || (m as any).default })));
 const EmpresaProfilePage = lazy(() => import("./features/auth/pages/profiles/EmpresaProfilePage").then(m => ({ default: (m as any).EmpresaProfilePage || (m as any).default })));
@@ -106,171 +107,188 @@ const LoadingFallback = () => (
   </div>
 );
 
+import { Auth0Provider } from "@auth0/auth0-react";
+
 function App() {
   useTheme();
 
+  const domain = import.meta.env.VITE_AUTH0_DOMAIN;
+  const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+  const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
+
   return (
-    <AuthProvider>
-      <Router>
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            {/* Rutas publicas: Auth */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-            <Route path="/auth/reset-password" element={<ResetPassword />} />
-            <Route path="/auth/verify-email" element={<VerifyEmail />} />
+    <Auth0Provider
+      domain={domain}
+      clientId={clientId}
+      authorizationParams={{
+        redirect_uri: `${window.location.origin}/login`,
+        audience: audience,
+      }}
+      cacheLocation="localstorage"
+    >
+      <AuthProvider>
+        <Router>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              {/* Rutas publicas: Auth */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+              <Route path="/auth/reset-password" element={<ResetPassword />} />
+              <Route path="/auth/verify-email" element={<VerifyEmail />} />
+              <Route path="/register/rol" element={<RoleSelectionPage />} />
 
-            {/* Formilarios de Perfil (Requieren token del rol, pero perfilCompleto=false) */}
-            <Route element={<ProtectedRoute allowedRoles={["CLIENTE"]} />}>
-              <Route path="/register/perfil/cliente" element={<ClienteProfilePage />} />
-            </Route>
+              {/* Formilarios de Perfil (Requieren token del rol, pero perfilCompleto=false) */}
+              <Route element={<ProtectedRoute allowedRoles={["CLIENTE"]} />}>
+                <Route path="/register/perfil/cliente" element={<ClienteProfilePage />} />
+              </Route>
 
-            <Route element={<ProtectedRoute allowedRoles={["VETERINARIO"]} />}>
-              <Route path="/register/perfil/veterinario" element={<VeterinarioProfilePage />} />
-            </Route>
+              <Route element={<ProtectedRoute allowedRoles={["VETERINARIO"]} />}>
+                <Route path="/register/perfil/veterinario" element={<VeterinarioProfilePage />} />
+              </Route>
 
-            <Route element={<ProtectedRoute allowedRoles={["EMPRESA"]} />}>
-              <Route path="/register/perfil/empresa" element={<EmpresaProfilePage />} />
-            </Route>
+              <Route element={<ProtectedRoute allowedRoles={["EMPRESA"]} />}>
+                <Route path="/register/perfil/empresa" element={<EmpresaProfilePage />} />
+              </Route>
 
-            <Route element={<ProtectedRoute allowedRoles={["REPARTIDOR"]} />}>
-              <Route path="/register/perfil/repartidor" element={<RepartidorProfilePage />} />
-            </Route>
+              <Route element={<ProtectedRoute allowedRoles={["REPARTIDOR"]} />}>
+                <Route path="/register/perfil/repartidor" element={<RepartidorProfilePage />} />
+              </Route>
 
-            {/* Rutas protegidas: Admin (Requiere Perfil Completo) */}
-            <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-              <Route element={<RequiresProfile />}>
-                <Route path="/portal/admin" element={<AdminPortal />}>
-                  <Route index element={<Dashboard />} />
-                  <Route path="empresas" element={<EmpresasPage />} />
-                  <Route path="usuarios" element={<UsuariosPage />} />
-                  <Route path="categorias" element={<CategoriasPage />} />
-                  <Route path="veterinarios" element={<VeterinariosPage />} />
-                  <Route path="marketplace" element={<AdminComingSoon {...({ title: "Marketplace", description: "Control global de productos, servicios y transacciones.", icon: ShoppingBag } as any)} />} />
-                  <Route path="suscripciones" element={<SubscriptionAdminPage />} />
-                  <Route path="gamificacion" element={<PointsConfigAdmin />} />
-                  <Route path="reportes" element={<AdminComingSoon {...({ title: "Reportes", description: "Análisis avanzado de datos e inteligencia de negocio.", icon: BarChart3 } as any)} />} />
+              {/* Rutas protegidas: Admin (Requiere Perfil Completo) */}
+              <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+                <Route element={<RequiresProfile />}>
+                  <Route path="/portal/admin" element={<AdminPortal />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="empresas" element={<EmpresasPage />} />
+                    <Route path="usuarios" element={<UsuariosPage />} />
+                    <Route path="categorias" element={<CategoriasPage />} />
+                    <Route path="veterinarios" element={<VeterinariosPage />} />
+                    <Route path="marketplace" element={<AdminComingSoon {...({ title: "Marketplace", description: "Control global de productos, servicios y transacciones.", icon: ShoppingBag } as any)} />} />
+                    <Route path="suscripciones" element={<SubscriptionAdminPage />} />
+                    <Route path="gamificacion" element={<PointsConfigAdmin />} />
+                    <Route path="reportes" element={<AdminComingSoon {...({ title: "Reportes", description: "Análisis avanzado de datos e inteligencia de negocio.", icon: BarChart3 } as any)} />} />
+                  </Route>
                 </Route>
               </Route>
-            </Route>
 
-            {/* Rutas protegidas: Empresa (Requiere Perfil Completo) */}
-            <Route element={<ProtectedRoute allowedRoles={["EMPRESA"]} />}>
-              <Route element={<RequiresProfile />}>
-                <Route path="/portal/empresa" element={<DashboardEmpresa />}>
-                  <Route index element={<DashboardHome />} />
-                  <Route path="servicios" element={<ServiciosPage />} />
-                  <Route path="productos" element={<ProductosPage />} />
-                  <Route path="equipo" element={<EquipoPage />} />
-                  <Route path="suscripcion" element={<MySubscriptionPage />} />
-                  <Route path="facturacion" element={<FacturacionPage />} />
-                  <Route path="adopciones" element={<AdopcionesPage />} />
-                  <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
-                  <Route path="configuracion" element={<EmpresaConfigPage />} />
-                  <Route path="talento" element={<TalentoPage />} />
-                  <Route path="pacientes" element={<EmpresaPacientesPage />} />
-                  <Route path="citas" element={<EmpresaCitasPage />} />
-                  <Route path="recompensas" element={<CompanyRewardsManagement />} />
-                  <Route path="oauth/mercadopago" element={<OAuthCallbackPage />} />
-                  <Route path="pago-exitoso" element={<PaymentSuccessPageEmpresa />} />
+              {/* Rutas protegidas: Empresa (Requiere Perfil Completo) */}
+              <Route element={<ProtectedRoute allowedRoles={["EMPRESA"]} />}>
+                <Route element={<RequiresProfile />}>
+                  <Route path="/portal/empresa" element={<DashboardEmpresa />}>
+                    <Route index element={<DashboardHome />} />
+                    <Route path="servicios" element={<ServiciosPage />} />
+                    <Route path="productos" element={<ProductosPage />} />
+                    <Route path="equipo" element={<EquipoPage />} />
+                    <Route path="suscripcion" element={<MySubscriptionPage />} />
+                    <Route path="facturacion" element={<FacturacionPage />} />
+                    <Route path="adopciones" element={<AdopcionesPage />} />
+                    <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
+                    <Route path="configuracion" element={<EmpresaConfigPage />} />
+                    <Route path="talento" element={<TalentoPage />} />
+                    <Route path="pacientes" element={<EmpresaPacientesPage />} />
+                    <Route path="citas" element={<EmpresaCitasPage />} />
+                    <Route path="recompensas" element={<CompanyRewardsManagement />} />
+                    <Route path="oauth/mercadopago" element={<OAuthCallbackPage />} />
+                    <Route path="pago-exitoso" element={<PaymentSuccessPageEmpresa />} />
+                  </Route>
                 </Route>
               </Route>
-            </Route>
 
-            {/* Rutas protegidas: Veterinario (Requiere Perfil Completo) */}
-            <Route element={<ProtectedRoute allowedRoles={["VETERINARIO"]} />}>
-              <Route element={<RequiresProfile />}>
-                <Route path="/portal/veterinario" element={<DashboardVeterinario />}>
-                  <Route index element={<VetHomePage />} />
-                  <Route path="citas" element={<VetCitasPage />} />
-                  <Route path="pacientes" element={<VetPacientesPage />} />
-                  <Route path="servicios" element={<VetServiciosPage />} />
-                  <Route path="invitaciones" element={<InvitacionesPage />} />
-                  <Route path="configuracion" element={<VetConfiguracionPage />} />
+              {/* Rutas protegidas: Veterinario (Requiere Perfil Completo) */}
+              <Route element={<ProtectedRoute allowedRoles={["VETERINARIO"]} />}>
+                <Route element={<RequiresProfile />}>
+                  <Route path="/portal/veterinario" element={<DashboardVeterinario />}>
+                    <Route index element={<VetHomePage />} />
+                    <Route path="citas" element={<VetCitasPage />} />
+                    <Route path="pacientes" element={<VetPacientesPage />} />
+                    <Route path="servicios" element={<VetServiciosPage />} />
+                    <Route path="invitaciones" element={<InvitacionesPage />} />
+                    <Route path="configuracion" element={<VetConfiguracionPage />} />
+                  </Route>
                 </Route>
               </Route>
-            </Route>
 
-            {/* Rutas protegidas: CLIENTE (Requiere Perfil Completo) */}
-            <Route element={<ProtectedRoute allowedRoles={["CLIENTE"]} />}>
-              <Route element={<RequiresProfile />}>
-                <Route path="/portal/cliente" element={<DashboardCliente />}>
-                  <Route index element={<MascotasPage />} />
-                  <Route path="mascotas" element={<MascotasPage />} />
-                  <Route path="adopciones" element={<AdopcionesPage />} />
-                  <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
-                  <Route path="mis-solicitudes" element={<MisSolicitudesPage />} />
-                  <Route path="servicios" element={<ClienteMisServiciosPage />} />
-                  <Route path="citas" element={<MisCitasPage />} />
-                  <Route path="configuracion" element={<ClienteConfigPage />} />
-                  <Route path="compras" element={<MisCompras />} />
-                  <Route path="puntos" element={<ClientPointsDashboard />} />
-                  <Route path="tracking/:ordenId" element={<TrackingPage />} />
+              {/* Rutas protegidas: CLIENTE (Requiere Perfil Completo) */}
+              <Route element={<ProtectedRoute allowedRoles={["CLIENTE"]} />}>
+                <Route element={<RequiresProfile />}>
+                  <Route path="/portal/cliente" element={<DashboardCliente />}>
+                    <Route index element={<MascotasPage />} />
+                    <Route path="mascotas" element={<MascotasPage />} />
+                    <Route path="adopciones" element={<AdopcionesPage />} />
+                    <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
+                    <Route path="mis-solicitudes" element={<MisSolicitudesPage />} />
+                    <Route path="servicios" element={<ClienteMisServiciosPage />} />
+                    <Route path="citas" element={<MisCitasPage />} />
+                    <Route path="configuracion" element={<ClienteConfigPage />} />
+                    <Route path="compras" element={<MisCompras />} />
+                    <Route path="puntos" element={<ClientPointsDashboard />} />
+                    <Route path="tracking/:ordenId" element={<TrackingPage />} />
+                  </Route>
                 </Route>
               </Route>
-            </Route>
 
-            {/* Rutas protegidas: REPARTIDOR */}
-            <Route element={<ProtectedRoute allowedRoles={["REPARTIDOR"]} />}>
-              <Route element={<RequiresProfile />}>
-                <Route path="/portal/repartidor" element={<RepartidorDashboard />} />
+              {/* Rutas protegidas: REPARTIDOR */}
+              <Route element={<ProtectedRoute allowedRoles={["REPARTIDOR"]} />}>
+                <Route element={<RequiresProfile />}>
+                  <Route path="/portal/repartidor" element={<RepartidorDashboard />} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* Rutas públicas con Layout (Header + Footer) */}
-            <Route
-              path="*"
-              element={
-                <CartProvider>
-                  <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
-                    <Header />
-                    <main className="flex-1 flex flex-col items-center w-full">
-                      <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/home" element={<Navigate to="/" replace />} />
-                        <Route path="/sobre-nosotros" element={<SobreNosotros />} />
-                        <Route path="/empleos" element={<Empleos />} />
-                        <Route path="/blog" element={<Blog />} />
-                        <Route path="/contacto" element={<Contacto />} />
-                        <Route path="/privacidad" element={<Privacidad />} />
-                        <Route path="/terminos" element={<Terminos />} />
+              {/* Rutas públicas con Layout (Header + Footer) */}
+              <Route
+                path="*"
+                element={
+                  <CartProvider>
+                    <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+                      <Header />
+                      <main className="flex-1 flex flex-col items-center w-full">
+                        <Routes>
+                          <Route path="/" element={<Home />} />
+                          <Route path="/home" element={<Navigate to="/" replace />} />
+                          <Route path="/sobre-nosotros" element={<SobreNosotros />} />
+                          <Route path="/empleos" element={<Empleos />} />
+                          <Route path="/blog" element={<Blog />} />
+                          <Route path="/contacto" element={<Contacto />} />
+                          <Route path="/privacidad" element={<Privacidad />} />
+                          <Route path="/terminos" element={<Terminos />} />
 
-                        <Route
-                          path="/marketplace/*"
-                          element={
-                            <Routes>
-                              <Route index element={<Marketplace />} />
-                              <Route path="product/:id" element={<ProductDetails />} />
-                              <Route path="checkout" element={<CheckoutPage />} />
-                              <Route path="success" element={<PaymentSuccessPage />} />
-                            </Routes>
-                          }
-                        />
+                          <Route
+                            path="/marketplace/*"
+                            element={
+                              <Routes>
+                                <Route index element={<Marketplace />} />
+                                <Route path="product/:id" element={<ProductDetails />} />
+                                <Route path="checkout" element={<CheckoutPage />} />
+                                <Route path="success" element={<PaymentSuccessPage />} />
+                              </Routes>
+                            }
+                          />
 
-                        <Route path="/empresas" element={<CompaniesPage />} />
-                        <Route path="/empresa/:id" element={<CompanyProfile />} />
+                          <Route path="/empresas" element={<CompaniesPage />} />
+                          <Route path="/empresa/:id" element={<CompanyProfile />} />
 
-                        <Route
-                          path="*"
-                          element={
-                            <div className="p-20 text-center text-slate-500 dark:text-slate-400">
-                              404 — Página no encontrada
-                            </div>
-                          }
-                        />
-                      </Routes>
-                    </main>
-                    <Footer />
-                    <CartSidebar />
-                  </div>
-                </CartProvider>
-              }
-            />
-          </Routes>
-        </Suspense>
-      </Router>
-    </AuthProvider>
+                          <Route
+                            path="*"
+                            element={
+                              <div className="p-20 text-center text-slate-500 dark:text-slate-400">
+                                404 — Página no encontrada
+                              </div>
+                            }
+                          />
+                        </Routes>
+                      </main>
+                      <Footer />
+                      <CartSidebar />
+                    </div>
+                  </CartProvider>
+                }
+              />
+            </Routes>
+          </Suspense>
+        </Router>
+      </AuthProvider>
+    </Auth0Provider>
   );
 }
 

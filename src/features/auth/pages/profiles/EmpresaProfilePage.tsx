@@ -6,7 +6,7 @@ import { ArrowRight, Building2, Phone, Mail, MapPin, Search, UploadCloud, X } fr
 import { Button } from "../../../../components/ui/Button";
 import { profileService } from "../../services/profileService";
 import { useAuth } from "../../context/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const empresaSchema = z.object({
@@ -28,9 +28,14 @@ const empresaSchema = z.object({
 type EmpresaFormData = z.infer<typeof empresaSchema>;
 
 export const EmpresaProfilePage = () => {
-  const { setPerfilCompleto } = useAuth();
+  const { perfilCompleto, setPerfilCompleto } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Si el backend ya confirmó que tiene perfil, lo mandamos al portal
+  if (perfilCompleto) {
+    return <Navigate to="/portal/empresa" replace />;
+  }
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);

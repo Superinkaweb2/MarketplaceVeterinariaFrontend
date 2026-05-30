@@ -6,7 +6,7 @@ import { ArrowRight, User, Phone, Truck, Camera, X } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { profileService } from "../../services/profileService";
 import { useAuth } from "../../context/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const repartidorSchema = z.object({
@@ -20,9 +20,13 @@ const repartidorSchema = z.object({
 type RepartidorFormData = z.infer<typeof repartidorSchema>;
 
 export const RepartidorProfilePage = () => {
-  const { setPerfilCompleto } = useAuth();
+  const { perfilCompleto, setPerfilCompleto } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (perfilCompleto) {
+    return <Navigate to="/portal/repartidor" replace />;
+  }
   const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
