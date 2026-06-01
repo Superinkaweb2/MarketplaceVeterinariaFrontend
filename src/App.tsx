@@ -16,7 +16,6 @@ import { CartProvider } from "./features/marketplace/context/CartContext";
 import { CartSidebar } from "./features/marketplace/components/CartSidebar";
 import { AuthProvider } from "./features/auth/context/AuthContext";
 import { useTheme } from "./hooks/useTheme";
-import { LibroReclamacionesButton } from "./components/ui/LibroReclamacionesButton";
 
 // Lazy Pages
 const Home = lazy(() => import("./pages/Home").then(m => ({ default: (m as any).default || (m as any).Home })));
@@ -283,7 +282,6 @@ function App() {
                       </main>
                       <Footer />
                       <CartSidebar />
-                      <LibroReclamacionesButton />
                     </div>
                   </CartProvider>
                 }
