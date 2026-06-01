@@ -16,6 +16,7 @@ import { CartProvider } from "./features/marketplace/context/CartContext";
 import { CartSidebar } from "./features/marketplace/components/CartSidebar";
 import { AuthProvider } from "./features/auth/context/AuthContext";
 import { useTheme } from "./hooks/useTheme";
+import { LibroReclamacionesButton } from "./components/ui/LibroReclamacionesButton";
 
 // Lazy Pages
 const Home = lazy(() => import("./pages/Home").then(m => ({ default: (m as any).default || (m as any).Home })));
@@ -25,6 +26,7 @@ const Blog = lazy(() => import("./pages/Blog").then(m => ({ default: (m as any).
 const Contacto = lazy(() => import("./pages/Contacto").then(m => ({ default: (m as any).default || (m as any).Contacto })));
 const Privacidad = lazy(() => import("./pages/Privacidad").then(m => ({ default: (m as any).default || (m as any).Privacidad })));
 const Terminos = lazy(() => import("./pages/Terminos").then(m => ({ default: (m as any).default || (m as any).Terminos })));
+const LibroReclamaciones = lazy(() => import("./pages/LibroReclamaciones").then(m => ({ default: (m as any).default || (m as any).LibroReclamaciones })));
 
 // Feature Pages
 const Marketplace = lazy(() => import("./features/marketplace/pages/Marketplace").then(m => ({ default: (m as any).Marketplace || (m as any).default })));
@@ -252,6 +254,7 @@ function App() {
                           <Route path="/contacto" element={<Contacto />} />
                           <Route path="/privacidad" element={<Privacidad />} />
                           <Route path="/terminos" element={<Terminos />} />
+                          <Route path="/libro-reclamaciones" element={<LibroReclamaciones />} />
 
                           <Route
                             path="/marketplace/*"
@@ -280,6 +283,7 @@ function App() {
                       </main>
                       <Footer />
                       <CartSidebar />
+                      <LibroReclamacionesButton />
                     </div>
                   </CartProvider>
                 }

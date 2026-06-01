@@ -103,12 +103,15 @@ export const Footer = () => {
         <p className="text-[#4c6c9a] dark:text-slate-500 text-sm">
           © 2026 Huella360. Todos los derechos reservados.
         </p>
-        <div className="flex gap-6 text-[#4c6c9a] dark:text-slate-500 text-sm">
+        <div className="flex flex-wrap gap-x-6 gap-y-2 text-[#4c6c9a] dark:text-slate-500 text-sm">
           <Link className="hover:text-primary transition-colors" to="/privacidad">
             Política de Privacidad
           </Link>
           <Link className="hover:text-primary transition-colors" to="/terminos">
             Términos de Servicio
+          </Link>
+          <Link className="hover:text-primary transition-colors" to="/libro-reclamaciones">
+            Libro de Reclamaciones
           </Link>
         </div>
       </div>
