@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const method = config.method?.toLowerCase() || "";
 
       // Definir rutas públicas
-      const alwaysPublic = ["/public/", "/payments/webhook"].some(e => url.includes(e));
+      const alwaysPublic = ["/public/", "/payments/webhook", "/reclamos"].some(e => url.includes(e));
       const publicGet = method === 'get' && ["/services", "/adoptions", "/categories", "/subscriptions/plans"].some(e => url.includes(e));
       const isProtected = url.includes("/me") || url.includes("/applications");
       const isPublic = (alwaysPublic || (publicGet && !isProtected));

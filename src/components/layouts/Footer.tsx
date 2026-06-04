@@ -99,18 +99,38 @@ export const Footer = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto pt-8 border-t border-[#e7ecf3] dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p className="text-[#4c6c9a] dark:text-slate-500 text-sm">
-          © 2026 Huella360. Todos los derechos reservados.
-        </p>
-        <div className="flex gap-6 text-[#4c6c9a] dark:text-slate-500 text-sm">
-          <Link className="hover:text-primary transition-colors" to="/privacidad">
-            Política de Privacidad
-          </Link>
-          <Link className="hover:text-primary transition-colors" to="/terminos">
-            Términos de Servicio
-          </Link>
+      <div className="max-w-7xl mx-auto pt-8 border-t border-[#e7ecf3] dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="flex flex-col gap-2 md:gap-0">
+          <p className="text-[#4c6c9a] dark:text-slate-500 text-sm mb-2">
+            © 2026 Huella360. Todos los derechos reservados.
+          </p>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-[#4c6c9a] dark:text-slate-500 text-sm">
+            <Link className="hover:text-primary transition-colors" to="/privacidad">
+              Política de Privacidad
+            </Link>
+            <Link className="hover:text-primary transition-colors" to="/terminos">
+              Términos de Servicio
+            </Link>
+            <Link className="hover:text-primary transition-colors" to="/cookies">
+              Política de Cookies
+            </Link>
+            <Link className="hover:text-primary transition-colors" to="/devoluciones">
+              Políticas de Devoluciones y Reembolsos
+            </Link>
+          </div>
         </div>
+
+        <Link
+          to="/libro-reclamaciones"
+          className="flex flex-col items-center justify-center p-3 border-2 border-slate-200 dark:border-slate-700 rounded-lg hover:border-primary dark:hover:border-primary transition-colors group bg-white dark:bg-slate-800 shadow-sm"
+        >
+          <div className="font-bold text-lg text-slate-800 dark:text-white group-hover:text-primary transition-colors text-center tracking-tight leading-tight">
+            LIBRO DE <br /> RECLAMACIONES
+          </div>
+          <div className="text-[10px] text-slate-500 mt-1 font-medium tracking-wider uppercase">
+            Quejas y Reclamos
+          </div>
+        </Link>
       </div>
     </footer>
   );
