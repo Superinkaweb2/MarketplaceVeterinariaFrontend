@@ -26,6 +26,8 @@ const Contacto = lazy(() => import("./pages/Contacto").then(m => ({ default: (m 
 const Privacidad = lazy(() => import("./pages/Privacidad").then(m => ({ default: (m as any).default || (m as any).Privacidad })));
 const Terminos = lazy(() => import("./pages/Terminos").then(m => ({ default: (m as any).default || (m as any).Terminos })));
 const LibroReclamaciones = lazy(() => import("./pages/LibroReclamaciones").then(m => ({ default: (m as any).default || (m as any).LibroReclamaciones })));
+const Devoluciones = lazy(() => import("./pages/Devoluciones").then(m => ({ default: (m as any).default || (m as any).Devoluciones })));
+const Cookies = lazy(() => import("./pages/Cookies").then(m => ({ default: (m as any).default || (m as any).Cookies })));
 
 // Feature Pages
 const Marketplace = lazy(() => import("./features/marketplace/pages/Marketplace").then(m => ({ default: (m as any).Marketplace || (m as any).default })));
@@ -254,6 +256,8 @@ function App() {
                           <Route path="/privacidad" element={<Privacidad />} />
                           <Route path="/terminos" element={<Terminos />} />
                           <Route path="/libro-reclamaciones" element={<LibroReclamaciones />} />
+                          <Route path="/devoluciones" element={<Devoluciones />} />
+                          <Route path="/cookies" element={<Cookies />} />
 
                           <Route
                             path="/marketplace/*"

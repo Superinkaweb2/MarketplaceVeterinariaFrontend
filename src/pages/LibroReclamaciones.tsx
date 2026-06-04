@@ -375,25 +375,35 @@ export const LibroReclamaciones = () => {
         formData.append("archivo", archivoAdjunto);
       }
 
-      await api.post("/api/reclamos", formData, {
+      const response = await api.post("/reclamos", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+
+      const pdfUrl = response.data?.pdfReclamoUrl;
 
       await Swal.fire({
         icon: "success",
         title: "¡Reclamo registrado!",
         html: `
-          <p class="text-slate-600">Su ${data.tipoReclamo === "RECLAMO" ? "reclamo" : "queja"} ha sido registrado exitosamente.</p>
-          <p class="text-sm text-slate-500 mt-2">Se ha enviado una copia a su correo electrónico: <strong>${data.correo}</strong></p>
+          <p class="text-slate-600 mb-2">Su ${data.tipoReclamo === "RECLAMO" ? "reclamo" : "queja"} ha sido registrado exitosamente.</p>
+          <p class="text-sm text-slate-500 mb-4">Se ha enviado una copia a su correo: <strong>${data.correo}</strong></p>
+          ${pdfUrl ? `
+            <div class="mt-4 pt-4 border-t border-slate-100">
+              <a href="${pdfUrl}" target="_blank" rel="noopener noreferrer" class="inline-block bg-[#1ea59c] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#198f87] transition-colors" style="text-decoration: none;">
+                Ver y Descargar Hoja de Reclamación
+              </a>
+            </div>
+          ` : ""}
         `,
-        confirmButtonColor: "#1ea59c",
-        confirmButtonText: "Entendido",
+        confirmButtonColor: "#64748b",
+        confirmButtonText: "Cerrar",
       });
 
       reset();
       setArchivoAdjunto(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch {
+    } catch (error) {
+      console.error(error);
       await Swal.fire({
         icon: "error",
         title: "Error al enviar",
@@ -727,10 +737,9 @@ export const LibroReclamaciones = () => {
                 <label
                   htmlFor="tipo-reclamo"
                   className={`flex-1 flex items-center gap-3 px-5 py-4 rounded-xl border-2 cursor-pointer transition-all select-none
-                    ${
-                      tipoReclamo === "RECLAMO"
-                        ? "border-primary bg-primary/5 dark:bg-primary/10 shadow-sm"
-                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                    ${tipoReclamo === "RECLAMO"
+                      ? "border-primary bg-primary/5 dark:bg-primary/10 shadow-sm"
+                      : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
                     }
                   `}
                 >
@@ -752,10 +761,9 @@ export const LibroReclamaciones = () => {
                 <label
                   htmlFor="tipo-queja"
                   className={`flex-1 flex items-center gap-3 px-5 py-4 rounded-xl border-2 cursor-pointer transition-all select-none
-                    ${
-                      tipoReclamo === "QUEJA"
-                        ? "border-primary bg-primary/5 dark:bg-primary/10 shadow-sm"
-                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                    ${tipoReclamo === "QUEJA"
+                      ? "border-primary bg-primary/5 dark:bg-primary/10 shadow-sm"
+                      : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
                     }
                   `}
                 >
@@ -904,17 +912,7 @@ export const LibroReclamaciones = () => {
         {/* ═══════ DISCLAIMER LEGAL ═══════ */}
         <div className="mt-12 px-6 py-5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
           <p className="text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
-            GLOBAL LEARNING SOLUTIONS EIRL, con RUC N.° 20614113872, con domicilio en Calle Ramón Zavala N.° 790,
-            Urb. Las Moreras, distrito de La Perla, provincia y departamento del Callao, es el titular del banco de
-            datos personales de Quejas y Reclamos. GLOBAL LEARNING SOLUTIONS EIRL declara que el tratamiento de sus
-            datos personales en este portal tiene por finalidad gestionar de manera adecuada su reclamo o queja
-            conforme a las disposiciones legales vigentes, así como llevar un registro histórico de los casos
-            presentados con el objetivo de mejorar la calidad de atención. La formulación del reclamo no impide
-            acudir a otras vías de solución de controversias ni constituye requisito previo para interponer una
-            denuncia ante el INDECOPI. El proveedor deberá brindar respuesta al reclamo en un plazo no mayor de
-            quince (15) días hábiles improrrogables. Esta cuenta de correo es utilizada únicamente para el envío de
-            constancias de recepción de reclamos, no siendo un medio para la recepción de los mismos; por lo que se
-            solicita no remitir mensajes a dicha cuenta.
+            SUPERINKA.COM E.I.R.L., con RUC N.° 20606677074, con domicilio en Calle Ramón Zavala N.° 790, Urb. Las Moreras, distrito de La Perla, provincia y departamento del Callao, es el titular del banco de datos personales de Quejas y Reclamos. SUPERINKA.COM E.I.R.L. declara que el tratamiento de sus datos personales en este portal tiene por finalidad gestionar de manera adecuada su reclamo o queja conforme a las disposiciones legales vigentes, así como llevar un registro histórico de los casos presentados con el objetivo de mejorar la calidad de atención. La formulación del reclamo no impide acudir a otras vías de solución de controversias ni constituye requisito previo para interponer una denuncia ante el INDECOPI. El proveedor deberá brindar respuesta al reclamo en un plazo no mayor de quince (15) días hábiles improrrogables. Esta cuenta de correo es utilizada únicamente para el envío de constancias de recepción de reclamos, no siendo un medio para la recepción de los mismos; por lo que se solicita no remitir mensajes a dicha cuenta.
           </p>
         </div>
       </section>

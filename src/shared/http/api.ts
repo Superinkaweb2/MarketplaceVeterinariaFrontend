@@ -12,7 +12,7 @@ api.interceptors.request.use((config) => {
     const method = config.method?.toLowerCase() || "";
 
     // endpoints that are always public regardless of method (usually POST)
-    const alwaysPublic = ["/auth/login", "/auth/register", "/public/", "/payments/webhook"].some(e => url.includes(e));
+    const alwaysPublic = ["/auth/login", "/auth/register", "/public/", "/payments/webhook", "/reclamos"].some(e => url.includes(e));
 
     // GET requests that are public (catalog, plans, categories)
     const publicGet = method === 'get' && ["/services", "/adoptions", "/categories", "/subscriptions/plans"].some(e => url.includes(e));
