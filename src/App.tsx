@@ -124,7 +124,7 @@ function App() {
       domain={domain}
       clientId={clientId}
       authorizationParams={{
-        redirect_uri: `${window.location.origin}/login`,
+        redirect_uri: window.location.origin,
         audience: audience,
       }}
       cacheLocation="localstorage"
