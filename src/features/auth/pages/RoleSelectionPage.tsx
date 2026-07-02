@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { User, Stethoscope, Building2, Truck, Check, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
 import { useAuth } from "../context/useAuth";
+import { useAuth0 } from "@auth0/auth0-react";
 import { api } from "../../../shared/http/api";
 
 type RoleId = "CLIENTE" | "VETERINARIO" | "EMPRESA" | "REPARTIDOR";
@@ -54,34 +55,45 @@ const roles: {
   },
 ];
 
+const PORTALS: Record<string, string> = {
+  CLIENTE: "/portal/cliente",
+  VETERINARIO: "/portal/veterinario",
+  EMPRESA: "/portal/empresa",
+  REPARTIDOR: "/portal/repartidor",
+  ADMIN: "/portal/admin",
+};
+
 /**
  * Página de selección de rol.
  * Se muestra DESPUÉS del registro en Auth0, cuando el usuario
- * todavía tiene el rol por defecto (CLIENTE) y perfilCompleto=false.
+ * todavía no tiene rol definido (localStorage userRole = null).
  */
 export const RoleSelectionPage = () => {
   const { isAuthenticated, role, perfilCompleto, setRole } = useAuth();
+  const { user, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<RoleId | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Si no está autenticado, mandarlo al login
+  // ── Guards (después de hooks, antes del JSX) ──────────────────────
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Si ya tiene perfil completo, mandarlo a su portal
   if (perfilCompleto && role) {
-    const portals: Record<string, string> = {
-      CLIENTE: "/portal/cliente",
-      VETERINARIO: "/portal/veterinario",
-      EMPRESA: "/portal/empresa",
-      REPARTIDOR: "/portal/repartidor",
-      ADMIN: "/portal/admin",
-    };
-    return <Navigate to={portals[role] ?? "/"} replace />;
+    return <Navigate to={PORTALS[role] ?? "/"} replace />;
   }
+
+  // Si ya tiene un rol (pero sin perfil completo), ir directo al form de perfil
+  if (role) {
+    return <Navigate to={`/register/perfil/${role.toLowerCase()}`} replace />;
+  }
+
+  const AUTH0_CLAIMS = {
+    EMAIL: "https://vet-saas.com/email",
+    NOMBRE: "https://vet-saas.com/nombre",
+  };
 
   const handleConfirm = async () => {
     if (!selectedRole) return;
@@ -89,14 +101,31 @@ export const RoleSelectionPage = () => {
     setError(null);
 
     try {
-      // 1. Llamar al backend para actualizar el rol en la BD
-      await api.patch("/users/me/role", { rol: selectedRole });
+      const token = await getAccessTokenSilently();
+      const auth0Email = (user?.[AUTH0_CLAIMS.EMAIL] as string) || user?.email;
 
-      // 2. Actualizar el rol localmente en el contexto para que el resto de la app lo use
-      setRole(selectedRole);
+      // 1. Sync user with backend, creating them with the chosen role
+      if (auth0Email) {
+        await api.post("/auth/sync", {
+          correo: auth0Email,
+          nombre: user?.[AUTH0_CLAIMS.NOMBRE] || user?.nickname || user?.name || null,
+          auth0Sub: user?.sub || null,
+          rol: selectedRole,
+        });
+      }
 
-      // 3. Navegar al formulario de perfil del rol elegido
-      navigate(`/register/perfil/${selectedRole.toLowerCase()}`, { replace: true });
+      // 2. Get authoritative role from backend
+      const userRes = await api.get("/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const backendRole = userRes.data.data.rol;
+
+      // 3. Update role locally via AuthContext (updates both state + localStorage)
+      const finalRole = backendRole || selectedRole;
+      setRole(finalRole);
+
+      // 4. Navigate to profile form
+      navigate(`/register/perfil/${finalRole.toLowerCase()}`, { replace: true });
 
     } catch (err: any) {
       const msg = err?.response?.data?.message || "Error al guardar el rol. Inténtalo de nuevo.";
@@ -145,20 +174,17 @@ export const RoleSelectionPage = () => {
                   }
                   disabled:opacity-60 disabled:cursor-not-allowed`}
               >
-                {/* Checkmark */}
                 {isSelected && (
                   <span className={`absolute top-4 right-4 ${r.color} bg-white dark:bg-slate-900 rounded-full p-0.5`}>
                     <Check size={15} strokeWidth={3} />
                   </span>
                 )}
 
-                {/* Icon */}
                 <span className={`w-11 h-11 rounded-xl flex items-center justify-center
                   ${isSelected ? `${r.bgColor} ${r.color}` : "bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 group-hover:bg-slate-200"}`}>
                   <Icon size={22} />
                 </span>
 
-                {/* Text */}
                 <div>
                   <p className={`font-bold text-base ${isSelected ? r.color : "text-slate-800 dark:text-slate-100"}`}>
                     {r.label}
@@ -172,12 +198,10 @@ export const RoleSelectionPage = () => {
           })}
         </div>
 
-        {/* Error message */}
         {error && (
           <p className="text-center text-sm text-red-500 mb-4">{error}</p>
         )}
 
-        {/* Confirm button */}
         <Button
           id="btn-confirm-role"
           onClick={handleConfirm}

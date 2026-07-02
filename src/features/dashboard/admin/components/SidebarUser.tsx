@@ -23,7 +23,7 @@ export const SidebarUser = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const dashboardPath = role ? getRedirectByRole(role) : "/dashboard";
+  const dashboardPath = role ? getRedirectByRole(role) : "/";
 
   return (
     <div

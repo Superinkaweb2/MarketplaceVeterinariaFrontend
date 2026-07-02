@@ -3,7 +3,6 @@ import { User, Settings, Save, ShieldCheck, Briefcase, Award, FileText, Camera, 
 import { Button } from "../../../../components/ui/Button";
 import { vetService } from "../services/vetService";
 import { useAuth } from "../../../auth/context/useAuth";
-import { authService } from "../../../auth/services/authService";
 import type { VetProfile } from "../types/vet.types";
 import Swal from "sweetalert2";
 
@@ -95,33 +94,25 @@ export const VetConfiguracionPage = () => {
 
     const handleLogoutAll = async () => {
         const result = await Swal.fire({
-            title: "¿Cerrar todas las sesiones?",
-            text: "Se cerrará la sesión en todos tus dispositivos activos.",
+            title: "¿Cerrar sesión?",
+            text: "Se cerrará tu sesión actual.",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#14b8a6", // teal-500
+            confirmButtonColor: "#14b8a6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, cerrar todas",
+            confirmButtonText: "Sí, cerrar",
             cancelButtonText: "Cancelar"
         });
 
         if (result.isConfirmed) {
-            try {
-                await authService.logoutAll();
-                logout();
-                Swal.fire({
-                    icon: "success",
-                    title: "Sesiones cerradas",
-                    text: "Has cerrado todas tus sesiones exitosamente. Serás redirigido al login.",
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-                setTimeout(() => {
-                    window.location.href = "/login";
-                }, 2000);
-            } catch (error: any) {
-                Swal.fire("Error", error.response?.data?.message || "No se pudo cerrar las sesiones.", "error");
-            }
+            logout();
+            Swal.fire({
+                icon: "success",
+                title: "Sesión cerrada",
+                text: "Has cerrado sesión exitosamente.",
+                timer: 2000,
+                showConfirmButton: false
+            });
         }
     };
 

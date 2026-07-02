@@ -23,7 +23,7 @@ export const UserDropdown = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const dashboardPath = role ? getRedirectByRole(role) : "/dashboard";
+  const dashboardPath = role ? getRedirectByRole(role) : "/";
 
   return (
     <div className="relative" ref={dropdownRef}>

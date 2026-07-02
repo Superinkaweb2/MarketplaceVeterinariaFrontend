@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRepartidor } from '../hooks/useRepartidor';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useStompClient } from '../hooks/useStompClient';
+import { useAuth } from '../../../auth/context/useAuth';
 import Swal from 'sweetalert2';
 import { repartidorService } from '../services/repartidorService';
 import { 
@@ -13,6 +14,7 @@ import {
 import type { DeliveryResponseDTO } from '../types/delivery';
 
 export const RepartidorDashboard: React.FC = () => {
+    const { logout } = useAuth();
     const { 
         perfil, 
         deliveryActivo, 
@@ -616,7 +618,7 @@ export const RepartidorDashboard: React.FC = () => {
             </div>
 
             <button 
-                onClick={() => { localStorage.clear(); window.location.href='/login'; }}
+                onClick={() => { logout(); }}
                 className="w-full py-4 text-red-500 font-bold text-sm bg-red-50 rounded-2xl border border-red-100 active:scale-95 transition-all"
             >
                 Cerrar Sesión

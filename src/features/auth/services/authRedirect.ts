@@ -7,4 +7,4 @@ export const roleRedirectMap: Record<string, string> = {
 };
 
 export const getRedirectByRole = (role: string) =>
-  roleRedirectMap[role] ?? "/dashboard";
+  roleRedirectMap[role] ?? "/";

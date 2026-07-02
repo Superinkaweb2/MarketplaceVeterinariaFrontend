@@ -17,13 +17,12 @@ export const Login = () => {
 
   // Si está autenticado pero SIN perfil completo → depende de si ya eligió rol
   if (isAuthenticated && !perfilCompleto) {
-    // Si sigue siendo CLIENTE (rol por defecto), lo mandamos a elegir rol
-    if (role === "CLIENTE") {
+    // Si no tiene rol (usuario nuevo), mandarlo a elegir rol
+    if (!role) {
       return <Navigate to="/register/rol" replace />;
-    } else if (role) {
-      // Si ya tiene otro rol (ej. EMPRESA) pero no tiene perfil, lo mandamos a crearlo
-      return <Navigate to={`/register/perfil/${role.toLowerCase()}`} replace />;
     }
+    // Si ya tiene un rol, mandarlo a crear su perfil
+    return <Navigate to={`/register/perfil/${role.toLowerCase()}`} replace />;
   }
 
   return (

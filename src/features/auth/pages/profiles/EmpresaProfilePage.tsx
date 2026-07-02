@@ -9,6 +9,9 @@ import { useAuth } from "../../context/useAuth";
 import { useNavigate, Navigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
+const MAX_FILE_SIZE = 1024 * 1024; // 1MB - límite del backend
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 const empresaSchema = z.object({
   nombreComercial: z.string().min(2, "Requerido"),
   razonSocial: z.string().min(2, "Requerido"),
@@ -52,6 +55,29 @@ export const EmpresaProfilePage = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validar tipo de archivo
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Formato no válido",
+        text: "Solo se permiten archivos JPG, PNG o WEBP.",
+      });
+      e.target.value = '';
+      return;
+    }
+
+    // Validar tamaño del archivo (máx 1MB)
+    if (file.size > MAX_FILE_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      Swal.fire({
+        icon: "warning",
+        title: "Imagen demasiado grande",
+        text: `El archivo pesa ${sizeMB}MB. El límite es 1MB. Por favor, comprime la imagen e intenta de nuevo.`,
+      });
+      e.target.value = '';
+      return;
+    }
 
     // Crear preview
     const reader = new FileReader();
@@ -143,7 +169,7 @@ export const EmpresaProfilePage = () => {
                 <div className="col-span-1">
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Logo</label>
                   <div className="relative group border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                    <input type="file" accept="image/*" className="hidden" ref={logoInputRef} onChange={(e) => handleImageChange(e, 'logo')} />
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" ref={logoInputRef} onChange={(e) => handleImageChange(e, 'logo')} />
 
                     {logoPreview ? (
                       <>
@@ -165,7 +191,7 @@ export const EmpresaProfilePage = () => {
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Banner (Portada)</label>
                   <div className="relative group border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                    <input type="file" accept="image/*" className="hidden" ref={bannerInputRef} onChange={(e) => handleImageChange(e, 'banner')} />
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" ref={bannerInputRef} onChange={(e) => handleImageChange(e, 'banner')} />
 
                     {bannerPreview ? (
                       <>
@@ -183,6 +209,9 @@ export const EmpresaProfilePage = () => {
                   </div>
                 </div>
               </div>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+                Formatos aceptados: JPG, PNG, WEBP. Tamaño máximo: 1MB por imagen.
+              </p>
             </div>
 
             {/* ── Datos Legales ── */}

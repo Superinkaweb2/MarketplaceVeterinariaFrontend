@@ -5,53 +5,69 @@ export const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
 });
 
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("token");
+// ── Guard anti-re-entrancia ──────────────────────────────────────────────────
+let isSessionExpiredGuardActive = false;
 
-    const url = config.url || "";
-    const method = config.method?.toLowerCase() || "";
+// ── Helper: Logout completo + redirect ────────────────────────────────────────
+const handleSessionExpired = async () => {
+    if (isSessionExpiredGuardActive) return;
+    isSessionExpiredGuardActive = true;
 
-    // endpoints that are always public regardless of method (usually POST)
-    const alwaysPublic = ["/auth/login", "/auth/register", "/public/", "/payments/webhook", "/reclamos"].some(e => url.includes(e));
+    const authKeys = ["token", "userRole", "empresaId", "userNombre", "perfilCompleto"];
+    authKeys.forEach((k) => localStorage.removeItem(k));
 
-    // GET requests that are public (catalog, plans, categories)
-    const publicGet = method === 'get' && ["/services", "/adoptions", "/categories", "/subscriptions/plans"].some(e => url.includes(e));
+    await Swal.fire({
+        icon: "warning",
+        title: "Sesión Expirada",
+        text: "Tu sesión ha caducado. Inicia sesión nuevamente.",
+        confirmButtonColor: "#3b82f6",
+        confirmButtonText: "Ir al Login",
+        allowOutsideClick: false,
+    });
 
-    // Protected routes that might contain public substrings (must override publicGet)
+    window.location.href = "/login";
+};
+
+// ── Helper: Determinar si un endpoint es publico ─────────────────────────────
+// Los endpoints publicos NO deben disparar "Sesion Expirada" en 401/403.
+const isPublicEndpoint = (url: string, method: string): boolean => {
+    const alwaysPublic = [
+        "/auth/",
+        "/public/",
+        "/payments/webhook",
+        "/reclamos",
+    ].some((e) => url.includes(e));
+
+    const publicGet =
+        method === "get" &&
+        [
+            "/services",
+            "/adoptions",
+            "/categories",
+            "/subscriptions/plans",
+        ].some((e) => url.includes(e));
+
+    // /me y /applications SIEMPRE necesitan token aunque contengan substrings publicos
     const isProtected = url.includes("/me") || url.includes("/applications");
 
-    const isPublic = (alwaysPublic || (publicGet && !isProtected));
+    return alwaysPublic || (publicGet && !isProtected);
+};
 
-    if (token && !isPublic) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-
+// ── Interceptor de REQUEST ───────────────────────────────────────────────────
+api.interceptors.request.use((config) => {
     return config;
 });
 
+// ── Interceptor de RESPONSE ──────────────────────────────────────────────────
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const status = error.response?.status;
         const url = error.config?.url || "";
+        const method = error.config?.method?.toLowerCase() || "";
 
-        const isAuthRequest = url.includes("/auth/login") || url.includes("/auth/register");
-
-        if ((status === 401 || status === 403) && !isAuthRequest) {
-            ["token", "userRole", "empresaId", "userNombre", "perfilCompleto"].forEach((k) =>
-                localStorage.removeItem(k)
-            );
-
-            await Swal.fire({
-                icon: "warning",
-                title: "Sesión Expirada",
-                text: "Tu sesión ha caducado. Inicia sesión nuevamente.",
-                confirmButtonColor: "#3b82f6",
-                confirmButtonText: "Ir al Login",
-                allowOutsideClick: false
-            });
-
-            window.location.href = "/login";
+        if ((status === 401 || status === 403) && !isPublicEndpoint(url, method)) {
+            await handleSessionExpired();
         }
 
         return Promise.reject(error);

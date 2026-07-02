@@ -22,5 +22,9 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
     return <Navigate to="/" replace />;
   }
 
+  if (!role) {
+    return <Navigate to="/register/rol" replace />;
+  }
+
   return <Outlet />;
 };

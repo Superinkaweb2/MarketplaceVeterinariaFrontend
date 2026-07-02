@@ -11,6 +11,17 @@ export default defineConfig({
   define: {
     global: 'window'
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
+    css: false,
+    server: {
+      deps: {
+        inline: ['sweetalert2']
+      }
+    }
+  },
   build: {
     rollupOptions: {
       output: {

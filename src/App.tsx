@@ -12,6 +12,7 @@ import { Header } from "./components/layouts/Header";
 import { Footer } from "./components/layouts/Footer";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RequiresProfile } from "./components/RequiresProfile";
+import { AuthRedirector } from "./components/AuthRedirector";
 import { CartProvider } from "./features/marketplace/context/CartContext";
 import { CartSidebar } from "./features/marketplace/components/CartSidebar";
 import { AuthProvider } from "./features/auth/context/AuthContext";
@@ -131,6 +132,7 @@ function App() {
     >
       <AuthProvider>
         <Router>
+          <AuthRedirector />
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
               {/* Rutas publicas: Auth */}

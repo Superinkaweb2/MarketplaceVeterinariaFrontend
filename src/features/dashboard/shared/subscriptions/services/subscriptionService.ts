@@ -9,7 +9,7 @@ export const subscriptionService = {
    * Obtiene las métricas de uso de la empresa actual (basado en token)
    */
     getUsageMetrics: async (): Promise<SubscriptionUsage> => {
-        const { data } = await api.get<ApiResponse<SubscriptionUsage>>("/subscriptions/usage/me");
+        const { data } = await api.get<ApiResponse<SubscriptionUsage>>(`${BASE_URL}/usage/me`);
         return data.data;
     },
 
@@ -25,7 +25,7 @@ export const subscriptionService = {
    * Obtiene la suscripción de la empresa actual (basado en token)
    */
     getMySubscription: async (): Promise<Suscripcion> => {
-        const { data } = await api.get<ApiResponse<Suscripcion>>("/subscriptions/me");
+        const { data } = await api.get<ApiResponse<Suscripcion>>(`${BASE_URL}/me`);
         return data.data;
     },
 
