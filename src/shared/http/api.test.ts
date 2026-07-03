@@ -17,9 +17,9 @@ const isPublicEndpoint = (url: string, method: string): boolean => {
       '/subscriptions/plans',
     ].some((e) => url.includes(e));
 
-  const isProtected = url.includes('/me') || url.includes('/applications');
+  const isProtected = ['/auth/sync', '/me', '/applications'].some((e) => url.includes(e));
 
-  return alwaysPublic || (publicGet && !isProtected);
+  return !isProtected && (alwaysPublic || publicGet);
 };
 
 describe('isPublicEndpoint', () => {
@@ -30,10 +30,6 @@ describe('isPublicEndpoint', () => {
 
     it('returns true for /auth/register', () => {
       expect(isPublicEndpoint('/auth/register', 'post')).toBe(true);
-    });
-
-    it('returns true for /auth/sync', () => {
-      expect(isPublicEndpoint('/auth/sync', 'post')).toBe(true);
     });
 
     it('returns true for /public/plans', () => {
@@ -72,6 +68,10 @@ describe('isPublicEndpoint', () => {
   });
 
   describe('protected endpoints override', () => {
+    it('returns false for POST /auth/sync', () => {
+      expect(isPublicEndpoint('/auth/sync', 'post')).toBe(false);
+    });
+
     it('returns false for GET /me', () => {
       expect(isPublicEndpoint('/me', 'get')).toBe(false);
     });

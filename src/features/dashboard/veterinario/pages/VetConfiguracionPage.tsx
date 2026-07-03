@@ -1,10 +1,27 @@
 import { useState, useEffect } from "react";
 import { User, Settings, Save, ShieldCheck, Briefcase, Award, FileText, Camera, Lock, CreditCard } from "lucide-react";
+import { z } from "zod";
 import { Button } from "../../../../components/ui/Button";
 import { vetService } from "../services/vetService";
+import { authService } from "../../../auth/services/authService";
 import { useAuth } from "../../../auth/context/useAuth";
 import type { VetProfile } from "../types/vet.types";
 import Swal from "sweetalert2";
+
+const vetProfileSchema = z.object({
+    nombres: z.string().min(2, "Los nombres deben tener al menos 2 caracteres"),
+    apellidos: z.string().min(2, "Los apellidos deben tener al menos 2 caracteres"),
+    especialidad: z.string().optional().or(z.literal("")),
+    biografia: z.string().optional().or(z.literal("")),
+    aniosExperiencia: z.number().min(0, "Los años de experiencia no pueden ser negativos"),
+    numeroColegiatura: z.string().optional().or(z.literal("")).refine(
+        (val) => !val || /^\d+$/.test(val),
+        "El número de colegiatura debe ser numérico"
+    ),
+    fotoPerfilUrl: z.string().optional().or(z.literal("")),
+    mpAccessToken: z.string().optional().or(z.literal("")),
+    mpPublicKey: z.string().optional().or(z.literal("")),
+});
 
 export const VetConfiguracionPage = () => {
     const { logout } = useAuth();
@@ -63,14 +80,10 @@ export const VetConfiguracionPage = () => {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // [NUEVO] Validaciones básicas
-        if (formData.aniosExperiencia < 0) {
-            Swal.fire("Error", "Los años de experiencia no pueden ser negativos", "error");
-            return;
-        }
-
-        if (formData.numeroColegiatura && !/^\d+$/.test(formData.numeroColegiatura)) {
-            Swal.fire("Error", "El número de colegiatura debe ser numérico", "error");
+        const result = vetProfileSchema.safeParse(formData);
+        if (!result.success) {
+            const firstError = Object.values(result.error.flatten().fieldErrors)[0]?.[0];
+            Swal.fire("Error de validación", firstError || "Corrige los errores del formulario", "error");
             return;
         }
 

@@ -1,5 +1,6 @@
 import axios from "axios";
 import Swal from "sweetalert2";
+import { isPublicEndpoint } from "./publicEndpoints";
 
 export const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -28,35 +29,8 @@ const handleSessionExpired = async () => {
     window.location.href = "/login";
 };
 
-// ── Helper: Determinar si un endpoint es publico ─────────────────────────────
-// Los endpoints publicos NO deben disparar "Sesion Expirada" en 401/403.
-const isPublicEndpoint = (url: string, method: string): boolean => {
-    const alwaysPublic = [
-        "/auth/",
-        "/public/",
-        "/payments/webhook",
-        "/reclamos",
-    ].some((e) => url.includes(e));
-
-    const publicGet =
-        method === "get" &&
-        [
-            "/services",
-            "/adoptions",
-            "/categories",
-            "/subscriptions/plans",
-        ].some((e) => url.includes(e));
-
-    // /me y /applications SIEMPRE necesitan token aunque contengan substrings publicos
-    const isProtected = url.includes("/me") || url.includes("/applications");
-
-    return alwaysPublic || (publicGet && !isProtected);
-};
-
 // ── Interceptor de REQUEST ───────────────────────────────────────────────────
-api.interceptors.request.use((config) => {
-    return config;
-});
+// Token injection is handled by AuthContext.tsx
 
 // ── Interceptor de RESPONSE ──────────────────────────────────────────────────
 api.interceptors.response.use(
@@ -66,8 +40,27 @@ api.interceptors.response.use(
         const url = error.config?.url || "";
         const method = error.config?.method?.toLowerCase() || "";
 
-        if ((status === 401 || status === 403) && !isPublicEndpoint(url, method)) {
+        if (status === 401 && !isPublicEndpoint(url, method)) {
             await handleSessionExpired();
+        }
+
+        if (status === 409 && !url.includes("/users/me/role")) {
+            const message = error.response?.data?.message || "El recurso ya existe o hay un conflicto de datos.";
+            await Swal.fire({
+                icon: "warning",
+                title: "Conflicto",
+                text: message,
+                confirmButtonColor: "#3b82f6",
+            });
+        }
+
+        if (status === 413) {
+            await Swal.fire({
+                icon: "warning",
+                title: "Archivo demasiado grande",
+                text: "El archivo excede el tamaño máximo permitido (10MB). Comprime el archivo e intenta de nuevo.",
+                confirmButtonColor: "#3b82f6",
+            });
         }
 
         return Promise.reject(error);

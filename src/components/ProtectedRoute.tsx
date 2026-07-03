@@ -1,16 +1,18 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../features/auth/context/useAuth";
 
+const PORTALS: Record<string, string> = {
+  CLIENTE: "/portal/cliente",
+  VETERINARIO: "/portal/veterinario",
+  EMPRESA: "/portal/empresa",
+  REPARTIDOR: "/portal/repartidor",
+  ADMIN: "/portal/admin",
+};
+
 interface ProtectedRouteProps {
   allowedRoles: string[];
 }
 
-/**
- * Guarda de ruta basada en rol.
- * - Sin token → redirige a /login
- * - Con token pero rol no permitido → redirige a /
- * - Autorizado → renderiza los hijos (<Outlet />)
- */
 export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   const { isAuthenticated, role } = useAuth();
 
@@ -19,7 +21,7 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   }
 
   if (role && !allowedRoles.includes(role)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={PORTALS[role] ?? "/"} replace />;
   }
 
   if (!role) {

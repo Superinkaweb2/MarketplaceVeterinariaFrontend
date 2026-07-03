@@ -2,6 +2,7 @@ import { createContext, useState, useContext, useEffect, useCallback, useRef } f
 import type { ReactNode } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { api } from "../../../shared/http/api";
+import { isPublicEndpoint } from "../../../shared/http/publicEndpoints";
 
 // ── Constantes de storage ────────────────────────────────────────────────────
 const STORAGE_KEYS = {
@@ -115,6 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!storedRole) {
             localStorage.setItem(STORAGE_KEYS.PERFIL_COMPLETO, "false");
             setPerfilCompletoState(false);
+            syncRef.current = true;
             return;
         }
 
@@ -124,17 +126,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             try {
                 const token = await getAccessTokenSilently();
                 const config = { headers: { Authorization: `Bearer ${token}` } };
-
-                const auth0Email = (user[AUTH0_CLAIMS.EMAIL] as string) || user.email;
-                const auth0Role = (user[AUTH0_CLAIMS.ROLE] as string) || null;
-                if (auth0Email) {
-                    await api.post("/auth/sync", {
-                        correo: auth0Email,
-                        nombre: user[AUTH0_CLAIMS.NOMBRE] || user.nickname || user.name || null,
-                        auth0Sub: user.sub || null,
-                        rol: auth0Role || storedRole,
-                    });
-                }
 
                 const userRes = await api.get("/users/me", config);
                 const backendRole = userRes.data.data.rol;
@@ -150,7 +141,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     setPerfilCompletoState(false);
                 }
 
-                if (localStorage.getItem(STORAGE_KEYS.PERFIL_COMPLETO) === null) {
+                if (localStorage.getItem(STORAGE_KEYS.PERFIL_COMPLETO) !== "true") {
                     try {
                         if (backendRole === "CLIENTE") await api.get("/clients/me", config);
                         else if (backendRole === "EMPRESA") await api.get("/companies/me", config);
@@ -181,23 +172,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 const url = config.url || "";
                 const method = config.method?.toLowerCase() || "";
 
-                const alwaysPublic = ["/auth/", "/public/", "/payments/webhook", "/reclamos"].some(
-                    (e) => url.includes(e)
-                );
-                const publicGet =
-                    method === "get" &&
-                    ["/services", "/adoptions", "/categories", "/subscriptions/plans"].some(
-                        (e) => url.includes(e)
-                    );
-                const isProtected = url.includes("/me") || url.includes("/applications");
-                const isPublic = alwaysPublic || (publicGet && !isProtected);
-
-                if (!isPublic && isAuthenticated) {
+                if (!isPublicEndpoint(url, method) && isAuthenticated) {
                     try {
                         const token = await getAccessTokenSilently();
                         config.headers.Authorization = `Bearer ${token}`;
                     } catch (error) {
                         console.error("Error al obtener token de Auth0:", error);
+                        return Promise.reject(error);
                     }
                 }
 

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { MarketplaceSidebar } from "../components/MarketplaceSidebar";
 import { ProductCard } from "../components/ProductCard";
 import { marketplaceService } from "../services/marketplaceService";
+import { Seo } from "../../../components/Seo";
 import type { Product, MarketplaceFilters } from "../types/marketplace";
 
 export const Marketplace = () => {
@@ -120,6 +121,7 @@ export const Marketplace = () => {
 
   return (
     <div className="w-full bg-slate-50 dark:bg-slate-950">
+      <Seo title="Marketplace" description="Explora productos, servicios veterinarios y opciones de adopción para tu mascota en Huella360." />
       <div className="flex w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-8">
         <MarketplaceSidebar
           selectedCategory={filters.category}

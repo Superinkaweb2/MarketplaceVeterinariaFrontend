@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 const AUTH0_CLAIMS = {
   EMAIL: 'https://vet-saas.com/email',
@@ -28,7 +28,7 @@ describe('AuthContext role extraction logic', () => {
       [AUTH0_CLAIMS.EMAIL]: 'test@test.com',
       [AUTH0_CLAIMS.EMPRESA_ID]: 42,
       [AUTH0_CLAIMS.NOMBRE]: 'Test User',
-    };
+    } as Record<string, unknown>;
 
     const role = (mockUser[AUTH0_CLAIMS.ROLE] as string) || null;
     expect(role).toBe('EMPRESA');
@@ -70,7 +70,7 @@ describe('AuthContext role extraction logic', () => {
   it('extracts empresaId as number from Auth0 claim', () => {
     const mockUser = {
       [AUTH0_CLAIMS.EMPRESA_ID]: 42,
-    };
+    } as Record<string, unknown>;
     const empresaId = mockUser[AUTH0_CLAIMS.EMPRESA_ID] || null;
     expect(Number(empresaId)).toBe(42);
   });
@@ -78,7 +78,7 @@ describe('AuthContext role extraction logic', () => {
   it('falls back to user.empresaId if custom claim missing', () => {
     const mockUser = {
       empresaId: 99,
-    };
+    } as Record<string, unknown>;
     const empresaId = mockUser[AUTH0_CLAIMS.EMPRESA_ID] || mockUser.empresaId || null;
     expect(Number(empresaId)).toBe(99);
   });
@@ -86,7 +86,7 @@ describe('AuthContext role extraction logic', () => {
   it('falls back to user.nickname for nombre', () => {
     const mockUser = {
       nickname: 'fallback_name',
-    };
+    } as Record<string, unknown>;
     const nombre = mockUser[AUTH0_CLAIMS.NOMBRE] || mockUser.nickname || mockUser.name || null;
     expect(nombre).toBe('fallback_name');
   });
@@ -96,7 +96,7 @@ describe('AuthContext role extraction logic', () => {
       [AUTH0_CLAIMS.NOMBRE]: 'Custom Name',
       name: 'Standard Name',
       nickname: 'Nick',
-    };
+    } as Record<string, unknown>;
     const nombre = mockUser[AUTH0_CLAIMS.NOMBRE] || mockUser.nickname || mockUser.name || null;
     expect(nombre).toBe('Custom Name');
   });
@@ -108,7 +108,7 @@ describe('AuthContext role extraction logic', () => {
       [AUTH0_CLAIMS.EMAIL]: 'custom@test.com',
       [AUTH0_CLAIMS.ROLE]: 'EMPRESA',
       [AUTH0_CLAIMS.NOMBRE]: 'Test User',
-    };
+    } as Record<string, unknown>;
 
     const auth0Email = (mockUser[AUTH0_CLAIMS.EMAIL] as string) || mockUser.email;
     const auth0Role = (mockUser[AUTH0_CLAIMS.ROLE] as string) || null;

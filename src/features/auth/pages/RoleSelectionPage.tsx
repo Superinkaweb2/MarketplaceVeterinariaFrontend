@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { User, Stethoscope, Building2, Truck, Check, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
@@ -63,37 +63,75 @@ const PORTALS: Record<string, string> = {
   ADMIN: "/portal/admin",
 };
 
-/**
- * Página de selección de rol.
- * Se muestra DESPUÉS del registro en Auth0, cuando el usuario
- * todavía no tiene rol definido (localStorage userRole = null).
- */
 export const RoleSelectionPage = () => {
-  const { isAuthenticated, role, perfilCompleto, setRole } = useAuth();
-  const { user, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, role, perfilCompleto, setRole, setPerfilCompleto } = useAuth();
+  const { getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<RoleId | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingRole, setIsCheckingRole] = useState(!role);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Guards (después de hooks, antes del JSX) ──────────────────────
+  useEffect(() => {
+    if (role || !isAuthenticated) {
+      if (role) setIsCheckingRole(false);
+      return;
+    }
+
+    const fetchBackendRole = async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        const headers = { Authorization: `Bearer ${token}` };
+        const res = await api.get("/users/me", { headers });
+        const backendRole = res.data?.data?.rol;
+        const VALID_ROLES = ["CLIENTE", "VETERINARIO", "EMPRESA", "REPARTIDOR", "ADMIN"];
+
+        if (backendRole && VALID_ROLES.includes(backendRole)) {
+          localStorage.setItem("userRole", backendRole);
+          setRole(backendRole);
+
+          if (localStorage.getItem("perfilCompleto") !== "true") {
+            try {
+              if (backendRole === "CLIENTE") await api.get("/clients/me", { headers });
+              else if (backendRole === "EMPRESA") await api.get("/companies/me", { headers });
+              else if (backendRole === "VETERINARIO") await api.get("/veterinarians/me", { headers });
+              else if (backendRole === "REPARTIDOR") await api.get("/repartidores/me", { headers });
+              setPerfilCompleto(true);
+            } catch {
+              setPerfilCompleto(false);
+            }
+          }
+        }
+      } catch {
+        // If we can't reach backend, just show the role selection
+      } finally {
+        setIsCheckingRole(false);
+      }
+    };
+
+    fetchBackendRole();
+  }, [role, isAuthenticated, getAccessTokenSilently, setRole, setPerfilCompleto]);
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (isCheckingRole) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-background-dark flex flex-col items-center justify-center p-6">
+        <Loader2 size={32} className="animate-spin text-slate-400 mb-4" />
+        <p className="text-slate-500 text-sm">Verificando tu cuenta...</p>
+      </div>
+    );
   }
 
   if (perfilCompleto && role) {
     return <Navigate to={PORTALS[role] ?? "/"} replace />;
   }
 
-  // Si ya tiene un rol (pero sin perfil completo), ir directo al form de perfil
   if (role) {
     return <Navigate to={`/register/perfil/${role.toLowerCase()}`} replace />;
   }
-
-  const AUTH0_CLAIMS = {
-    EMAIL: "https://vet-saas.com/email",
-    NOMBRE: "https://vet-saas.com/nombre",
-  };
 
   const handleConfirm = async () => {
     if (!selectedRole) return;
@@ -102,32 +140,27 @@ export const RoleSelectionPage = () => {
 
     try {
       const token = await getAccessTokenSilently();
-      const auth0Email = (user?.[AUTH0_CLAIMS.EMAIL] as string) || user?.email;
+      const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      // 1. Sync user with backend, creating them with the chosen role
-      if (auth0Email) {
-        await api.post("/auth/sync", {
-          correo: auth0Email,
-          nombre: user?.[AUTH0_CLAIMS.NOMBRE] || user?.nickname || user?.name || null,
-          auth0Sub: user?.sub || null,
-          rol: selectedRole,
-        });
-      }
+      await api.patch("/users/me/role", { rol: selectedRole }, config);
 
-      // 2. Get authoritative role from backend
-      const userRes = await api.get("/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const userRes = await api.get("/users/me", config);
       const backendRole = userRes.data.data.rol;
 
-      // 3. Update role locally via AuthContext (updates both state + localStorage)
       const finalRole = backendRole || selectedRole;
       setRole(finalRole);
 
-      // 4. Navigate to profile form
       navigate(`/register/perfil/${finalRole.toLowerCase()}`, { replace: true });
 
     } catch (err: any) {
+      if (err?.response?.status === 409) {
+        const backendRole = err.response?.data?.message?.match(/como (\w+)/)?.[1];
+        if (backendRole && PORTALS[backendRole]) {
+          setRole(backendRole);
+          navigate(`/register/perfil/${backendRole.toLowerCase()}`, { replace: true });
+          return;
+        }
+      }
       const msg = err?.response?.data?.message || "Error al guardar el rol. Inténtalo de nuevo.";
       setError(msg);
       setIsLoading(false);

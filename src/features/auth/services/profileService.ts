@@ -67,11 +67,6 @@ export const profileService = {
     if (logo) formData.append("logo", logo);
     if (banner) formData.append("banner", banner);
 
-    console.log("--- FormData Payload ---");
-    formData.forEach((value, key) => {
-      console.log(`${key}:`, value instanceof Blob ? `File/Blob (${value.type})` : value);
-    });
-
     const { data: response } = await api.post("/companies", formData);
     return response;
   },

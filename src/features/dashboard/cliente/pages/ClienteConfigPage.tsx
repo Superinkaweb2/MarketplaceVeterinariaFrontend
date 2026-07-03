@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { useAuth } from "../../../auth/context/useAuth";
+import { authService } from "../../../auth/services/authService";
 import { clienteService } from "../services/clienteService";
 import Swal from "sweetalert2";
 

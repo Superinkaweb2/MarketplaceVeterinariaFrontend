@@ -8,7 +8,12 @@ import { getRedirectByRole } from "../services/authRedirect";
 export const Login = () => {
   const { login, isAuthenticated, role, perfilCompleto } = useAuth();
   const [searchParams] = useSearchParams();
-  const nextUrl = searchParams.get("next") || undefined;
+
+  // Validar nextUrl para prevenir open redirect
+  const rawNext = searchParams.get("next");
+  const nextUrl = rawNext && rawNext.startsWith("/") && !rawNext.includes("://")
+    ? rawNext
+    : undefined;
 
   // Si ya está autenticado con perfil completo → al portal
   if (isAuthenticated && role && perfilCompleto) {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,15 +24,44 @@ export const ClienteProfilePage = () => {
   const { perfilCompleto, setPerfilCompleto } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  if (perfilCompleto) {
-    return <Navigate to="/portal/cliente" replace />;
-  }
+  const [isChecking, setIsChecking] = useState(true);
 
   const { register, handleSubmit, formState: { errors } } = useForm<ClienteFormData>({
     resolver: zodResolver(clienteSchema),
     defaultValues: { pais: "Perú" }
   });
+
+  useEffect(() => {
+    const checkProfile = async () => {
+      try {
+        await profileService.getClienteProfile();
+        setPerfilCompleto(true);
+        navigate("/portal/cliente", { replace: true });
+      } catch {
+        setIsChecking(false);
+      }
+    };
+    if (!perfilCompleto) {
+      checkProfile();
+    } else {
+      setIsChecking(false);
+    }
+  }, [perfilCompleto, setPerfilCompleto, navigate]);
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-background-dark flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-500 animate-pulse font-medium">Verificando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (perfilCompleto) {
+    return <Navigate to="/portal/cliente" replace />;
+  }
 
   const onSubmit = async (data: ClienteFormData) => {
     setIsSubmitting(true);
@@ -47,7 +76,7 @@ export const ClienteProfilePage = () => {
         timer: 3000,
         showConfirmButton: false,
       });
-      navigate("/portal/cliente");
+      navigate("/portal/cliente", { replace: true });
     } catch (error: any) {
       console.error("Error creating profile:", error);
 

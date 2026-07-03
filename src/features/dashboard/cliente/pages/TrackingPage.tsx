@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { deliveryService, type DeliveryTrackingDTO } from "../services/deliveryService";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   Package, Truck, Store, Navigation, CheckCircle, Search,
   ArrowLeft, Clock, MapPin, ShieldCheck, AlertCircle, XCircle, Route, Trash2,
@@ -12,7 +13,7 @@ import { DeliveryMap } from "../components/DeliveryMap";
 import { RatingModal } from "../components/RatingModal";
 import Swal from "sweetalert2";
 
-const STOMP_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const STOMP_URL = import.meta.env.VITE_WS_URL || "http://localhost:8080";
 
 const STEPS = [
   { key: "BUSCANDO_REPARTIDOR", label: "Buscando repartidor", icon: Search, color: "text-amber-500" },
@@ -32,6 +33,7 @@ export const TrackingPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const stompRef = useRef<Client | null>(null);
+  const { getAccessTokenSilently } = useAuth0();
 
   // Fetch inicial del delivery
   useEffect(() => {
@@ -50,43 +52,65 @@ export const TrackingPage = () => {
   useEffect(() => {
     if (!delivery || FINAL_STATES.includes(delivery.estado)) return;
 
-    const token = localStorage.getItem("token");
-    const client = new Client({
-      webSocketFactory: () => new SockJS(`${STOMP_URL}/ws`),
-      connectHeaders: { Authorization: token ? `Bearer ${token}` : "" },
-      reconnectDelay: 5000,
-      debug: () => {}, // silenciar logs
-    });
+    let client: Client | null = null;
 
-    client.onConnect = () => {
-      // Suscribirse al tópico del estado de ESTE delivery
-      client.subscribe(`/topic/delivery/${delivery.idDelivery}/estado`, (msg) => {
-        let nuevoEstado: string;
-        try {
-          const parsed = JSON.parse(msg.body);
-          // El backend puede enviar EstadoDeliveryEvent (objeto) o un string directo
-          nuevoEstado = typeof parsed === "object" && parsed.estado ? parsed.estado : String(parsed);
-        } catch {
-          nuevoEstado = msg.body.replace(/"/g, "");
-        }
+    const connect = async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        client = new Client({
+          webSocketFactory: () => new SockJS(`${STOMP_URL}/api/v1/ws`),
+          connectHeaders: { Authorization: `Bearer ${token}` },
+          reconnectDelay: 5000,
+          debug: () => {},
+        });
 
-        setDelivery(prev => prev ? { ...prev, estado: nuevoEstado } : prev);
+        client.onConnect = () => {
+          client?.subscribe(`/topic/delivery/${delivery.idDelivery}/estado`, (msg) => {
+            let nuevoEstado: string;
+            try {
+              const parsed = JSON.parse(msg.body);
+              nuevoEstado = typeof parsed === "object" && parsed.estado ? parsed.estado : String(parsed);
+            } catch {
+              nuevoEstado = msg.body.replace(/"/g, "");
+            }
 
-        // Recargar datos completos para obtener info del repartidor u otros cambios
-        deliveryService.getByOrden(Number(ordenId))
-          .then(res => setDelivery(res.data))
-          .catch(console.error);
-      });
+            setDelivery(prev => prev ? { ...prev, estado: nuevoEstado } : prev);
+
+            deliveryService.getByOrden(Number(ordenId))
+              .then(res => setDelivery(res.data))
+              .catch(() => {});
+          });
+
+          client?.subscribe(`/topic/delivery/${delivery.idDelivery}/ubicacion`, (msg) => {
+            try {
+              const ubicacion = JSON.parse(msg.body);
+              setDelivery(prev => prev ? {
+                ...prev,
+                repartidorLat: ubicacion.lat,
+                repartidorLng: ubicacion.lng,
+              } : prev);
+            } catch {
+              // Ignore malformed GPS data
+            }
+          });
+        };
+
+        client.activate();
+        stompRef.current = client;
+      } catch {
+        // Token acquisition failed
+      }
     };
 
-    client.activate();
-    stompRef.current = client;
+    connect();
 
     return () => {
-      client.deactivate();
+      if (client) {
+        client.deactivate();
+      }
       stompRef.current = null;
     };
-  }, [delivery?.idDelivery, ordenId]);
+  }, [delivery?.idDelivery, ordenId, getAccessTokenSilently]);
 
   const handleCancelar = async () => {
     if (!delivery) return;

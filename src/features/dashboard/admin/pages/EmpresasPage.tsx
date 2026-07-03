@@ -229,7 +229,13 @@ export const EmpresasPage = () => {
 
             {/* Mobile View - Enhanced Cards */}
             <div className="md:hidden flex flex-col p-6 gap-6">
-              {filteredCompanies.map((company) => (
+              {filteredCompanies.length === 0 ? (
+                <div className="text-center py-12">
+                  <Building2 size={40} className="mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+                  <h3 className="text-xl font-bold text-[#2D3E82] dark:text-white">Sin resultados</h3>
+                  <p className="text-sm text-slate-500 mt-1">No se encontraron empresas con los filtros aplicados.</p>
+                </div>
+              ) : filteredCompanies.map((company) => (
                 <div key={company.id} className="relative group overflow-hidden bg-white/40 dark:bg-white/5 p-6 rounded-[2rem] border border-white/40 dark:border-white/10 shadow-soft animate-in zoom-in-95 duration-500">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#1ea59c]/5 to-[#2D3E82]/5 blur-3xl rounded-full" />
 

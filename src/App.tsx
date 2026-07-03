@@ -1,4 +1,5 @@
 import { Suspense, lazy } from "react";
+import type { ComponentType } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,96 +14,102 @@ import { Footer } from "./components/layouts/Footer";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RequiresProfile } from "./components/RequiresProfile";
 import { AuthRedirector } from "./components/AuthRedirector";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { CartProvider } from "./features/marketplace/context/CartContext";
 import { CartSidebar } from "./features/marketplace/components/CartSidebar";
 import { AuthProvider } from "./features/auth/context/AuthContext";
 import { useTheme } from "./hooks/useTheme";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Module = { default: ComponentType<any> } | Record<string, ComponentType<any>>;
+const lazyPage = (factory: () => Promise<Module>, name: string) =>
+  lazy(() => factory().then((m) => ({ default: (m as Record<string, ComponentType>)[name] || m.default })));
+
 // Lazy Pages
-const Home = lazy(() => import("./pages/Home").then(m => ({ default: (m as any).default || (m as any).Home })));
-const SobreNosotros = lazy(() => import("./pages/SobreNosotros").then(m => ({ default: (m as any).default || (m as any).SobreNosotros })));
-const Empleos = lazy(() => import("./pages/Empleos").then(m => ({ default: (m as any).default || (m as any).Empleos })));
-const Blog = lazy(() => import("./pages/Blog").then(m => ({ default: (m as any).default || (m as any).Blog })));
-const Contacto = lazy(() => import("./pages/Contacto").then(m => ({ default: (m as any).default || (m as any).Contacto })));
-const Privacidad = lazy(() => import("./pages/Privacidad").then(m => ({ default: (m as any).default || (m as any).Privacidad })));
-const Terminos = lazy(() => import("./pages/Terminos").then(m => ({ default: (m as any).default || (m as any).Terminos })));
-const LibroReclamaciones = lazy(() => import("./pages/LibroReclamaciones").then(m => ({ default: (m as any).default || (m as any).LibroReclamaciones })));
-const Devoluciones = lazy(() => import("./pages/Devoluciones").then(m => ({ default: (m as any).default || (m as any).Devoluciones })));
-const Cookies = lazy(() => import("./pages/Cookies").then(m => ({ default: (m as any).default || (m as any).Cookies })));
+const Home = lazyPage(() => import("./pages/Home"), "Home");
+const SobreNosotros = lazyPage(() => import("./pages/SobreNosotros"), "SobreNosotros");
+const Empleos = lazyPage(() => import("./pages/Empleos"), "Empleos");
+const Blog = lazyPage(() => import("./pages/Blog"), "Blog");
+const Contacto = lazyPage(() => import("./pages/Contacto"), "Contacto");
+const Privacidad = lazyPage(() => import("./pages/Privacidad"), "Privacidad");
+const Terminos = lazyPage(() => import("./pages/Terminos"), "Terminos");
+const LibroReclamaciones = lazyPage(() => import("./pages/LibroReclamaciones"), "LibroReclamaciones");
+const Devoluciones = lazyPage(() => import("./pages/Devoluciones"), "Devoluciones");
+const Cookies = lazyPage(() => import("./pages/Cookies"), "Cookies");
 
 // Feature Pages
-const Marketplace = lazy(() => import("./features/marketplace/pages/Marketplace").then(m => ({ default: (m as any).Marketplace || (m as any).default })));
-const ProductDetails = lazy(() => import("./features/marketplace/pages/ProductDetails").then(m => ({ default: (m as any).ProductDetails || (m as any).default })));
-const CheckoutPage = lazy(() => import("./features/marketplace/pages/CheckoutPage").then(m => ({ default: (m as any).CheckoutPage || (m as any).default })));
-const PaymentSuccessPage = lazy(() => import("./features/marketplace/pages/PaymentSuccessPage").then(m => ({ default: (m as any).PaymentSuccessPage || (m as any).default })));
-const CompanyProfile = lazy(() => import("./features/marketplace/pages/CompanyProfile").then(m => ({ default: (m as any).CompanyProfile || (m as any).default })));
-const CompaniesPage = lazy(() => import("./features/marketplace/pages/CompaniesPage").then(m => ({ default: (m as any).CompaniesPage || (m as any).default })));
+const Marketplace = lazyPage(() => import("./features/marketplace/pages/Marketplace"), "Marketplace");
+const ProductDetails = lazyPage(() => import("./features/marketplace/pages/ProductDetails"), "ProductDetails");
+const CheckoutPage = lazyPage(() => import("./features/marketplace/pages/CheckoutPage"), "CheckoutPage");
+const PaymentSuccessPage = lazyPage(() => import("./features/marketplace/pages/PaymentSuccessPage"), "PaymentSuccessPage");
+const CompanyProfile = lazyPage(() => import("./features/marketplace/pages/CompanyProfile"), "CompanyProfile");
+const CompaniesPage = lazyPage(() => import("./features/marketplace/pages/CompaniesPage"), "CompaniesPage");
 
 // Auth Pages
-const Login = lazy(() => import("./features/auth/pages/Login").then(m => ({ default: (m as any).Login || (m as any).default })));
-const Register = lazy(() => import("./features/auth/pages/Register").then(m => ({ default: (m as any).Register || (m as any).default })));
-const ForgotPassword = lazy(() => import("./features/auth/pages/ForgotPassword").then(m => ({ default: (m as any).default || (m as any).ForgotPassword })));
-const ResetPassword = lazy(() => import("./features/auth/pages/ResetPassword").then(m => ({ default: (m as any).default || (m as any).ResetPassword })));
-const VerifyEmail = lazy(() => import("./features/auth/pages/VerifyEmail").then(m => ({ default: (m as any).default || (m as any).VerifyEmail })));
-const RoleSelectionPage = lazy(() => import("./features/auth/pages/RoleSelectionPage").then(m => ({ default: (m as any).RoleSelectionPage || (m as any).default })));
-const ClienteProfilePage = lazy(() => import("./features/auth/pages/profiles/ClienteProfilePage").then(m => ({ default: (m as any).ClienteProfilePage || (m as any).default })));
-const VeterinarioProfilePage = lazy(() => import("./features/auth/pages/profiles/VeterinarioProfilePage").then(m => ({ default: (m as any).VeterinarioProfilePage || (m as any).default })));
-const EmpresaProfilePage = lazy(() => import("./features/auth/pages/profiles/EmpresaProfilePage").then(m => ({ default: (m as any).EmpresaProfilePage || (m as any).default })));
-const RepartidorProfilePage = lazy(() => import("./features/auth/pages/profiles/RepartidorProfilePage").then(m => ({ default: (m as any).RepartidorProfilePage || (m as any).default })));
+const Login = lazyPage(() => import("./features/auth/pages/Login"), "Login");
+const Register = lazyPage(() => import("./features/auth/pages/Register"), "Register");
+const ForgotPassword = lazyPage(() => import("./features/auth/pages/ForgotPassword"), "ForgotPassword");
+const ResetPassword = lazyPage(() => import("./features/auth/pages/ResetPassword"), "ResetPassword");
+const VerifyEmail = lazyPage(() => import("./features/auth/pages/VerifyEmail"), "VerifyEmail");
+const RoleSelectionPage = lazyPage(() => import("./features/auth/pages/RoleSelectionPage"), "RoleSelectionPage");
+const ClienteProfilePage = lazyPage(() => import("./features/auth/pages/profiles/ClienteProfilePage"), "ClienteProfilePage");
+const VeterinarioProfilePage = lazyPage(() => import("./features/auth/pages/profiles/VeterinarioProfilePage"), "VeterinarioProfilePage");
+const EmpresaProfilePage = lazyPage(() => import("./features/auth/pages/profiles/EmpresaProfilePage"), "EmpresaProfilePage");
+const RepartidorProfilePage = lazyPage(() => import("./features/auth/pages/profiles/RepartidorProfilePage"), "RepartidorProfilePage");
 
 // Admin Pages
-const AdminPortal = lazy(() => import("./features/dashboard/admin/pages/AdminPortal").then(m => ({ default: (m as any).default || (m as any).AdminPortal })));
-const Dashboard = lazy(() => import("./features/dashboard/admin/pages/Dashboard").then(m => ({ default: (m as any).default || (m as any).Dashboard })));
-const EmpresasPage = lazy(() => import("./features/dashboard/admin/pages/EmpresasPage").then(m => ({ default: (m as any).EmpresasPage || (m as any).default })));
-const UsuariosPage = lazy(() => import("./features/dashboard/admin/pages/UsuariosPage").then(m => ({ default: (m as any).UsuariosPage || (m as any).default })));
-const CategoriasPage = lazy(() => import("./features/dashboard/admin/pages/CategoriasPage").then(m => ({ default: (m as any).CategoriasPage || (m as any).default })));
-const VeterinariosPage = lazy(() => import("./features/dashboard/admin/pages/VeterinariosPage").then(m => ({ default: (m as any).VeterinariosPage || (m as any).default })));
-const SubscriptionAdminPage = lazy(() => import("./features/dashboard/admin/pages/SubscriptionAdminPage").then(m => ({ default: (m as any).SubscriptionAdminPage || (m as any).default })));
-const AdminComingSoon = lazy(() => import("./features/dashboard/admin/components/AdminComingSoon").then(m => ({ default: (m as any).AdminComingSoon || (m as any).default })));
-const PointsConfigAdmin = lazy(() => import("./features/dashboard/gamification/components/admin/PointsConfigAdmin").then(m => ({ default: (m as any).PointsConfigAdmin || (m as any).default })));
+const AdminPortal = lazyPage(() => import("./features/dashboard/admin/pages/AdminPortal"), "AdminPortal");
+const Dashboard = lazyPage(() => import("./features/dashboard/admin/pages/Dashboard"), "Dashboard");
+const EmpresasPage = lazyPage(() => import("./features/dashboard/admin/pages/EmpresasPage"), "EmpresasPage");
+const UsuariosPage = lazyPage(() => import("./features/dashboard/admin/pages/UsuariosPage"), "UsuariosPage");
+const CategoriasPage = lazyPage(() => import("./features/dashboard/admin/pages/CategoriasPage"), "CategoriasPage");
+const VeterinariosPage = lazyPage(() => import("./features/dashboard/admin/pages/VeterinariosPage"), "VeterinariosPage");
+const SubscriptionAdminPage = lazyPage(() => import("./features/dashboard/admin/pages/SubscriptionAdminPage"), "SubscriptionAdminPage");
+const AdminComingSoon = lazyPage(() => import("./features/dashboard/admin/components/AdminComingSoon"), "AdminComingSoon");
+const PointsConfigAdmin = lazyPage(() => import("./features/dashboard/gamification/components/admin/PointsConfigAdmin"), "PointsConfigAdmin");
 
 // Empresa Pages
-const DashboardEmpresa = lazy(() => import("./features/dashboard/empresa/pages/DashboardEmpresa").then(m => ({ default: (m as any).default || (m as any).DashboardEmpresa })));
-const DashboardHome = lazy(() => import("./features/dashboard/empresa/components/layouts/DashboardHome").then(m => ({ default: (m as any).DashboardHome || (m as any).default })));
-const ServiciosPage = lazy(() => import("./features/dashboard/empresa/pages/ServiciosPage").then(m => ({ default: (m as any).ServiciosPage || (m as any).default })));
-const ProductosPage = lazy(() => import("./features/dashboard/empresa/pages/ProductosPage").then(m => ({ default: (m as any).ProductosPage || (m as any).default })));
-const EquipoPage = lazy(() => import("./features/dashboard/empresa/pages/EquipoPage").then(m => ({ default: (m as any).EquipoPage || (m as any).default })));
-const MySubscriptionPage = lazy(() => import("./features/dashboard/empresa/pages/MySubscriptionPage").then(m => ({ default: (m as any).MySubscriptionPage || (m as any).default })));
-const FacturacionPage = lazy(() => import("./features/dashboard/empresa/pages/FacturacionPage").then(m => ({ default: (m as any).FacturacionPage || (m as any).default })));
-const TalentoPage = lazy(() => import("./features/dashboard/empresa/pages/TalentoPage").then(m => ({ default: (m as any).TalentoPage || (m as any).default })));
-const EmpresaPacientesPage = lazy(() => import("./features/dashboard/empresa/pages/PacientesPage").then(m => ({ default: (m as any).PacientesPage || (m as any).default })));
-const EmpresaCitasPage = lazy(() => import("./features/dashboard/empresa/pages/EmpresaCitasPage").then(m => ({ default: (m as any).EmpresaCitasPage || (m as any).default })));
-const EmpresaConfigPage = lazy(() => import("./features/dashboard/empresa/pages/EmpresaConfigPage").then(m => ({ default: (m as any).EmpresaConfigPage || (m as any).default })));
-const OAuthCallbackPage = lazy(() => import("./features/dashboard/empresa/pages/OAuthCallbackPage").then(m => ({ default: (m as any).OAuthCallbackPage || (m as any).default })));
-const PaymentSuccessPageEmpresa = lazy(() => import("./features/dashboard/empresa/pages/PaymentSuccessPage").then(m => ({ default: (m as any).PaymentSuccessPage || (m as any).default })));
-const CompanyRewardsManagement = lazy(() => import("./features/dashboard/gamification/components/company/CompanyRewardsManagement").then(m => ({ default: (m as any).CompanyRewardsManagement || (m as any).default })));
+const DashboardEmpresa = lazyPage(() => import("./features/dashboard/empresa/pages/DashboardEmpresa"), "DashboardEmpresa");
+const DashboardHome = lazyPage(() => import("./features/dashboard/empresa/components/layouts/DashboardHome"), "DashboardHome");
+const ServiciosPage = lazyPage(() => import("./features/dashboard/empresa/pages/ServiciosPage"), "ServiciosPage");
+const ProductosPage = lazyPage(() => import("./features/dashboard/empresa/pages/ProductosPage"), "ProductosPage");
+const EquipoPage = lazyPage(() => import("./features/dashboard/empresa/pages/EquipoPage"), "EquipoPage");
+const MySubscriptionPage = lazyPage(() => import("./features/dashboard/empresa/pages/MySubscriptionPage"), "MySubscriptionPage");
+const FacturacionPage = lazyPage(() => import("./features/dashboard/empresa/pages/FacturacionPage"), "FacturacionPage");
+const TalentoPage = lazyPage(() => import("./features/dashboard/empresa/pages/TalentoPage"), "TalentoPage");
+const EmpresaPacientesPage = lazyPage(() => import("./features/dashboard/empresa/pages/PacientesPage"), "PacientesPage");
+const EmpresaCitasPage = lazyPage(() => import("./features/dashboard/empresa/pages/EmpresaCitasPage"), "EmpresaCitasPage");
+const EmpresaConfigPage = lazyPage(() => import("./features/dashboard/empresa/pages/EmpresaConfigPage"), "EmpresaConfigPage");
+const OAuthCallbackPage = lazyPage(() => import("./features/dashboard/empresa/pages/OAuthCallbackPage"), "OAuthCallbackPage");
+const PaymentSuccessPageEmpresa = lazyPage(() => import("./features/dashboard/empresa/pages/PaymentSuccessPage"), "PaymentSuccessPage");
+const CompanyRewardsManagement = lazyPage(() => import("./features/dashboard/gamification/components/company/CompanyRewardsManagement"), "CompanyRewardsManagement");
 
 // Cliente Pages
-const DashboardCliente = lazy(() => import("./features/dashboard/cliente/components/layouts/DashboardCliente").then(m => ({ default: (m as any).DashboardCliente || (m as any).default })));
-const MascotasPage = lazy(() => import("./features/dashboard/cliente/pages/MascotasPage").then(m => ({ default: (m as any).MascotasPage || (m as any).default })));
-const MisCompras = lazy(() => import("./features/dashboard/cliente/components/MisCompras").then(m => ({ default: (m as any).MisCompras || (m as any).default })));
-const TrackingPage = lazy(() => import("./features/dashboard/cliente/pages/TrackingPage").then(m => ({ default: (m as any).TrackingPage || (m as any).default })));
-const ClienteConfigPage = lazy(() => import("./features/dashboard/cliente/pages/ClienteConfigPage").then(m => ({ default: (m as any).ClienteConfigPage || (m as any).default })));
-const ClienteMisServiciosPage = lazy(() => import("./features/dashboard/cliente/pages/MisServiciosPage").then(m => ({ default: (m as any).MisServiciosPage || (m as any).default })));
-const MisCitasPage = lazy(() => import("./features/dashboard/cliente/pages/MisCitasPage").then(m => ({ default: (m as any).MisCitasPage || (m as any).default })));
-const MisSolicitudesPage = lazy(() => import("./features/dashboard/cliente/pages/MisSolicitudesPage").then(m => ({ default: (m as any).MisSolicitudesPage || (m as any).default })));
-const ClientPointsDashboard = lazy(() => import("./features/dashboard/gamification/components/client/ClientPointsDashboard").then(m => ({ default: (m as any).ClientPointsDashboard || (m as any).default })));
+const DashboardCliente = lazyPage(() => import("./features/dashboard/cliente/components/layouts/DashboardCliente"), "DashboardCliente");
+const MascotasPage = lazyPage(() => import("./features/dashboard/cliente/pages/MascotasPage"), "MascotasPage");
+const MisCompras = lazyPage(() => import("./features/dashboard/cliente/components/MisCompras"), "MisCompras");
+const TrackingPage = lazyPage(() => import("./features/dashboard/cliente/pages/TrackingPage"), "TrackingPage");
+const ClienteConfigPage = lazyPage(() => import("./features/dashboard/cliente/pages/ClienteConfigPage"), "ClienteConfigPage");
+const ClienteMisServiciosPage = lazyPage(() => import("./features/dashboard/cliente/pages/MisServiciosPage"), "MisServiciosPage");
+const MisCitasPage = lazyPage(() => import("./features/dashboard/cliente/pages/MisCitasPage"), "MisCitasPage");
+const MisSolicitudesPage = lazyPage(() => import("./features/dashboard/cliente/pages/MisSolicitudesPage"), "MisSolicitudesPage");
+const ClientPointsDashboard = lazyPage(() => import("./features/dashboard/gamification/components/client/ClientPointsDashboard"), "ClientPointsDashboard");
 
 // Shared / Other
-const AdopcionesPage = lazy(() => import("./features/dashboard/shared/adopciones/pages/AdopcionesPage").then(m => ({ default: (m as any).AdopcionesPage || (m as any).default })));
-const MisAdopcionesPage = lazy(() => import("./features/dashboard/shared/adopciones/pages/MisAdopcionesPage").then(m => ({ default: (m as any).MisAdopcionesPage || (m as any).default })));
+const AdopcionesPage = lazyPage(() => import("./features/dashboard/shared/adopciones/pages/AdopcionesPage"), "AdopcionesPage");
+const MisAdopcionesPage = lazyPage(() => import("./features/dashboard/shared/adopciones/pages/MisAdopcionesPage"), "MisAdopcionesPage");
 
 // Veterinario Pages
-const DashboardVeterinario = lazy(() => import("./features/dashboard/veterinario/pages/DashboardVeterinario").then(m => ({ default: (m as any).default || (m as any).DashboardVeterinario })));
-const VetHomePage = lazy(() => import("./features/dashboard/veterinario/pages/VetHomePage").then(m => ({ default: (m as any).VetHomePage || (m as any).default })));
-const VetServiciosPage = lazy(() => import("./features/dashboard/veterinario/pages/VetServiciosPage").then(m => ({ default: (m as any).VetServiciosPage || (m as any).default })));
-const InvitacionesPage = lazy(() => import("./features/dashboard/veterinario/pages/InvitacionesPage").then(m => ({ default: (m as any).InvitacionesPage || (m as any).default })));
-const VetConfiguracionPage = lazy(() => import("./features/dashboard/veterinario/pages/VetConfiguracionPage").then(m => ({ default: (m as any).VetConfiguracionPage || (m as any).default })));
-const VetCitasPage = lazy(() => import("./features/dashboard/veterinario/pages/VetCitasPage").then(m => ({ default: (m as any).VetCitasPage || (m as any).default })));
-const VetPacientesPage = lazy(() => import("./features/dashboard/veterinario/pages/VetPacientesPage").then(m => ({ default: (m as any).VetPacientesPage || (m as any).default })));
+const DashboardVeterinario = lazyPage(() => import("./features/dashboard/veterinario/pages/DashboardVeterinario"), "DashboardVeterinario");
+const VetHomePage = lazyPage(() => import("./features/dashboard/veterinario/pages/VetHomePage"), "VetHomePage");
+const VetServiciosPage = lazyPage(() => import("./features/dashboard/veterinario/pages/VetServiciosPage"), "VetServiciosPage");
+const InvitacionesPage = lazyPage(() => import("./features/dashboard/veterinario/pages/InvitacionesPage"), "InvitacionesPage");
+const VetConfiguracionPage = lazyPage(() => import("./features/dashboard/veterinario/pages/VetConfiguracionPage"), "VetConfiguracionPage");
+const VetCitasPage = lazyPage(() => import("./features/dashboard/veterinario/pages/VetCitasPage"), "VetCitasPage");
+const VetPacientesPage = lazyPage(() => import("./features/dashboard/veterinario/pages/VetPacientesPage"), "VetPacientesPage");
 
 // Repartidor Pages
-const RepartidorDashboard = lazy(() => import("./features/dashboard/repartidor/components/RepartidorDashboard").then(m => ({ default: (m as any).RepartidorDashboard || (m as any).default })));
+const RepartidorDashboard = lazyPage(() => import("./features/dashboard/repartidor/components/RepartidorDashboard"), "RepartidorDashboard");
 
 const LoadingFallback = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
@@ -133,6 +140,7 @@ function App() {
       <AuthProvider>
         <Router>
           <AuthRedirector />
+          <ErrorBoundary>
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
               {/* Rutas publicas: Auth */}
@@ -294,6 +302,7 @@ function App() {
               />
             </Routes>
           </Suspense>
+          </ErrorBoundary>
         </Router>
       </AuthProvider>
     </Auth0Provider>

@@ -1,8 +1,19 @@
 import { useState, useEffect } from "react";
 import { X, Plus, Calendar, User, FileText, Activity, Save } from "lucide-react";
+import { z } from "zod";
 import { Button } from "../../../../components/ui/Button";
 import { vetService } from "../services/vetService";
 import Swal from "sweetalert2";
+
+const medicalRecordSchema = z.object({
+    diagnostico: z.string().min(2, "El diagnóstico es requerido"),
+    tratamiento: z.string().min(2, "El tratamiento es requerido"),
+    notas: z.string().optional().or(z.literal("")),
+    pesoKg: z.string().optional().or(z.literal("")).refine(
+        (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) > 0),
+        "El peso debe ser un número positivo"
+    ),
+});
 
 interface MedicalRecordModalProps {
     isOpen: boolean;
@@ -54,6 +65,14 @@ export const MedicalRecordModal = ({ isOpen, onClose, patientId, patientName }: 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const schemaResult = medicalRecordSchema.safeParse(formData);
+        if (!schemaResult.success) {
+            const firstError = Object.values(schemaResult.error.flatten().fieldErrors)[0]?.[0];
+            Swal.fire("Error de validación", firstError || "Corrige los errores del formulario", "error");
+            return;
+        }
+
         setIsSaving(true);
         try {
             await vetService.addMedicalRecord({

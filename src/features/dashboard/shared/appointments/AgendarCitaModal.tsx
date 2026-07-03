@@ -1,9 +1,17 @@
 import { useState, useEffect } from "react";
 import { X, Calendar, Clock, PawPrint, Loader2, CheckCircle } from "lucide-react";
+import { z } from "zod";
 import { petService } from "../../cliente/services/petService";
 import { appointmentService } from "./appointmentService";
 import type { Pet } from "../../cliente/types/pet.types";
 import type { CitaRequest } from "./appointmentService";
+
+const agendarCitaSchema = z.object({
+    mascotaId: z.string().optional().or(z.literal("")),
+    fechaProgramada: z.string().min(1, "La fecha es requerida"),
+    horaInicio: z.string().min(1, "La hora es requerida"),
+    notasCliente: z.string().optional().or(z.literal("")),
+});
 
 interface AgendarCitaModalProps {
     isOpen: boolean;
@@ -54,6 +62,14 @@ export const AgendarCitaModal = ({ isOpen, onClose, servicioId, empresaId, servi
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const schemaResult = agendarCitaSchema.safeParse(form);
+        if (!schemaResult.success) {
+            const firstError = Object.values(schemaResult.error.flatten().fieldErrors)[0]?.[0];
+            alert(firstError || "Corrige los errores del formulario");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const request: CitaRequest = {

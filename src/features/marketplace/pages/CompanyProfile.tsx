@@ -13,6 +13,7 @@ import {
 import { marketplaceService } from "../services/marketplaceService";
 import { ProductCard } from "../components/ProductCard";
 import { MapView } from "../components/MapView";
+import { Seo } from "../../../components/Seo";
 import type { Product } from "../types/marketplace";
 import { RewardsStore } from "../../dashboard/gamification/components/client/RewardsStore";
 
@@ -185,6 +186,11 @@ export const CompanyProfile = () => {
 
     return (
         <div className="w-full min-h-screen bg-white dark:bg-slate-950 pb-20">
+            <Seo
+                title={company.nombreComercial}
+                description={company.descripcion || `Perfil de ${company.nombreComercial} en Huella360`}
+                image={company.logoUrl}
+            />
             {/* Banner Section */}
             <div className="relative w-full h-[280px] md:h-[320px] bg-slate-100 dark:bg-slate-900">
                 {company.bannerUrl ? (

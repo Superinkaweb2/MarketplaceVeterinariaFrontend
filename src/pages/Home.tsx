@@ -5,6 +5,7 @@ import { Segments } from "../sections/Segments";
 import { Pricing } from "../sections/Pricing";
 import { CTA } from "../sections/CTA";
 import { ProfilesInfo } from "./ProfileInfo";
+import { Seo } from "../components/Seo";
 
 function Home() {
   const { hash } = useLocation();
@@ -24,6 +25,7 @@ function Home() {
 
   return (
     <>
+      <Seo title="Inicio" description="Huella360 - Plataforma integral de servicios veterinarios. Encuentra productos, servicios y profesionales para el bienestar de tus mascotas." />
       <Hero />
       <Segments />
 

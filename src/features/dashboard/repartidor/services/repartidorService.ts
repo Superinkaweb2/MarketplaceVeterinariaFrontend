@@ -7,6 +7,9 @@ export const repartidorService = {
     getPerfil: (): Promise<AxiosResponse<ApiResponse<RepartidorResponseDTO>>> => 
         api.get("/repartidores/me"),
 
+    actualizarPerfil: (data: FormData): Promise<AxiosResponse<ApiResponse<RepartidorResponseDTO>>> =>
+        api.put("/repartidores/me", data),
+
     actualizarUbicacion: (lat: number, lng: number): Promise<AxiosResponse<ApiResponse<void>>> => 
         api.patch(`/repartidores/me/ubicacion`, { lat, lng }),
         

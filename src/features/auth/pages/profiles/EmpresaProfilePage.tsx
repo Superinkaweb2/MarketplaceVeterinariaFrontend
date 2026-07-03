@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,11 +34,7 @@ export const EmpresaProfilePage = () => {
   const { perfilCompleto, setPerfilCompleto } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Si el backend ya confirmó que tiene perfil, lo mandamos al portal
-  if (perfilCompleto) {
-    return <Navigate to="/portal/empresa" replace />;
-  }
+  const [isChecking, setIsChecking] = useState(true);
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
@@ -49,6 +45,38 @@ export const EmpresaProfilePage = () => {
     resolver: zodResolver(empresaSchema),
     defaultValues: { tipoServicio: "VETERINARIA" }
   });
+
+  useEffect(() => {
+    const checkProfile = async () => {
+      try {
+        await profileService.getEmpresaProfile();
+        setPerfilCompleto(true);
+        navigate("/portal/empresa", { replace: true });
+      } catch {
+        setIsChecking(false);
+      }
+    };
+    if (!perfilCompleto) {
+      checkProfile();
+    } else {
+      setIsChecking(false);
+    }
+  }, [perfilCompleto, setPerfilCompleto, navigate]);
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-background-dark flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-500 animate-pulse font-medium">Verificando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (perfilCompleto) {
+    return <Navigate to="/portal/empresa" replace />;
+  }
 
   const tipoServicio = watch("tipoServicio");
 
@@ -109,6 +137,29 @@ export const EmpresaProfilePage = () => {
       const logoFile = logoInputRef.current?.files?.[0];
       const bannerFile = bannerInputRef.current?.files?.[0];
 
+      // Validar tamaño de archivos ANTES de enviar al backend
+      if (logoFile && logoFile.size > MAX_FILE_SIZE) {
+        const sizeMB = (logoFile.size / (1024 * 1024)).toFixed(2);
+        Swal.fire({
+          icon: "warning",
+          title: "Logo demasiado grande",
+          text: `El logo pesa ${sizeMB}MB. El límite es 1MB. Por favor, comprime la imagen.`,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (bannerFile && bannerFile.size > MAX_FILE_SIZE) {
+        const sizeMB = (bannerFile.size / (1024 * 1024)).toFixed(2);
+        Swal.fire({
+          icon: "warning",
+          title: "Banner demasiado grande",
+          text: `El banner pesa ${sizeMB}MB. El límite es 1MB. Por favor, comprime la imagen.`,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       console.log("Submitting profile with data:", finalData);
       await profileService.createEmpresaProfile(finalData, logoFile, bannerFile);
       setPerfilCompleto(true);
@@ -120,12 +171,32 @@ export const EmpresaProfilePage = () => {
         timer: 3000,
         showConfirmButton: false,
       });
-      navigate("/portal/empresa");
+      navigate("/portal/empresa", { replace: true });
     } catch (error: any) {
       console.error("Error creating profile:", error);
 
       let message = "Ocurrió un error inesperado al crear el perfil.";
       let footer = undefined;
+
+      // Detectar error de tamaño de archivo del backend
+      const errorText = error?.response?.data?.message || error?.message || "";
+      const isSizeError =
+        error?.response?.status === 413 ||
+        errorText.includes("Maximum upload size exceeded") ||
+        errorText.includes("exceeds its maximum permitted size") ||
+        errorText.includes("FileSizeLimitExceededException") ||
+        error?.response?.status === 500 && errorText.includes("upload");
+
+      if (isSizeError) {
+        Swal.fire({
+          icon: "warning",
+          title: "Imagen demasiado grande",
+          text: "Una de las imágenes supera el límite de 1MB. Por favor, comprime las imágenes e intenta de nuevo.",
+          confirmButtonColor: "#3b82f6",
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
       if (error.response?.data) {
         const data = error.response.data;
@@ -141,8 +212,8 @@ export const EmpresaProfilePage = () => {
         icon: "error",
         title: "Error al crear perfil",
         text: message,
-        html: footer ? undefined : undefined, // fallback to text if no html
-        footer: footer ? footer : undefined
+        html: footer || undefined,
+        footer: footer ? undefined : undefined
       });
     } finally {
       setIsSubmitting(false);

@@ -1,9 +1,28 @@
 import { useState, useEffect } from "react";
 import { X, Save, Upload, Image as ImageIcon } from "lucide-react";
+import { z } from "zod";
 import { Button } from "../../../../components/ui/Button";
 import type { Service, ModalidadServicio } from "../../../catalog/types/service.types";
 import { vetService } from "../services/vetService";
 import Swal from "sweetalert2";
+
+const MODALIDADES = ["PRESENCIAL", "VIRTUAL", "DOMICILIO", "HIBRIDO"] as const;
+
+const vetServiceSchema = z.object({
+    nombre: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
+    descripcion: z.string().optional().or(z.literal("")),
+    precio: z.string().refine((val) => {
+        const num = parseFloat(val);
+        return !isNaN(num) && num > 0;
+    }, "El precio debe ser mayor a 0"),
+    duracionMinutos: z.string().refine((val) => {
+        const num = parseInt(val);
+        return !isNaN(num) && num >= 1;
+    }, "La duración debe ser al menos 1 minuto"),
+    modalidad: z.enum(MODALIDADES, { error: "Selecciona una modalidad" }),
+    visible: z.boolean(),
+    activo: z.boolean(),
+});
 
 interface VetServiceModalProps {
     isOpen: boolean;
@@ -11,13 +30,6 @@ interface VetServiceModalProps {
     onSuccess: () => void;
     serviceToEdit?: Service | null;
 }
-
-const MODALIDADES: { value: ModalidadServicio; label: string }[] = [
-    { value: "PRESENCIAL", label: "Presencial" },
-    { value: "VIRTUAL", label: "Virtual" },
-    { value: "DOMICILIO", label: "Domicilio" },
-    { value: "HIBRIDO", label: "Híbrido" }
-];
 
 export const VetServiceModal = ({ isOpen, onClose, onSuccess, serviceToEdit }: VetServiceModalProps) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -80,14 +92,20 @@ export const VetServiceModal = ({ isOpen, onClose, onSuccess, serviceToEdit }: V
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // VALIDACIÓN: Imagen obligatoria si es un servicio nuevo
         if (!serviceToEdit && !imagenFile) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Imagen requerida',
                 text: 'Debes subir una imagen para crear el servicio.',
-                confirmButtonColor: '#14b8a6' // Color teal-500
+                confirmButtonColor: '#14b8a6'
             });
+            return;
+        }
+
+        const schemaResult = vetServiceSchema.safeParse(formData);
+        if (!schemaResult.success) {
+            const firstError = Object.values(schemaResult.error.flatten().fieldErrors)[0]?.[0];
+            Swal.fire("Error de validación", firstError || "Corrige los errores del formulario", "error");
             return;
         }
 
@@ -204,7 +222,7 @@ export const VetServiceModal = ({ isOpen, onClose, onSuccess, serviceToEdit }: V
                                 <input
                                     type="number"
                                     required
-                                    min="0"
+                                    min="0.01"
                                     step="0.01"
                                     value={formData.precio}
                                     onChange={e => setFormData({ ...formData, precio: e.target.value })}
@@ -236,7 +254,7 @@ export const VetServiceModal = ({ isOpen, onClose, onSuccess, serviceToEdit }: V
                                 className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-slate-900 dark:text-white appearance-none transition-all text-sm"
                             >
                                 {MODALIDADES.map(m => (
-                                    <option key={m.value} value={m.value}>{m.label}</option>
+                                    <option key={m} value={m}>{m}</option>
                                 ))}
                             </select>
                         </div>

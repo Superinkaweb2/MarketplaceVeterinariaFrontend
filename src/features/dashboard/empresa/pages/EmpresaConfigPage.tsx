@@ -20,6 +20,7 @@ import {
 import { Button } from "../../../../components/ui/Button";
 import { api } from "../../../../shared/http/api";
 import { useAuth } from "../../../auth/context/useAuth";
+import { authService } from "../../../auth/services/authService";
 import Swal from "sweetalert2";
 import { MapPicker } from "../components/MapPicker";
 
