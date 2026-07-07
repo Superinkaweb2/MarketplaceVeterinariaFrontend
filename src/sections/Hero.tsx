@@ -14,11 +14,6 @@ export const Hero = () => {
 
           <div className="text-center lg:text-left">
 
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold tracking-wide uppercase mb-6 dark:bg-primary/20">
-              <span className="w-2 h-2 rounded-full bg-primary"></span>
-              Lanzamiento Próximo
-            </div>
-
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-secondary dark:text-white mb-6 leading-tight">
               La Plataforma
               <p>Todo en Uno para el</p> 
