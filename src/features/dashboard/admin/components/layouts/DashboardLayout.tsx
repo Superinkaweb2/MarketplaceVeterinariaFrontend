@@ -1,14 +1,13 @@
 import { Outlet, Link } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { ChevronRight, Home } from "lucide-react";
-import { ThemeToggle } from "../../../../../components/ui/ThemeToggle";
 
 export const DashboardLayout = () => {
   return (
-    <div className="flex h-screen bg-background-light dark:bg-background-dark">
+    <div className="flex h-screen bg-background-light">
       <Sidebar />
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 bg-white dark:bg-surface-dark border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 z-10">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
           <nav aria-label="Breadcrumb" className="flex">
             <ol className="flex items-center space-x-2">
               <li>
@@ -30,7 +29,6 @@ export const DashboardLayout = () => {
             </ol>
           </nav>
           <div className="flex items-center gap-4">
-            <ThemeToggle />
           </div>
         </header>
 

@@ -67,13 +67,13 @@ export const MapPicker = ({ lat, lng, onChange }: MapPickerProps) => {
 
     return (
         <div className="space-y-3">
-            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <div className="flex items-center gap-2">
                     <div className={`p-2 rounded-lg ${isLocked ? 'bg-slate-200 text-slate-600' : 'bg-blue-100 text-blue-600'}`}>
                         {isLocked ? <Lock size={18} /> : <Unlock size={18} />}
                     </div>
                     <div>
-                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                        <p className="text-sm font-bold text-slate-700">
                             {isLocked ? 'Ubicación Bloqueada' : 'Modo Edición Activo'}
                         </p>
                         <p className="text-[11px] text-slate-500">
@@ -93,7 +93,7 @@ export const MapPicker = ({ lat, lng, onChange }: MapPickerProps) => {
                 </button>
             </div>
 
-            <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-inner relative z-0">
+            <div className="h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-slate-200 shadow-inner relative z-0">
                 <MapContainer
                     center={initialPos}
                     zoom={13}

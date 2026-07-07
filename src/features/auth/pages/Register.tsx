@@ -51,7 +51,7 @@ export const Register = () => {
       </div>
 
       {/* ── LADO DERECHO ── */}
-      <div className="flex w-full lg:w-1/2 flex-col items-center justify-center p-8 sm:p-12 lg:p-24 bg-white dark:bg-background-dark relative">
+      <div className="flex w-full lg:w-1/2 flex-col items-center justify-center p-8 sm:p-12 lg:p-24 bg-white relative">
         <div className="absolute top-8 right-8 md:top-12 md:right-12">
           <Link to="/">
             <Button variant="outline" className="min-w-21 h-10 px-4 text-sm">
@@ -62,7 +62,7 @@ export const Register = () => {
 
         {/* Logo móvil */}
         <div className="lg:hidden mb-12">
-          <div className="flex items-center gap-2 text-slate-900 dark:text-white">
+          <div className="flex items-center gap-2 text-slate-900">
             <img
               src="/LOGO HUELLA360_logo primario.png"
               alt="Logo Huella360"
@@ -74,10 +74,10 @@ export const Register = () => {
 
         <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="text-center lg:text-left">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
               Crea tu cuenta gratis
             </h1>
-            <p className="mt-3 text-slate-500 dark:text-slate-400">
+            <p className="mt-3 text-slate-500">
               Regístrate de forma segura con Auth0. Luego podrás elegir tu tipo de cuenta.
             </p>
           </div>

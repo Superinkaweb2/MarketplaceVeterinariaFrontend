@@ -12,15 +12,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
         const baseInputClasses = "w-full px-4 py-2.5 rounded-xl border transition-all outline-none text-sm";
         const lightClasses = "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary";
-        const darkClasses = "dark:bg-slate-900 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-primary/20 dark:focus:border-primary";
-        const errorClasses = error ? "border-red-500 focus:ring-red-500/20 focus:border-red-500 dark:border-red-500" : "";
+        const errorClasses = error ? "border-red-500 focus:ring-red-500/20 focus:border-red-500" : "";
 
         return (
             <div className={`space-y-1.5 ${className}`}>
                 {label && (
                     <label
                         htmlFor={inputId}
-                        className="text-sm font-semibold text-slate-700 dark:text-slate-300"
+                        className="text-sm font-semibold text-slate-700"
                     >
                         {label} {props.required && <span className="text-red-500">*</span>}
                     </label>
@@ -29,7 +28,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                     <input
                         id={inputId}
                         ref={ref}
-                        className={`${baseInputClasses} ${lightClasses} ${darkClasses} ${errorClasses}`}
+                        className={`${baseInputClasses} ${lightClasses} ${errorClasses}`}
                         {...props}
                     />
                 </div>
@@ -38,7 +37,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                         {error}
                     </p>
                 ) : helperText ? (
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-slate-500">
                         {helperText}
                     </p>
                 ) : null}

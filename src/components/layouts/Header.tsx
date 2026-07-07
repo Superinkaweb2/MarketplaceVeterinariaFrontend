@@ -1,6 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "../ui/Button";
-import { ThemeToggle } from "../ui/ThemeToggle";
 import { useAuth } from "../../features/auth/context/useAuth";
 import { UserDropdown } from "../UserDropdown";
 import { useClientPointsDashboard } from "../../features/dashboard/gamification/hooks/useGamification";
@@ -21,7 +20,7 @@ export const Header = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7ecf3] dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-10 py-3">
+    <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7ecf3] bg-white/90 backdrop-blur-md px-10 py-3">
       <Link
         to="/home"
         className="flex items-center hover:opacity-80 transition-opacity"
@@ -43,13 +42,12 @@ export const Header = () => {
               to={item.path}
               className={`text-sm font-medium leading-normal transition-colors ${location.pathname === item.path
                 ? "text-primary font-bold"
-                : "text-[#0d131b] dark:text-slate-300 hover:text-primary"
+                : "text-[#0d131b] hover:text-primary"
                 }`}
             >
               {item.name}
             </Link>
           ))}
-          <ThemeToggle />
         </div>
 
         <div className="flex gap-2">
@@ -77,11 +75,11 @@ export const Header = () => {
               {isCliente && pointsData && (
                 <Link 
                   to="/portal/cliente/puntos" 
-                  className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/30 rounded-full hover:bg-yellow-100 transition-colors group"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 border border-yellow-200 rounded-full hover:bg-yellow-100 transition-colors group"
                   title="Tus puntos Huella360"
                 >
-                  <Gift className="w-4 h-4 text-yellow-600 dark:text-yellow-500 group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-bold text-yellow-700 dark:text-yellow-400">
+                  <Gift className="w-4 h-4 text-yellow-600 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-bold text-yellow-700">
                     {pointsData.totalPuntos} pts
                   </span>
                 </Link>

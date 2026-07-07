@@ -7,7 +7,7 @@ export default function DashboardEmpresa() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased font-sans">
+    <div className="flex h-screen w-full overflow-hidden bg-background-light text-slate-900 antialiased font-sans">
       
       {/* Pasamos el estado y la función para cerrar al Sidebar */}
       <Sidebar 

@@ -1,8 +1,13 @@
 export interface Category {
   id: number;
   nombre: string;
+  slug?: string;
   descripcion?: string;
   padreId?: number;
+  padreNombre?: string;
+  iconoUrl?: string;
+  activo?: boolean;
+  orden?: number;
 }
 
 export interface Product {
@@ -21,7 +26,7 @@ export interface Product {
   empresaTipoServicio?: string;
   mpPublicKey?: string;
   badge?: { text: string; style: 'rx' | 'service' | 'approved' | 'adoption' };
-  itemType?: 'product' | 'service';
+  itemType?: 'product' | 'service' | 'adoption';
 }
 
 export interface MarketplaceFilters {
@@ -29,7 +34,7 @@ export interface MarketplaceFilters {
   category?: number;
   page?: number;
   size?: number;
-  sort?: 'asc' | 'desc';
+  sort?: string;
 }
 
 export interface CompanyResponse {
@@ -51,4 +56,33 @@ export interface CompanyResponse {
   bannerUrl: string;
   mpPublicKey: string;
   estadoValidacion: string;
+}
+
+export interface ServiceResponse {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  duracionMinutos: number;
+  modalidad: string;
+  imagenUrl?: string;
+  empresaId?: number;
+  empresaNombre?: string;
+  empresaTipoServicio?: string;
+  veterinarioId?: number;
+  veterinarioNombres?: string;
+  veterinarioApellidos?: string;
+  veterinarioEspecialidad?: string;
+  mpPublicKey?: string;
+}
+
+export interface AdoptionResponse {
+  id: number;
+  titulo: string;
+  historia: string;
+  mascotaFotoUrl?: string;
+  publicadoPorId: number;
+  publicadoPorNombre?: string;
+  publicadoPorTipoServicio?: string;
+  estado?: string;
 }

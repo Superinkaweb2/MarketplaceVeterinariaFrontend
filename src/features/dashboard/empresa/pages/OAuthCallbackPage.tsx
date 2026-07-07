@@ -63,7 +63,7 @@ export const OAuthCallbackPage = () => {
                 {status === "loading" && (
                     <>
                         <Loader2 className="h-16 w-16 text-primary animate-spin mx-auto" />
-                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{message}</h1>
+                        <h1 className="text-2xl font-bold text-slate-900">{message}</h1>
                         <p className="text-slate-500">Por favor, no cierres esta ventana.</p>
                     </>
                 )}
@@ -71,7 +71,7 @@ export const OAuthCallbackPage = () => {
                 {status === "success" && (
                     <>
                         <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto" />
-                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">¡Vínculo Exitoso!</h1>
+                        <h1 className="text-2xl font-bold text-slate-900">¡Vínculo Exitoso!</h1>
                         <p className="text-slate-500">Redirigiéndote de vuelta...</p>
                     </>
                 )}
@@ -79,7 +79,7 @@ export const OAuthCallbackPage = () => {
                 {status === "error" && (
                     <>
                         <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
-                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Error de Conexión</h1>
+                        <h1 className="text-2xl font-bold text-slate-900">Error de Conexión</h1>
                         <p className="text-slate-500">{message}</p>
                         <button
                             onClick={() => navigate("/portal/empresa/configuracion")}

@@ -27,11 +27,11 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
   }, []);
 
   return (
-    <header className="h-16 flex items-center justify-between px-4 md:px-6 bg-white dark:bg-surface-dark border-b border-slate-200 dark:border-slate-800 shrink-0 z-10">
+    <header className="h-16 flex items-center justify-between px-4 md:px-6 bg-white border-b border-slate-200 shrink-0 z-10">
       {/* Mobile Toggle Button (Ahora funcional) */}
       <button
         onClick={onMenuClick}
-        className="md:hidden p-2 -ml-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+        className="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
       >
         <Menu size={24} />
       </button>
@@ -43,7 +43,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
             <Search size={20} />
           </span>
           <input
-            className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary dark:text-white placeholder-slate-400 outline-none transition-all"
+            className="w-full bg-slate-100 border-none rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary placeholder-slate-400 outline-none transition-all"
             placeholder="Search..."
             type="text"
           />
@@ -53,18 +53,18 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
       {/* Actions */}
       <div className="flex items-center gap-2 md:gap-4 ml-auto">
         {/* Botón de búsqueda solo visible en móvil (opcional) */}
-        <button className="sm:hidden p-2 text-slate-600 dark:text-slate-300">
+        <button className="sm:hidden p-2 text-slate-600">
           <Search size={20} />
         </button>
 
-        <div className="flex items-center gap-3 pl-2 md:pl-4 md:border-l border-slate-200 dark:border-slate-700">
+        <div className="flex items-center gap-3 pl-2 md:pl-4 md:border-l border-slate-200">
           <div className="text-right hidden md:block">
-            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[150px]">
+            <p className="text-sm font-semibold text-slate-900 truncate max-w-[150px]">
               {isLoading ? "Cargando..." : (companyData?.nombreComercial || nombre || "Mi Empresa")}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">{role?.toLowerCase() || "Admin"}</p>
+            <p className="text-xs text-slate-500 capitalize">{role?.toLowerCase() || "Admin"}</p>
           </div>
-          <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary ring-2 ring-white dark:ring-slate-800 shrink-0 overflow-hidden transition-all hover:bg-primary hover:text-white">
+          <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary ring-2 ring-white shrink-0 overflow-hidden transition-all hover:bg-primary hover:text-white">
             {companyData?.logoUrl ? (
               <img src={companyData.logoUrl} alt="Logo" className="h-full w-full object-contain p-1" />
             ) : (

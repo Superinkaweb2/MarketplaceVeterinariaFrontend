@@ -43,13 +43,13 @@ export default function ForgotPassword() {
     const StatusVisual = ({ mode }: { mode: 'request' | 'sent' }) => (
         <div className="w-24 h-24 mx-auto mb-10 relative group">
             <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-tr from-[#2D3E82] to-[#1ea59c] p-[2px] shadow-lg transform transition-transform duration-700 hover:rotate-y-12 hover:scale-105">
-                <div className="w-full h-full bg-[#f6f8f8] dark:bg-[#12201f] rounded-[calc(2rem-2px)] overflow-hidden relative">
+                    <div className="w-full h-full bg-[#f6f8f8] rounded-[calc(2rem-2px)] overflow-hidden relative">
                     {/* Formas abstractas internas para dinamismo */}
                     <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#1ea59c]/20 rounded-full blur-3xl animate-pulse"></div>
                     <div className="absolute -bottom-10 -left-10 w-28 h-28 bg-[#2D3E82]/20 rounded-full blur-3xl animate-pulse delay-700"></div>
                     
                     {/* Tarjeta de cristal flotante interna con el icono */}
-                    <div className="absolute inset-4 rounded-xl bg-white/20 dark:bg-white/5 backdrop-blur-md border border-white/30 flex items-center justify-center transform transition-all duration-500 hover:scale-110">
+                    <div className="absolute inset-4 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center transform transition-all duration-500 hover:scale-110">
                         {mode === 'request' ? (
                             <Mail className="h-8 w-8 text-[#1ea59c]" strokeWidth={2.5} />
                         ) : (
@@ -67,9 +67,9 @@ export default function ForgotPassword() {
      * Contenedor base con Glassmorphism y sombras suaves
      */
     const GlassCard = ({ children, isSent }: { children: React.ReactNode, isSent: boolean }) => (
-        <div className="min-h-screen bg-[#f6f8f8] dark:bg-[#12201f] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-montserrat transition-colors duration-500">
+        <div className="min-h-screen bg-[#f6f8f8] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-montserrat transition-colors duration-500">
             <div className="sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-                <div className={`relative rounded-[2rem] p-1 bg-white/40 dark:bg-black/20 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-hidden group animate-fade-in-up ${isSent ? 'text-center' : ''}`}>
+                <div className={`relative rounded-[2rem] p-1 bg-white/40 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden group animate-fade-in-up ${isSent ? 'text-center' : ''}`}>
                     
                     {/* Resplandor decorativo de fondo del card */}
                     <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-3/4 h-48 bg-[#1ea59c]/15 blur-[80px] rounded-full pointer-events-none transition-all duration-700 group-hover:bg-[#1ea59c]/25"></div>
@@ -87,10 +87,10 @@ export default function ForgotPassword() {
             <GlassCard isSent={true}>
                 <StatusVisual mode="sent" />
                 
-                <h2 className="text-3xl font-extrabold text-[#2D3E82] dark:text-white tracking-tight leading-tight mb-4">
+                <h2 className="text-3xl font-extrabold text-[#2D3E82] tracking-tight leading-tight mb-4">
                     ¡Correo Enviado!
                 </h2>
-                <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed font-medium mb-10 px-4">
+                <p className="text-base text-gray-600 leading-relaxed font-medium mb-10 px-4">
                     Hemos enviado un enlace de recuperación a la dirección 
                     <strong className="text-[#1ea59c] font-semibold"> {email}</strong>. 
                     Por favor, revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu acceso.
@@ -109,21 +109,21 @@ export default function ForgotPassword() {
         <GlassCard isSent={false}>
             <StatusVisual mode="request" />
             
-            <h2 className="text-3xl font-extrabold text-[#2D3E82] dark:text-white tracking-tight leading-tight mb-3 px-6">
+            <h2 className="text-3xl font-extrabold text-[#2D3E82] tracking-tight leading-tight mb-3 px-6">
                 ¿Olvidaste tu contraseña?
             </h2>
-            <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed font-medium mb-10 px-4">
+            <p className="text-base text-gray-600 leading-relaxed font-medium mb-10 px-4">
                 No te preocupes, introduce tu correo y te enviaremos instrucciones detalladas para restablecerla de forma segura.
             </p>
 
             <form className="space-y-7" onSubmit={handleSubmit}>
                 <div className="text-left">
-                    <label htmlFor="email" className="block text-sm font-semibold text-[#2D3E82] dark:text-gray-100 mb-2">
+                    <label htmlFor="email" className="block text-sm font-semibold text-[#2D3E82] mb-2">
                         Correo Electrónico
                     </label>
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <Mail className="h-5 w-5 text-[#2D3E82]/60 dark:text-white/40" />
+                            <Mail className="h-5 w-5 text-[#2D3E82]/60" />
                         </div>
                         {/* Input estilizado con border-primary #1ea59c y shadow-soft */}
                         <input
@@ -134,7 +134,7 @@ export default function ForgotPassword() {
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="appearance-none block w-full pl-11 pr-4 py-3.5 border border-[#2D3E82]/10 dark:border-white/10 bg-white/50 dark:bg-black/20 rounded-xl placeholder-gray-400 dark:placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] transition-all text-sm font-medium shadow-soft text-gray-900 dark:text-white"
+                            className="appearance-none block w-full pl-11 pr-4 py-3.5 border border-[#2D3E82]/10 bg-white/50 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] transition-all text-sm font-medium shadow-soft text-gray-900"
                             placeholder="tu@correo.com"
                         />
                     </div>

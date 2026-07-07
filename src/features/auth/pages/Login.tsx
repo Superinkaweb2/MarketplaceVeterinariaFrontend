@@ -62,7 +62,7 @@ export const Login = () => {
       </div>
 
       {/* ── LADO DERECHO: Formulario ── */}
-      <div className="flex w-full lg:w-1/2 flex-col items-center justify-center p-8 sm:p-12 lg:p-24 bg-white dark:bg-background-dark relative">
+      <div className="flex w-full lg:w-1/2 flex-col items-center justify-center p-8 sm:p-12 lg:p-24 bg-white relative">
         {/* Botón volver */}
         <div className="absolute top-8 right-8 md:top-12 md:right-12">
           <Link to="/">
@@ -75,7 +75,7 @@ export const Login = () => {
 
         {/* Logo móvil */}
         <div className="lg:hidden mb-12">
-          <div className="flex items-center gap-2 text-slate-900 dark:text-white">
+          <div className="flex items-center gap-2 text-slate-900">
             <img
               src="/LOGO HUELLA360_logo primario.png"
               alt="Logo Huella360"
@@ -87,10 +87,10 @@ export const Login = () => {
 
         <div className="w-full max-w-md space-y-8 text-center lg:text-left">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
               Bienvenido de nuevo
             </h1>
-            <p className="mt-3 text-slate-500 dark:text-slate-400">
+            <p className="mt-3 text-slate-500">
               Accede a tu plataforma de forma segura.
             </p>
           </div>
@@ -108,7 +108,7 @@ export const Login = () => {
           {/* Separador */}
           <div className="relative mt-10">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200 dark:border-slate-800" />
+              <div className="w-full border-t border-slate-200" />
             </div>
           </div>
 

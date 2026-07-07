@@ -33,7 +33,7 @@ export const MapView = ({ lat, lng, zoom = 15 }: MapViewProps) => {
     const position: [number, number] = [lat, lng];
 
     return (
-        <div className="h-48 w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm relative z-0">
+        <div className="h-48 w-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative z-0">
             <MapContainer
                 center={position}
                 zoom={zoom}

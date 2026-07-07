@@ -178,19 +178,19 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-slate-200 dark:border-slate-800">
+      <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-slate-200">
 
         {/* Header */}
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+        <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <Package size={24} />
             </div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+            <h2 className="text-xl font-bold text-slate-900">
               {product ? "Editar Producto" : "Nuevo Producto"}
             </h2>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -206,18 +206,18 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nombre del Producto</label>
-                <input {...register("nombre")} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="Ej. Smartwatch Series 7" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Nombre del Producto</label>
+                <input {...register("nombre")} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="Ej. Smartwatch Series 7" />
                 {errors.nombre && <p className="text-xs text-red-500 mt-1">{errors.nombre.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">SKU</label>
-                <input {...register("sku")} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="PROD-001" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">SKU</label>
+                <input {...register("sku")} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="PROD-001" />
                 {errors.sku && <p className="text-xs text-red-500 mt-1">{errors.sku.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Categoría</label>
-                <select {...register("categoriaId", { valueAsNumber: true })} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 outline-none transition-all appearance-none">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Categoría</label>
+                <select {...register("categoriaId", { valueAsNumber: true })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary/50 outline-none transition-all appearance-none">
                   <option value="">Seleccionar...</option>
                   {categories.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                 </select>
@@ -233,18 +233,18 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Precio Base (S/)</label>
-                <input type="number" step="0.01" {...register("precio", { valueAsNumber: true })} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 outline-none transition-all" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Precio Base (S/)</label>
+                <input type="number" step="0.01" {...register("precio", { valueAsNumber: true })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary/50 outline-none transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Stock Inicial</label>
-                <input type="number" {...register("stock", { valueAsNumber: true })} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 outline-none transition-all" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Stock Inicial</label>
+                <input type="number" {...register("stock", { valueAsNumber: true })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary/50 outline-none transition-all" />
               </div>
             </div>
           </section>
 
           {/* Section 3: Temporary Offer */}
-          <section className={`space-y-4 p-5 rounded-2xl border transition-all ${showOffer ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-slate-800'}`}>
+          <section className={`space-y-4 p-5 rounded-2xl border transition-all ${showOffer ? 'bg-blue-50/50 border-blue-200' : 'bg-slate-50 border-slate-200'}`}>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Check className={showOffer ? 'text-primary' : 'text-slate-400'} size={18} />
@@ -252,7 +252,7 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" checked={showOffer} onChange={(e) => setShowOffer(e.target.checked)} className="sr-only peer" />
-                <div className="w-11 h-6 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
               </label>
             </div>
             <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 transition-opacity ${showOffer ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
@@ -262,15 +262,15 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
                   type="number" 
                   step="0.01" 
                   {...register("precioOferta", { valueAsNumber: true })} 
-                  className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 outline-none" 
+                  className="w-full bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm text-slate-900 focus:ring-2 focus:ring-primary/50 outline-none" 
                 />
                 {errors.precioOferta && <p className="text-[10px] text-red-500 mt-1">{errors.precioOferta.message}</p>}
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1.5">Vigencia (Inicio - Fin)</label>
                 <div className="flex gap-2">
-                  <input type="datetime-local" {...register("ofertaInicio")} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-[10px]" />
-                  <input type="datetime-local" {...register("ofertaFin")} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-[10px]" />
+                  <input type="datetime-local" {...register("ofertaInicio")} className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-[10px]" />
+                  <input type="datetime-local" {...register("ofertaFin")} className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-[10px]" />
                 </div>
               </div>
             </div>
@@ -282,7 +282,7 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
               <FileText className="text-primary/70" size={18} />
               <h3 className="text-sm font-bold uppercase tracking-wider text-primary/80">Descripción</h3>
             </div>
-            <textarea {...register("descripcion")} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 outline-none transition-all resize-none" rows={4} placeholder="Escribe una descripción detallada..." />
+            <textarea {...register("descripcion")} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:ring-2 focus:ring-primary/50 outline-none transition-all resize-none" rows={4} placeholder="Escribe una descripción detallada..." />
           </section>
 
           {/* Section 5: Images */}
@@ -292,18 +292,18 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
               <h3 className="text-sm font-bold uppercase tracking-wider text-primary/80">Imágenes del Producto</h3>
             </div>
 
-            <label className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer group">
+            <label className="border-2 border-dashed border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center bg-slate-50 hover:bg-slate-100 transition-all cursor-pointer group">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform text-primary">
                 <Upload size={24} />
               </div>
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Arrastra imágenes o <span className="text-primary">explora</span></p>
+              <p className="text-sm font-medium text-slate-600">Arrastra imágenes o <span className="text-primary">explora</span></p>
               <p className="text-xs text-slate-500 mt-1">Máximo 5 imágenes (JPG, PNG)</p>
               <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
             </label>
 
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-4 mt-4">
               {previews.map((src, i) => (
-                <div key={i} className="aspect-square bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden relative group">
+                <div key={i} className="aspect-square bg-slate-100 rounded-xl border border-slate-200 overflow-hidden relative group">
                   <img src={src} className="w-full h-full object-cover" alt="Preview" />
                   <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 bg-red-500 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity text-white">
                     <Trash2 size={14} />
@@ -311,7 +311,7 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
                 </div>
               ))}
               {previews.length < 5 && (
-                <div className="aspect-square bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400">
+                <div className="aspect-square bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400">
                   <Plus size={20} />
                 </div>
               )}
@@ -320,7 +320,7 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
         </form>
 
         {/* Footer */}
-        <div className="p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-end gap-3">
+        <div className="p-5 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
           <Button variant="outline" onClick={onClose} type="button">Cancelar</Button>
           <Button variant="primary" onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="min-w-[140px]">
             {isSubmitting ? (

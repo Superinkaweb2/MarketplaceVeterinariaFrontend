@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { marketplaceService } from "../services/marketplaceService";
 import { mapAdoptionToProduct, mapServiceToProduct } from "../utils/productAdapter";
 import type { Product } from "../types/marketplace";
@@ -29,6 +30,7 @@ export const useProductDetails = (id?: string) => {
                 }
             } catch (error) {
                 console.error("Error fetching product details:", error);
+                toast.error("No se pudo cargar el producto.");
                 setProduct(null);
             } finally {
                 setLoading(false);

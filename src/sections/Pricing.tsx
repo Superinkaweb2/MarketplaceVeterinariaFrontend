@@ -83,7 +83,7 @@ export const Pricing = () => {
                   // Lógica visual: Si es Pro, usa la tarjeta verde elevada. Si no, usa la tarjeta blanca.
                   className={`relative group rounded-xl p-8 flex flex-col transition-all duration-300 shadow-xl ${isPro
                     ? "bg-primary text-white border-4 border-primary-light/50 transform lg:-translate-y-4 z-10"
-                    : "bg-white text-slate-800 dark:bg-surface-dark dark:text-slate-200 border border-transparent"
+                    : "bg-white text-slate-800 border border-transparent"
                     }`}
                 >
                   {isPro && (
@@ -99,7 +99,7 @@ export const Pricing = () => {
                       {planIcon}
                     </div>
 
-                    <h3 className={`text-2xl font-bold mb-2 ${isPro ? "" : "text-secondary dark:text-white"}`}>
+                    <h3 className={`text-2xl font-bold mb-2 ${isPro ? "" : "text-secondary"}`}>
                       {plan.nombre}
                     </h3>
                     <p className={`text-sm min-h-[40px] ${isPro ? "text-white/80" : "text-slate-500"}`}>
@@ -109,7 +109,7 @@ export const Pricing = () => {
 
                   {/* Precios */}
                   <div className="flex items-baseline gap-1 mb-8">
-                    <span className={`text-4xl font-bold ${isPro ? "" : "text-secondary dark:text-white"}`}>
+                    <span className={`text-4xl font-bold ${isPro ? "" : "text-secondary"}`}>
                       S/ {plan.precioMensual}
                     </span>
                     <span className={`font-bold uppercase text-[10px] tracking-widest ${isPro ? "text-white/80" : "text-slate-400"}`}>
@@ -117,7 +117,7 @@ export const Pricing = () => {
                     </span>
                   </div>
 
-                  <hr className={`mb-8 ${isPro ? "border-white/20" : "border-slate-100 dark:border-slate-800"}`} />
+                  <hr className={`mb-8 ${isPro ? "border-white/20" : "border-slate-100"}`} />
 
                   {/* Lista de Features usando tu componente interno */}
                   <ul className="space-y-4 mb-10 flex-1">
@@ -153,12 +153,12 @@ export const Pricing = () => {
 // Tu FeatureItem restaurado y adaptado para que se vea bien en fondos blancos y verdes
 const FeatureItem = ({ text, included, isFeatured }: { text: string, included: boolean, isFeatured: boolean }) => (
   <li className={`flex items-center gap-4 text-sm font-semibold transition-colors ${included
-    ? (isFeatured ? "text-white" : "text-slate-700 dark:text-slate-200")
+    ? (isFeatured ? "text-white" : "text-slate-700")
     : (isFeatured ? "text-white/50" : "text-slate-400")
     }`}>
     <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${included
-      ? (isFeatured ? "bg-white/20 text-white" : "bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400")
-      : (isFeatured ? "bg-black/10 text-white/40" : "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500")
+      ? (isFeatured ? "bg-white/20 text-white" : "bg-green-100 text-green-600")
+      : (isFeatured ? "bg-black/10 text-white/40" : "bg-slate-100 text-slate-400")
       }`}>
       {included ? <Check size={14} strokeWidth={4} /> : <X size={14} />}
     </div>

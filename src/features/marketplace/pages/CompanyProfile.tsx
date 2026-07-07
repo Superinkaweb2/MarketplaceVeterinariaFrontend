@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import {
     Store,
     Stethoscope,
@@ -11,6 +12,7 @@ import {
     Gift
 } from "lucide-react";
 import { marketplaceService } from "../services/marketplaceService";
+import { mapAdoptionToProduct, mapServiceToProduct } from "../utils/productAdapter";
 import { ProductCard } from "../components/ProductCard";
 import { MapView } from "../components/MapView";
 import { Seo } from "../../../components/Seo";
@@ -57,40 +59,15 @@ export const CompanyProfile = () => {
 
             setCompany(companyData);
 
-            setProducts(productsData.content.map((p: any) => ({ ...p, itemType: 'product' })));
+            setProducts(productsData.content.map((p: Product) => ({ ...p, itemType: 'product' as const })));
 
-            setAdoptions(adoptionsData.content.map((a: any) => ({
-                id: `adoption_${a.id}` as any,
-                nombre: a.titulo,
-                descripcion: a.historia,
-                precio: 0,
-                precioActual: 0,
-                stock: 1,
-                imagenes: a.mascotaFotoUrl ? [a.mascotaFotoUrl] : [],
-                categoriaId: -1,
-                categoriaNombre: "Adopción",
-                empresaId: a.publicadoPorId,
-                empresaNombre: a.publicadoPorNombre || companyData.nombreComercial,
-                badge: { text: "Adopción", style: "adoption" },
-                itemType: 'adoption' as any
-            })));
+            setAdoptions(adoptionsData.content.map((a) => {
+                const mapped = mapAdoptionToProduct(a);
+                mapped.empresaNombre = companyData.nombreComercial;
+                return mapped;
+            }));
 
-            setServices(servicesData.content.map((s: any) => ({
-                id: `service_${s.id}`,
-                nombre: s.nombre,
-                descripcion: s.descripcion,
-                precio: s.precio,
-                precioActual: s.precio,
-                stock: 1,
-                imagenes: s.imagenUrl ? [s.imagenUrl] : [],
-                categoriaId: -2,
-                categoriaNombre: "Servicio",
-                empresaId: s.empresaId,
-                empresaNombre: s.empresaNombre,
-                mpPublicKey: s.mpPublicKey,
-                badge: { text: s.modalidad || "Servicio", style: "service" },
-                itemType: 'service'
-            })));
+            setServices(servicesData.content.map((s) => mapServiceToProduct(s)));
 
             // Smart tab selection based on content availability
             if (productsData.content.length > 0) setActiveTab('products');
@@ -99,6 +76,7 @@ export const CompanyProfile = () => {
 
         } catch (error) {
             console.error("Error fetching company profile data:", error);
+            toast.error("No se pudo cargar el perfil de la empresa.");
         } finally {
             setLoading(false);
         }
@@ -111,19 +89,19 @@ export const CompanyProfile = () => {
     if (loading) {
         return (
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
-                <div className="h-[300px] bg-slate-200 dark:bg-slate-800 rounded-3xl mb-8" />
+                <div className="h-[300px] bg-slate-200 rounded-3xl mb-8" />
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     <div className="lg:col-span-1 space-y-4 -mt-24 relative z-10">
-                        <div className="w-32 h-32 bg-slate-300 dark:bg-slate-700 rounded-2xl border-4 border-white dark:border-slate-950" />
-                        <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded w-3/4" />
-                        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-full" />
-                        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-5/6" />
+                        <div className="w-32 h-32 bg-slate-300 rounded-2xl border-4 border-white" />
+                        <div className="h-6 bg-slate-200 rounded w-3/4" />
+                        <div className="h-4 bg-slate-200 rounded w-full" />
+                        <div className="h-4 bg-slate-200 rounded w-5/6" />
                     </div>
                     <div className="lg:col-span-3 mt-8 lg:mt-0 space-y-6">
-                        <div className="h-10 bg-slate-200 dark:bg-slate-800 rounded-lg w-1/2" />
+                        <div className="h-10 bg-slate-200 rounded-lg w-1/2" />
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="h-64 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
+                                <div key={i} className="h-64 bg-slate-200 rounded-2xl" />
                             ))}
                         </div>
                     </div>
@@ -135,8 +113,8 @@ export const CompanyProfile = () => {
     if (!company) {
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
-                <Store className="w-16 h-16 text-slate-300 dark:text-slate-700 mb-4" />
-                <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Empresa no encontrada</h2>
+                <Store className="w-16 h-16 text-slate-300 mb-4" />
+                <h2 className="text-2xl font-semibold text-slate-900">Empresa no encontrada</h2>
                 <p className="text-slate-500 mt-2 mb-6">La empresa que buscas no existe o ha sido eliminada.</p>
                 <Link 
                     to="/marketplace" 
@@ -167,10 +145,10 @@ export const CompanyProfile = () => {
 
         if (items.length === 0) {
             return (
-                <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                     <Info className="w-10 h-10 text-slate-400 mb-3" />
-                    <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-1">Nada por aquí</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{emptyMessage}</p>
+                    <h3 className="text-sm font-medium text-slate-900 mb-1">Nada por aquí</h3>
+                    <p className="text-sm text-slate-500">{emptyMessage}</p>
                 </div>
             );
         }
@@ -185,14 +163,14 @@ export const CompanyProfile = () => {
     };
 
     return (
-        <div className="w-full min-h-screen bg-white dark:bg-slate-950 pb-20">
+        <div className="w-full min-h-screen bg-white pb-20">
             <Seo
                 title={company.nombreComercial}
                 description={company.descripcion || `Perfil de ${company.nombreComercial} en Huella360`}
                 image={company.logoUrl}
             />
             {/* Banner Section */}
-            <div className="relative w-full h-[280px] md:h-[320px] bg-slate-100 dark:bg-slate-900">
+            <div className="relative w-full h-[280px] md:h-[320px] bg-slate-100">
                 {company.bannerUrl ? (
                     <img
                         src={company.bannerUrl}
@@ -211,9 +189,9 @@ export const CompanyProfile = () => {
                     
                     {/* Sidebar / Company Info */}
                     <div className="lg:col-span-4 xl:col-span-3 -mt-20 relative z-10">
-                        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+                        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
                             {/* Logo */}
-                            <div className="w-28 h-28 bg-white dark:bg-slate-950 rounded-2xl p-1.5 shadow-sm border border-slate-100 dark:border-slate-800 mb-6">
+                            <div className="w-28 h-28 bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 mb-6">
                                 {company.logoUrl ? (
                                     <img
                                         src={company.logoUrl}
@@ -221,7 +199,7 @@ export const CompanyProfile = () => {
                                         className="w-full h-full object-cover rounded-xl"
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center rounded-xl">
+                                    <div className="w-full h-full bg-slate-50 flex items-center justify-center rounded-xl">
                                         <Store className="w-10 h-10 text-slate-400" />
                                     </div>
                                 )}
@@ -229,25 +207,25 @@ export const CompanyProfile = () => {
 
                             {/* Info */}
                             <div className="mb-6">
-                                <span className="inline-block px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-md mb-3">
+                                <span className="inline-block px-2.5 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-md mb-3">
                                     {company.tipoServicio}
                                 </span>
-                                <h1 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight mb-2">
+                                <h1 className="text-2xl font-bold text-slate-900 leading-tight mb-2">
                                     {company.nombreComercial}
                                 </h1>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                                <p className="text-sm text-slate-500 leading-relaxed">
                                     {company.descripcion || "Este negocio aún no ha añadido una descripción a su perfil."}
                                 </p>
                             </div>
 
                             {/* Contact Details */}
-                            <div className="space-y-3 pt-6 border-t border-slate-100 dark:border-slate-800/60 text-sm">
-                                <div className="flex items-start gap-3 text-slate-600 dark:text-slate-300">
+                            <div className="space-y-3 pt-6 border-t border-slate-100 text-sm">
+                                <div className="flex items-start gap-3 text-slate-600">
                                     <MapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
                                     <span className="leading-snug">{company.direccion}, {company.ciudad}</span>
                                 </div>
                                 {company.emailContacto && (
-                                    <span className="flex items-center gap-3 text-slate-600 dark:text-slate-300 hover:text-blue-600 transition-colors group">
+                                    <span className="flex items-center gap-3 text-slate-600 hover:text-blue-600 transition-colors group">
                                         <Mail className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors shrink-0" />
                                         <span className="truncate">{company.emailContacto}</span>
                                     </span>
@@ -256,18 +234,18 @@ export const CompanyProfile = () => {
 
                             {/* Map */}
                             {company.latitud && company.longitud && (
-                                <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/60">
-                                    <h3 className="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-4">
+                                <div className="mt-8 pt-6 border-t border-slate-100">
+                                    <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-4">
                                         Ubicación
                                     </h3>
-                                    <div className="rounded-xl overflow-hidden border border-slate-100 dark:border-slate-800 mb-3 h-32">
+                                    <div className="rounded-xl overflow-hidden border border-slate-100 mb-3 h-32">
                                         <MapView lat={company.latitud} lng={company.longitud} />
                                     </div>
                                     <a
                                         href={`https://www.google.com/maps/dir/?api=1&destination=${company.latitud},${company.longitud}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center justify-center gap-2 w-full py-2.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-xl transition-colors"
+                                        className="flex items-center justify-center gap-2 w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-medium rounded-xl transition-colors"
                                     >
                                         <Navigation className="w-4 h-4" />
                                         Cómo llegar
@@ -281,7 +259,7 @@ export const CompanyProfile = () => {
                     <div className="lg:col-span-8 xl:col-span-9 pt-8 lg:pt-12">
                         
                         {/* Minimalist Tabs */}
-                        <div className="flex overflow-x-auto no-scrollbar border-b border-slate-200 dark:border-slate-800 mb-8">
+                        <div className="flex overflow-x-auto no-scrollbar border-b border-slate-200 mb-8">
                             <div className="flex gap-6 px-1">
                                 {tabs.map((tab) => {
                                     const isActive = activeTab === tab.id;
@@ -292,9 +270,9 @@ export const CompanyProfile = () => {
                                             onClick={() => setActiveTab(tab.id as TabType)}
                                             className={`
                                                 relative flex items-center gap-2 pb-4 text-sm font-medium transition-colors whitespace-nowrap
-                                                ${isActive 
-                                                    ? 'text-blue-600 dark:text-blue-400' 
-                                                    : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                                                ${isActive
+                                                    ? 'text-blue-600'
+                                                    : 'text-slate-500 hover:text-slate-800'
                                                 }
                                             `}
                                         >
@@ -302,9 +280,9 @@ export const CompanyProfile = () => {
                                             {tab.label}
                                             <span className={`
                                                 px-2 py-0.5 rounded-full text-xs
-                                                ${isActive 
-                                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' 
-                                                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                                                ${isActive
+                                                    ? 'bg-blue-100 text-blue-700'
+                                                    : 'bg-slate-100 text-slate-600'
                                                 }
                                             `}>
                                                 {tab.count}
@@ -312,7 +290,7 @@ export const CompanyProfile = () => {
                                             
                                             {/* Active Indicator */}
                                             {isActive && (
-                                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-t-full" />
+                                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full" />
                                             )}
                                         </button>
                                     );

@@ -65,7 +65,7 @@ export const EmpresaProfilePage = () => {
 
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-background-dark flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-500 animate-pulse font-medium">Verificando perfil...</p>
@@ -221,25 +221,25 @@ export const EmpresaProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-background-dark py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
+    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Perfil de Empresa</h2>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">Registra tu clínica o veterinaria para comenzar a operar en la plataforma.</p>
+          <h2 className="text-3xl font-bold text-slate-900">Perfil de Empresa</h2>
+          <p className="mt-2 text-slate-600">Registra tu clínica o veterinaria para comenzar a operar en la plataforma.</p>
         </div>
 
-        <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <form onSubmit={handleSubmit(onSubmit)} className="p-8 sm:p-10 space-y-8">
 
             {/* ── Subida de Imágenes ── */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold border-b border-slate-100 dark:border-slate-800 pb-2 dark:text-white">Imágenes de Marca</h3>
+              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Imágenes de Marca</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Logo */}
                 <div className="col-span-1">
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Logo</label>
-                  <div className="relative group border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Logo</label>
+                  <div className="relative group border-2 border-dashed border-slate-300 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 hover:bg-slate-100 transition-colors">
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" ref={logoInputRef} onChange={(e) => handleImageChange(e, 'logo')} />
 
                     {logoPreview ? (
@@ -260,8 +260,8 @@ export const EmpresaProfilePage = () => {
 
                 {/* Banner */}
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Banner (Portada)</label>
-                  <div className="relative group border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Banner (Portada)</label>
+                  <div className="relative group border-2 border-dashed border-slate-300 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 hover:bg-slate-100 transition-colors">
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" ref={bannerInputRef} onChange={(e) => handleImageChange(e, 'banner')} />
 
                     {bannerPreview ? (
@@ -280,23 +280,23 @@ export const EmpresaProfilePage = () => {
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+              <p className="text-xs text-slate-400 mt-2">
                 Formatos aceptados: JPG, PNG, WEBP. Tamaño máximo: 1MB por imagen.
               </p>
             </div>
 
             {/* ── Datos Legales ── */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold border-b border-slate-100 dark:border-slate-800 pb-2 dark:text-white">Información Legal</h3>
+              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Información Legal</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Razón Social *</label>
-                  <input type="text" {...register("razonSocial")} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 px-4 focus:ring-2 focus:ring-primary dark:text-white" />
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Razón Social *</label>
+                  <input type="text" {...register("razonSocial")} className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary" />
                   {errors.razonSocial && <p className="mt-1 text-xs text-red-500">{errors.razonSocial.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">RUC / NIT *</label>
-                  <input type="text" {...register("ruc")} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 px-4 focus:ring-2 focus:ring-primary dark:text-white" />
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">RUC / NIT *</label>
+                  <input type="text" {...register("ruc")} className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary" />
                   {errors.ruc && <p className="mt-1 text-xs text-red-500">{errors.ruc.message}</p>}
                 </div>
               </div>
@@ -304,21 +304,21 @@ export const EmpresaProfilePage = () => {
 
             {/* ── Datos Comerciales ── */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold border-b border-slate-100 dark:border-slate-800 pb-2 dark:text-white">Perfil Público</h3>
+              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Perfil Público</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Nombre Comercial *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Nombre Comercial *</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Building2 size={18} /></div>
-                    <input type="text" {...register("nombreComercial")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white" />
+                    <input type="text" {...register("nombreComercial")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
                   </div>
                   {errors.nombreComercial && <p className="mt-1 text-xs text-red-500">{errors.nombreComercial.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Tipo de Servicio *</label>
-                  <select {...register("tipoServicio")} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 px-4 focus:ring-2 focus:ring-primary dark:text-white">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Tipo de Servicio *</label>
+                  <select {...register("tipoServicio")} className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary">
                     <option value="VETERINARIA">Veterinaria / Clínica</option>
                     <option value="PETSHOP">Pet Shop / Tienda</option>
                     <option value="GROOMING">Peluquería / Grooming</option>
@@ -329,31 +329,31 @@ export const EmpresaProfilePage = () => {
 
                 {tipoServicio === "OTRO" && (
                   <div className="animate-in fade-in slide-in-from-top-2">
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Especifique el Tipo de Servicio *</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">Especifique el Tipo de Servicio *</label>
                     <input
                       type="text"
                       {...register("tipoServicioOtro", { required: tipoServicio === "OTRO" })}
                       placeholder="Ej: Guardería, Adiestramiento, etc."
-                      className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 px-4 focus:ring-2 focus:ring-primary dark:text-white"
+                      className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary"
                     />
                     {errors.tipoServicioOtro && <p className="mt-1 text-xs text-red-500">Campo requerido cuando selecciona Otros</p>}
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Teléfono de Contacto *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Teléfono de Contacto *</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Phone size={18} /></div>
-                    <input type="tel" {...register("telefono")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white" />
+                    <input type="tel" {...register("telefono")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
                   </div>
                   {errors.telefono && <p className="mt-1 text-xs text-red-500">{errors.telefono.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Email de Contacto *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Email de Contacto *</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Mail size={18} /></div>
-                    <input type="email" {...register("emailContacto")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white" />
+                    <input type="email" {...register("emailContacto")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
                   </div>
                   {errors.emailContacto && <p className="mt-1 text-xs text-red-500">{errors.emailContacto.message}</p>}
                 </div>
@@ -362,21 +362,21 @@ export const EmpresaProfilePage = () => {
 
             {/* ── Ubicación ── */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold border-b border-slate-100 dark:border-slate-800 pb-2 dark:text-white">Ubicación</h3>
+              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Ubicación</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Ciudad *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Ciudad *</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Search size={18} /></div>
-                    <input type="text" {...register("ciudad")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white" />
+                    <input type="text" {...register("ciudad")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
                   </div>
                   {errors.ciudad && <p className="mt-1 text-xs text-red-500">{errors.ciudad.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Dirección exacta *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Dirección exacta *</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><MapPin size={18} /></div>
-                    <input type="text" {...register("direccion")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white" />
+                    <input type="text" {...register("direccion")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
                   </div>
                   {errors.direccion && <p className="mt-1 text-xs text-red-500">{errors.direccion.message}</p>}
                 </div>

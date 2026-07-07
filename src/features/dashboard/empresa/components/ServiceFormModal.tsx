@@ -137,20 +137,20 @@ export const ServiceFormModal = ({
 
     return (
         <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4">
-            <div className="bg-white dark:bg-surface-dark w-full max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[95vh] sm:max-h-[90vh] flex flex-col transition-all duration-300">
-                <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+            <div className="bg-white w-full max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[95vh] sm:max-h-[90vh] flex flex-col transition-all duration-300">
+                <div className="p-4 sm:p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary shrink-0">
                             <Stethoscope size={20} className="sm:hidden" />
                             <Stethoscope size={24} className="hidden sm:block" />
                         </div>
-                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white truncate">
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 truncate">
                             {service ? "Editar Servicio" : "Nuevo Servicio"}
                         </h2>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
                     >
                         <X size={20} />
                     </button>
@@ -160,17 +160,17 @@ export const ServiceFormModal = ({
                     <div className="flex flex-col md:flex-row gap-8">
                         <div className="flex flex-col items-center gap-4 shrink-0">
                             <div className="relative group">
-                                <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm bg-slate-50 dark:bg-slate-900 flex items-center justify-center transition-transform group-hover:scale-[1.02]">
+                                <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden border border-slate-100 shadow-sm bg-slate-50 flex items-center justify-center transition-transform group-hover:scale-[1.02]">
                                     {fotoPreview ? (
                                         <img src={fotoPreview} alt="Preview" className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="flex flex-col items-center text-slate-400 dark:text-slate-600">
+                                        <div className="flex flex-col items-center text-slate-400">
                                             <ImageIcon size={40} strokeWidth={1.5} />
                                             <span className="text-[10px] mt-2 font-medium">SIN IMAGEN</span>
                                         </div>
                                     )}
                                 </div>
-                                <label className="absolute -bottom-2 -right-2 p-2.5 bg-primary text-white rounded-xl shadow-lg border-4 border-white dark:border-surface-dark cursor-pointer hover:scale-110 active:scale-95 transition-all">
+                                <label className="absolute -bottom-2 -right-2 p-2.5 bg-primary text-white rounded-xl shadow-lg border-4 border-white cursor-pointer hover:scale-110 active:scale-95 transition-all">
                                     <Camera size={18} />
                                     <input type="file" className="sr-only" onChange={handleImageChange} accept="image/*" />
                                 </label>
@@ -183,38 +183,38 @@ export const ServiceFormModal = ({
 
                         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                             <div className="space-y-2 md:col-span-2">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                <label className="text-sm font-semibold text-slate-700">
                                     Nombre del Servicio
                                 </label>
                                 <input
                                     {...register("nombre")}
-                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white transition-all focus:ring-2 focus:ring-primary/20 outline-none"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white transition-all focus:ring-2 focus:ring-primary/20 outline-none"
                                     placeholder="Ej: Consulta General, Vacunación, Cirugía"
                                 />
                                 {errors.nombre && <p className="text-xs text-red-500">{errors.nombre.message}</p>}
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                <label className="text-sm font-semibold text-slate-700">
                                     Precio (S/)
                                 </label>
                                 <input
                                     type="number"
                                     step="0.01"
                                     {...register("precio", { valueAsNumber: true })}
-                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white font-mono transition-all focus:ring-2 focus:ring-primary/20 outline-none"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white font-mono transition-all focus:ring-2 focus:ring-primary/20 outline-none"
                                 />
                                 {errors.precio && <p className="text-xs text-red-500">{errors.precio.message}</p>}
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                <label className="text-sm font-semibold text-slate-700">
                                     Duración (minutos)
                                 </label>
                                 <input
                                     type="number"
                                     {...register("duracionMinutos", { valueAsNumber: true })}
-                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white transition-all focus:ring-2 focus:ring-primary/20 outline-none"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white transition-all focus:ring-2 focus:ring-primary/20 outline-none"
                                     placeholder="30"
                                 />
                                 {errors.duracionMinutos && (
@@ -223,12 +223,12 @@ export const ServiceFormModal = ({
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                <label className="text-sm font-semibold text-slate-700">
                                     Modalidad
                                 </label>
                                 <select
                                     {...register("modalidad")}
-                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white transition-all focus:ring-2 focus:ring-primary/20 outline-none"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white transition-all focus:ring-2 focus:ring-primary/20 outline-none"
                                 >
                                     {MODALIDADES.map((m) => (
                                         <option key={m} value={m}>
@@ -241,13 +241,13 @@ export const ServiceFormModal = ({
 
 
                             <div className="space-y-2 md:col-span-2">
-                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                <label className="text-sm font-semibold text-slate-700">
                                     Descripción
                                 </label>
                                 <textarea
                                     {...register("descripcion")}
                                     rows={3}
-                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white resize-none transition-all focus:ring-2 focus:ring-primary/20 outline-none"
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white resize-none transition-all focus:ring-2 focus:ring-primary/20 outline-none"
                                     placeholder="Describe en qué consiste el servicio..."
                                 />
                             </div>
@@ -255,7 +255,7 @@ export const ServiceFormModal = ({
                     </div>
                 </form>
 
-                <div className="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex flex-col sm:flex-row justify-end gap-3">
+                <div className="p-4 sm:p-6 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-end gap-3">
                     <Button
                         variant="outline"
                         onClick={onClose}

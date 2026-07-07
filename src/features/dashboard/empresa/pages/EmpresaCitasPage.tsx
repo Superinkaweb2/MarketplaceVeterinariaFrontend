@@ -7,12 +7,12 @@ import type { ApiResponse } from "../../../../shared/types/api";
 import Swal from "sweetalert2";
 
 const STATUS_STYLES: Record<string, string> = {
-    SOLICITADA: "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400",
-    CONFIRMADA: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400",
-    COMPLETADA: "bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400",
-    RECHAZADA: "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400",
-    CANCELADA: "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400",
-    NOSHOW: "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400",
+    SOLICITADA: "bg-blue-100 text-blue-700",
+    CONFIRMADA: "bg-emerald-100 text-emerald-700",
+    COMPLETADA: "bg-slate-100 text-slate-700",
+    RECHAZADA: "bg-red-100 text-red-700",
+    CANCELADA: "bg-red-100 text-red-700",
+    NOSHOW: "bg-orange-100 text-orange-700",
 };
 
 export const EmpresaCitasPage = () => {
@@ -65,7 +65,7 @@ export const EmpresaCitasPage = () => {
     return (
         <div className="p-6 max-w-5xl mx-auto">
             <div className="mb-8">
-                <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-2 flex items-center gap-3">
+                <h1 className="text-3xl font-black text-slate-900 mb-2 flex items-center gap-3">
                     <Calendar className="text-teal-500" size={32} />
                     Gestión de Citas
                 </h1>
@@ -78,9 +78,9 @@ export const EmpresaCitasPage = () => {
                     <p className="text-slate-400">Cargando citas...</p>
                 </div>
             ) : citas.length === 0 ? (
-                <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+                <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
                     <Calendar size={48} className="text-slate-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Sin citas por gestionar</h3>
+                    <h3 className="text-xl font-bold text-slate-900">Sin citas por gestionar</h3>
                     <p className="text-sm text-slate-500 mt-2 max-w-xs mx-auto">
                         Cuando un cliente agende una cita con tus servicios, aparecerá aquí.
                     </p>
@@ -88,11 +88,11 @@ export const EmpresaCitasPage = () => {
             ) : (
                 <div className="space-y-4">
                     {citas.map((cita) => (
-                        <div key={cita.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden hover:border-teal-500/30 transition-all group">
+                        <div key={cita.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:border-teal-500/30 transition-all group">
                             <div className="p-5 flex flex-col md:flex-row md:items-center gap-5">
                                 {/* Time Block */}
-                                <div className="flex md:flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-xl px-4 py-3 md:w-28 shrink-0 gap-2 md:gap-0 md:text-center">
-                                    <span className="text-lg font-black text-teal-600 dark:text-teal-400">
+                                <div className="flex md:flex-col items-center justify-center bg-slate-50 rounded-xl px-4 py-3 md:w-28 shrink-0 gap-2 md:gap-0 md:text-center">
+                                    <span className="text-lg font-black text-teal-600">
                                         {cita.horaInicio?.slice(0, 5) ?? "--:--"}
                                     </span>
                                     <span className="text-[10px] text-slate-400 font-bold uppercase md:mt-0.5">
@@ -105,7 +105,7 @@ export const EmpresaCitasPage = () => {
                                 {/* Info */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                        <h3 className="font-bold text-lg text-slate-900 dark:text-white truncate group-hover:text-teal-600 transition-colors">
+                                        <h3 className="font-bold text-lg text-slate-900 truncate group-hover:text-teal-600 transition-colors">
                                             {cita.mascotaNombre || "Sin mascota"}
                                         </h3>
                                         <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase ${STATUS_STYLES[cita.estado] ?? "bg-slate-100 text-slate-600"}`}>
@@ -113,7 +113,7 @@ export const EmpresaCitasPage = () => {
                                         </span>
                                     </div>
                                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500">
-                                        <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                        <span className="font-semibold text-slate-700 flex items-center gap-1.5">
                                             <Clock size={14} className="text-teal-500" />
                                             {cita.servicioNombre}
                                         </span>
@@ -139,7 +139,7 @@ export const EmpresaCitasPage = () => {
                                             </button>
                                             <button
                                                 onClick={() => handleUpdateStatus(cita.id, "RECHAZADA")}
-                                                className="flex-1 lg:flex-none h-9 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                                                className="flex-1 lg:flex-none h-9 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                                             >
                                                 <X size={14} /> Rechazar
                                             </button>

@@ -170,14 +170,14 @@ export const MySubscriptionPage = () => {
         <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
             <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
                 <header className="text-center space-y-2">
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">Mi Suscripción</h1>
-                    <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Mi Suscripción</h1>
+                    <p className="text-slate-500 max-w-2xl mx-auto">
                         Controla tu plan actual, gestiona tus límites y descubre nuevas funciones para potenciar tu veterinaria.
                     </p>
                 </header>
 
                 {/* Current Plan Card */}
-                <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl shadow-primary/5 overflow-hidden">
+                <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-primary/5 overflow-hidden">
                     <div className="bg-gradient-to-br from-primary via-orange-500 to-primary-dark p-8 md:p-12 text-white relative overflow-hidden">
                         {/* Decorative shapes */}
                         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
@@ -237,7 +237,7 @@ export const MySubscriptionPage = () => {
 
                 {/* Available Plans Grid */}
                 <div className="space-y-6">
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white px-2">Explora nuestros planes</h3>
+                    <h3 className="text-2xl font-bold text-slate-900 px-2">Explora nuestros planes</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-4">
                         {plans.map((plan) => {
                             const isCurrent = mySub?.plan.id === plan.id;
@@ -248,8 +248,8 @@ export const MySubscriptionPage = () => {
                                 <div
                                     key={plan.id}
                                     className={`group relative rounded-[2.5rem] p-8 md:p-10 border transition-all duration-300 flex flex-col ${isCurrent
-                                        ? 'border-primary ring-4 ring-primary/5 bg-primary/[0.02] dark:bg-primary/[0.05]'
-                                        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-2xl hover:shadow-slate-200/50 dark:hover:shadow-none'
+                                        ? 'border-primary ring-4 ring-primary/5 bg-primary/[0.02]'
+                                        : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-2xl hover:shadow-slate-200/50'
                                         }`}
                                 >
                                     {isCurrent && (
@@ -259,16 +259,16 @@ export const MySubscriptionPage = () => {
                                     )}
 
                                     <div className="mb-8">
-                                        <h3 className={`text-2xl font-black mb-3 ${isCurrent ? 'text-primary' : 'text-slate-900 dark:text-white'}`}>
+                                        <h3 className={`text-2xl font-black mb-3 ${isCurrent ? 'text-primary' : 'text-slate-900'}`}>
                                             {plan.nombre}
                                         </h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                                        <p className="text-sm text-slate-500 leading-relaxed font-medium">
                                             {plan.descripcion}
                                         </p>
                                     </div>
 
                                     <div className="mb-10 flex items-baseline gap-2">
-                                        <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">S/ {plan.precioMensual.toFixed(0)}</span>
+                                        <span className="text-5xl font-black text-slate-900 tracking-tighter">S/ {plan.precioMensual.toFixed(0)}</span>
                                         <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">/mes</span>
                                     </div>
 
@@ -284,7 +284,7 @@ export const MySubscriptionPage = () => {
                                         variant={isCurrent ? 'outline' : 'primary'}
                                         disabled={isCurrent}
                                         onClick={() => handleUpgrade(plan)}
-                                        className={`w-full py-6 rounded-2xl font-black shadow-lg transition-all transform group-hover:scale-[1.02] h-auto text-sm uppercase tracking-widest ${isCurrent ? 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700' : ''
+                                        className={`w-full py-6 rounded-2xl font-black shadow-lg transition-all transform group-hover:scale-[1.02] h-auto text-sm uppercase tracking-widest ${isCurrent ? 'bg-slate-50 border-slate-200' : ''
                                             }`}
                                     >
                                         {isCurrent ? 'Plan Actual' : 'Subir de Nivel'}
@@ -296,7 +296,7 @@ export const MySubscriptionPage = () => {
                 </div>
 
                 {/* Support Banner */}
-                <div className="bg-slate-900 dark:bg-slate-800 rounded-[2rem] p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 text-center md:text-left border border-white/5 shadow-2xl">
+                <div className="bg-slate-900 rounded-[2rem] p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 text-center md:text-left border border-white/5 shadow-2xl">
                     <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shrink-0 border border-primary/20">
                         <AlertCircle size={32} />
                     </div>
@@ -318,19 +318,19 @@ export const MySubscriptionPage = () => {
 const StatCard = ({ icon, label, value, color, percentage }: { icon: React.ReactNode, label: string, value: string | number, color: string, percentage?: number }) => {
     const colors = {
         blue: {
-            bg: "bg-blue-50 dark:bg-blue-500/10 text-blue-500",
+            bg: "bg-blue-50 text-blue-500",
             bar: "bg-blue-500"
         },
         emerald: {
-            bg: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500",
+            bg: "bg-emerald-50 text-emerald-500",
             bar: "bg-emerald-500"
         },
         purple: {
-            bg: "bg-purple-50 dark:bg-purple-500/10 text-purple-500",
+            bg: "bg-purple-50 text-purple-500",
             bar: "bg-purple-500"
         },
         amber: {
-            bg: "bg-amber-50 dark:bg-amber-500/10 text-amber-500",
+            bg: "bg-amber-50 text-amber-500",
             bar: "bg-amber-500"
         },
     };
@@ -338,19 +338,19 @@ const StatCard = ({ icon, label, value, color, percentage }: { icon: React.React
     const colorConfig = colors[color as keyof typeof colors];
 
     return (
-        <div className="flex flex-col gap-4 p-4 rounded-3xl transition-all border border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/50">
+        <div className="flex flex-col gap-4 p-4 rounded-3xl transition-all border border-transparent hover:bg-slate-50">
             <div className="flex items-center gap-5 group">
                 <div className={`p-4 rounded-2xl ${colorConfig.bg} transition-transform duration-300 group-hover:scale-110 shadow-sm border border-transparent`}>
                     {icon}
                 </div>
                 <div className="space-y-0.5">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">{label}</p>
-                    <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter">{value}</h4>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
+                    <h4 className="text-xl font-black text-slate-900 tracking-tighter">{value}</h4>
                 </div>
             </div>
             {percentage !== undefined && (
                 <div className="space-y-2">
-                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                         <div
                             className={`h-full ${colorConfig.bar} transition-all duration-1000 ease-out`}
                             style={{ width: `${percentage}%` }}
@@ -364,7 +364,7 @@ const StatCard = ({ icon, label, value, color, percentage }: { icon: React.React
 };
 
 const FeatureItem = ({ text }: { text: string }) => (
-    <div className="flex items-center gap-4 text-sm font-semibold text-slate-600 dark:text-slate-400">
+    <div className="flex items-center gap-4 text-sm font-semibold text-slate-600">
         <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
             <Check size={14} strokeWidth={4} />
         </div>

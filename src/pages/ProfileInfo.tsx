@@ -77,7 +77,7 @@ export const ProfilesInfo = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="w-full bg-[#f6f8f8] dark:bg-[#12201f] pb-24">
+    <div className="w-full bg-[#f6f8f8] pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24">
 
         {PROFILE_DETAILS.map((profile, index) => {
@@ -94,7 +94,7 @@ export const ProfilesInfo = () => {
 
               {/* Contenedor de la Imagen (Minimalista) */}
               <div className="w-full lg:w-1/2">
-                <article className="aspect-square max-h-[450px] w-full bg-white dark:bg-[#1a2c2b] rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800/50 overflow-hidden group">
+                <article className="aspect-square max-h-[450px] w-full bg-white rounded-2xl shadow-soft border border-slate-100 overflow-hidden group">
                   <img
                     src={profile.imageUrl}
                     alt={profile.imageAlt}
@@ -106,14 +106,14 @@ export const ProfilesInfo = () => {
 
               {/* Contenido Informativo */}
               <div className="w-full lg:w-1/2 flex flex-col justify-center">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-[#1a2c2b] border border-slate-200 dark:border-slate-700 shadow-sm w-max mb-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 shadow-sm w-max mb-6">
                   <Icon size={14} className={profile.color} />
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                  <span className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
                     {profile.id}
                   </span>
                 </div>
 
-                <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E82] dark:text-white mb-4">
+                <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E82] mb-4">
                   {profile.title}
                 </h2>
 
@@ -121,7 +121,7 @@ export const ProfilesInfo = () => {
                   {profile.subtitle}
                 </p>
 
-                <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed text-lg">
+                <p className="text-slate-600 mb-8 leading-relaxed text-lg">
                   {profile.description}
                 </p>
 
@@ -129,7 +129,7 @@ export const ProfilesInfo = () => {
                   {profile.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
                       <CheckCircle2 className="w-6 h-6 text-[#1ea59c] shrink-0 mt-0.5" />
-                      <span className="text-slate-700 dark:text-slate-300">
+                      <span className="text-slate-700">
                         {feature}
                       </span>
                     </li>

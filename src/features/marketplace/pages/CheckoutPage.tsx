@@ -124,20 +124,12 @@ export const CheckoutPage = () => {
                 return;
             }
 
-            const orderItems = group.items.map((item: any) => {
-                const isService = item.itemType === 'service' || String(item.id).startsWith('service_');
-                const numericId = typeof item.id === 'string'
-                    ? Number(item.id.split('_').pop())
-                    : item.id;
+            const orderItems = group.items.map((item: any) => ({
+                productoId: item.id,
+                servicioId: null,
+                cantidad: item.quantity
+            }));
 
-                return {
-                    productoId: isService ? null : numericId,
-                    servicioId: isService ? numericId : null,
-                    cantidad: item.quantity
-                };
-            });
-
-            // Validar campos de envío
             if (deliveryMode === 'delivery') {
                 if (!location) {
                     setError("Necesitas compartir tu ubicación para el envío a domicilio");
@@ -151,12 +143,9 @@ export const CheckoutPage = () => {
                 }
             }
 
-            // 1. Create Order
-            const isFirstItemService = group.items[0]?.itemType === 'service' || String(group.items[0]?.id).startsWith('service_');
-
             const orderId = await marketplaceService.createOrder({
-                empresaId: !isFirstItemService ? empresaId : null,
-                veterinarioId: isFirstItemService ? empresaId : null,
+                empresaId,
+                veterinarioId: null,
                 costoEnvio: shippingCost,
                 destinoLat: deliveryMode === 'delivery' && location ? location.lat : undefined,
                 destinoLng: deliveryMode === 'delivery' && location ? location.lng : undefined,
@@ -189,7 +178,7 @@ export const CheckoutPage = () => {
         return (
             <div className="max-w-4xl mx-auto px-4 py-20 text-center">
                 <span className="material-symbols-outlined text-6xl text-slate-300 mb-4">shopping_cart</span>
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Tu carrito está vacío</h2>
+                <h2 className="text-2xl font-bold text-slate-900 mb-4">Tu carrito está vacío</h2>
                 <Link to="/marketplace" className="text-blue-600 font-medium hover:underline">
                     Ir a comprar algo
                 </Link>
@@ -198,24 +187,24 @@ export const CheckoutPage = () => {
     }
 
     return (
-        <div className="w-full bg-slate-50 dark:bg-slate-950 min-h-screen pb-20">
+        <div className="w-full bg-slate-50 min-h-screen pb-20">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-6">Confirmar Pedido</h1>
+                <h1 className="text-3xl font-extrabold text-slate-900 mb-6">Confirmar Pedido</h1>
 
                 {/* Sandbox Banner */}
                 {isSandboxMode && (
-                    <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl">
+                    <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
                         <div className="flex items-start gap-3">
                             <span className="material-symbols-outlined text-amber-500 text-xl mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>science</span>
                             <div>
-                                <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Modo Sandbox (Pruebas)</p>
-                                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                                <p className="text-sm font-bold text-amber-800">Modo Sandbox (Pruebas)</p>
+                                <p className="text-xs text-amber-700 mt-1">
                                     Estás en entorno de pruebas. Para completar el pago:
                                 </p>
-                                <ul className="text-xs text-amber-700 dark:text-amber-400 mt-1.5 space-y-1 list-disc list-inside">
+                                <ul className="text-xs text-amber-700 mt-1.5 space-y-1 list-disc list-inside">
                                     <li>Inicia sesión en MercadoPago con tu <strong>cuenta de comprador de prueba</strong> (no tu correo real)</li>
                                     <li>Usa las <a href="https://www.mercadopago.com.pe/developers/es/docs/your-integrations/test/cards" target="_blank" rel="noopener noreferrer" className="underline font-semibold hover:text-amber-900">tarjetas de prueba oficiales</a></li>
-                                    <li>Mastercard: <code className="bg-amber-100 dark:bg-amber-900/40 px-1 rounded">5031 7557 3453 0604</code></li>
+                                    <li>Mastercard: <code className="bg-amber-100 px-1 rounded">5031 7557 3453 0604</code></li>
                                 </ul>
                             </div>
                         </div>
@@ -227,27 +216,27 @@ export const CheckoutPage = () => {
                     <div className="lg:col-span-2 space-y-6">
 
                         {/* SECCIÓN DE ENVÍO */}
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                            <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                                 <span className="material-symbols-outlined text-blue-500">local_shipping</span>
                                 Entrega
                             </h2>
 
                             <div className="grid grid-cols-2 gap-4 mb-6">
-                                <label className={`border rounded-xl p-4 cursor-pointer transition-all ${deliveryMode === 'pickup' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700 hover:border-blue-300'}`}>
+                                <label className={`border rounded-xl p-4 cursor-pointer transition-all ${deliveryMode === 'pickup' ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-blue-300'}`}>
                                     <div className="flex items-center gap-3">
                                         <input type="radio" className="w-4 h-4 text-blue-600" checked={deliveryMode === 'pickup'} onChange={() => setDeliveryMode('pickup')} />
                                         <div>
-                                            <p className="font-bold text-slate-900 dark:text-white">Retiro en Tienda</p>
+                                            <p className="font-bold text-slate-900">Retiro en Tienda</p>
                                             <p className="text-xs text-slate-500">Gratis</p>
                                         </div>
                                     </div>
                                 </label>
-                                <label className={`border rounded-xl p-4 cursor-pointer transition-all ${deliveryMode === 'delivery' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700 hover:border-blue-300'}`}>
+                                <label className={`border rounded-xl p-4 cursor-pointer transition-all ${deliveryMode === 'delivery' ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-blue-300'}`}>
                                     <div className="flex items-center gap-3">
                                         <input type="radio" className="w-4 h-4 text-blue-600" checked={deliveryMode === 'delivery'} onChange={() => setDeliveryMode('delivery')} />
                                         <div>
-                                            <p className="font-bold text-slate-900 dark:text-white">Envío a Domicilio</p>
+                                            <p className="font-bold text-slate-900">Envío a Domicilio</p>
                                             <p className="text-xs text-slate-500">S/ 10.00</p>
                                         </div>
                                     </div>
@@ -260,10 +249,10 @@ export const CheckoutPage = () => {
                                         type="button"
                                         onClick={handleGetLocation}
                                         disabled={locationLoading}
-                                        className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-medium py-3 px-4 rounded-xl transition-colors"
+                                        className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-900 font-medium py-3 px-4 rounded-xl transition-colors"
                                     >
                                         {locationLoading ? (
-                                            <div className="w-5 h-5 border-2 border-slate-400 border-t-slate-800 dark:border-t-white rounded-full animate-spin" />
+                                            <div className="w-5 h-5 border-2 border-slate-400 border-t-slate-800 rounded-full animate-spin" />
                                         ) : (
                                             <span className={`material-symbols-outlined ${location ? 'text-green-500' : 'text-slate-500'}`}>my_location</span>
                                         )}
@@ -272,23 +261,23 @@ export const CheckoutPage = () => {
 
                                     <div className="space-y-3">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Dirección de Entrega</label>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Dirección de Entrega</label>
                                             <input 
                                                 type="text" 
                                                 value={address}
                                                 onChange={(e) => setAddress(e.target.value)}
                                                 placeholder="Ej. Av. Larco 123, Miraflores"
-                                                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 placeholder:text-slate-400 outline-none focus:border-blue-500 transition-colors"
+                                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 placeholder:text-slate-400 outline-none focus:border-blue-500 transition-colors"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Referencia (Opcional)</label>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Referencia (Opcional)</label>
                                             <input 
                                                 type="text" 
                                                 value={reference}
                                                 onChange={(e) => setReference(e.target.value)}
                                                 placeholder="Frente a la farmacia, portón negro"
-                                                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 placeholder:text-slate-400 outline-none focus:border-blue-500 transition-colors"
+                                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 placeholder:text-slate-400 outline-none focus:border-blue-500 transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -298,8 +287,8 @@ export const CheckoutPage = () => {
 
                         {/* SECCIÓN DE RECOMPENSAS */}
                         {isAuthenticated && availableRewards && availableRewards.length > 0 && (
-                            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-                                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                                <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                                     <span className="material-symbols-outlined text-amber-500">loyalty</span>
                                     Cupones Disponibles
                                 </h2>
@@ -308,8 +297,8 @@ export const CheckoutPage = () => {
                                     <label
                                         className={`block border rounded-xl p-4 cursor-pointer transition-all ${
                                             selectedRewardId === null
-                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                                : 'border-slate-200 dark:border-slate-700 hover:border-blue-300'
+                                                ? 'border-blue-500 bg-blue-50'
+                                                : 'border-slate-200 hover:border-blue-300'
                                         }`}
                                     >
                                         <div className="flex items-center gap-3">
@@ -319,7 +308,7 @@ export const CheckoutPage = () => {
                                                 checked={selectedRewardId === null}
                                                 onChange={() => setSelectedRewardId(null)}
                                             />
-                                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">No usar cupón</span>
+                                            <span className="text-sm font-medium text-slate-700">No usar cupón</span>
                                         </div>
                                     </label>
                                     {availableRewards.map((reward: any) => (
@@ -327,8 +316,8 @@ export const CheckoutPage = () => {
                                             key={reward.id}
                                             className={`block border rounded-xl p-4 cursor-pointer transition-all ${
                                                 selectedRewardId === reward.id
-                                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                                    : 'border-slate-200 dark:border-slate-700 hover:border-blue-300'
+                                                ? 'border-blue-500 bg-blue-50'
+                                                : 'border-slate-200 hover:border-blue-300'
                                             }`}
                                         >
                                             <div className="flex items-center gap-3">
@@ -339,7 +328,7 @@ export const CheckoutPage = () => {
                                                     onChange={() => setSelectedRewardId(reward.id)}
                                                 />
                                                 <div className="flex-1">
-                                                    <p className="font-bold text-slate-900 dark:text-white">{reward.recompensaTitulo}</p>
+                                                    <p className="font-bold text-slate-900">{reward.recompensaTitulo}</p>
                                                     <p className="text-xs text-slate-500 mt-0.5">
                                                         {reward.tipoDescuento === 'PORCENTAJE'
                                                             ? `${reward.valorDescuento}% de descuento`
@@ -360,23 +349,23 @@ export const CheckoutPage = () => {
                         )}
 
                         {Object.entries(groupedItems).map(([empresaId, group]) => (
-                            <div key={empresaId} className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+                            <div key={empresaId} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                                 <h2 className="text-sm font-bold uppercase text-slate-400 mb-4 flex items-center gap-2">
                                     <span className="material-symbols-outlined text-sm">storefront</span>
                                     Veterinaria: {group.empresaNombre}
                                 </h2>
-                                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                                <div className="divide-y divide-slate-100">
                                     {group.items.map((item) => (
                                         <div key={item.id} className="py-4 flex gap-4">
-                                            <div className="w-16 h-16 rounded-lg bg-slate-50 dark:bg-slate-800 overflow-hidden shrink-0">
+                                            <div className="w-16 h-16 rounded-lg bg-slate-50 overflow-hidden shrink-0">
                                                 <img src={item.imagenes?.[0]} alt={item.nombre} className="w-full h-full object-cover" />
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="text-slate-900 dark:text-white font-medium">{item.nombre}</h3>
+                                                <h3 className="text-slate-900 font-medium">{item.nombre}</h3>
                                                 <p className="text-sm text-slate-500">Cantidad: {item.quantity}</p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-slate-900 dark:text-white font-bold">S/{(item.precioActual * item.quantity).toFixed(2)}</p>
+                                                <p className="text-slate-900 font-bold">S/{(item.precioActual * item.quantity).toFixed(2)}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -387,20 +376,20 @@ export const CheckoutPage = () => {
 
                     {/* Pago */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-100 dark:border-slate-800 sticky top-8">
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Resumen de Pago</h2>
+                        <div className="bg-white rounded-2xl p-6 shadow-xl border border-slate-100 sticky top-8">
+                            <h2 className="text-xl font-bold text-slate-900 mb-6">Resumen de Pago</h2>
 
                             <div className="space-y-4 mb-8">
-                                <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                                <div className="flex justify-between text-slate-600">
                                     <span>Subtotal</span>
                                     <span>S/{cartTotal.toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                                <div className="flex justify-between text-slate-600">
                                     <span>Envío</span>
                                     {shippingCost === 0 ? (
                                         <span className="text-green-500 font-medium">Gratis (Retiro)</span>
                                     ) : (
-                                        <span className="text-slate-900 dark:text-white font-medium">S/{shippingCost.toFixed(2)}</span>
+                                        <span className="text-slate-900 font-medium">S/{shippingCost.toFixed(2)}</span>
                                     )}
                                 </div>
                                 {rewardDiscount > 0 && (
@@ -412,14 +401,14 @@ export const CheckoutPage = () => {
                                         <span>-S/{rewardDiscount.toFixed(2)}</span>
                                     </div>
                                 )}
-                                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between text-xl font-black text-slate-900 dark:text-white">
+                                <div className="pt-4 border-t border-slate-100 flex justify-between text-xl font-black text-slate-900">
                                     <span>Total</span>
                                     <span>S/{finalTotal.toFixed(2)}</span>
                                 </div>
                             </div>
 
                             {error && (
-                                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl border border-red-100 dark:border-red-900/30">
+                                <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100">
                                     {error}
                                 </div>
                             )}

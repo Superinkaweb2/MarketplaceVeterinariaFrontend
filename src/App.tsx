@@ -18,7 +18,6 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { CartProvider } from "./features/marketplace/context/CartContext";
 import { CartSidebar } from "./features/marketplace/components/CartSidebar";
 import { AuthProvider } from "./features/auth/context/AuthContext";
-import { useTheme } from "./hooks/useTheme";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Module = { default: ComponentType<any> } | Record<string, ComponentType<any>>;
@@ -121,7 +120,6 @@ const LoadingFallback = () => (
 import { Auth0Provider } from "@auth0/auth0-react";
 
 function App() {
-  useTheme();
 
   const domain = import.meta.env.VITE_AUTH0_DOMAIN;
   const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
@@ -253,7 +251,7 @@ function App() {
                 path="*"
                 element={
                   <CartProvider>
-                    <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+                    <div className="min-h-screen flex flex-col bg-background-light">
                       <Header />
                       <main className="flex-1 flex flex-col items-center w-full">
                         <Routes>
@@ -287,7 +285,7 @@ function App() {
                           <Route
                             path="*"
                             element={
-                              <div className="p-20 text-center text-slate-500 dark:text-slate-400">
+                              <div className="p-20 text-center text-slate-500">
                                 404 — Página no encontrada
                               </div>
                             }

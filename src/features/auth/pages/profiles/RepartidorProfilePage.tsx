@@ -50,7 +50,7 @@ export const RepartidorProfilePage = () => {
 
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-background-dark flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-500 animate-pulse font-medium">Verificando perfil...</p>
@@ -114,23 +114,23 @@ export const RepartidorProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-background-dark py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
+    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
       <div className="max-w-2xl w-full">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Registro de Repartidor</h2>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">Completa tu información para empezar a realizar entregas.</p>
+          <h2 className="text-3xl font-bold text-slate-900">Registro de Repartidor</h2>
+          <p className="mt-2 text-slate-600">Completa tu información para empezar a realizar entregas.</p>
         </div>
 
-        <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-8 sm:p-10">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 sm:p-10">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             
             {/* Foto de Perfil */}
             <div className="flex flex-col items-center mb-8">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4 text-center w-full">
+              <label className="block text-sm font-semibold text-slate-700 mb-4 text-center w-full">
                 Foto de Perfil / Identificación *
               </label>
               <div className="relative group">
-                <div className="w-32 h-32 rounded-full border-2 border-dashed border-slate-300 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                <div className="w-32 h-32 rounded-full border-2 border-dashed border-slate-300 overflow-hidden bg-slate-50 flex items-center justify-center">
                   {previewUrl ? (
                     <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
@@ -157,24 +157,24 @@ export const RepartidorProfilePage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Nombres */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Nombres *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Nombres *</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                     <User size={18} />
                   </div>
-                  <input type="text" {...register("nombres")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white outline-none" />
+                  <input type="text" {...register("nombres")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary outline-none" />
                 </div>
                 {errors.nombres && <p className="mt-1 text-xs text-red-500">{errors.nombres.message}</p>}
               </div>
 
               {/* Apellidos */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Apellidos *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Apellidos *</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                     <User size={18} />
                   </div>
-                  <input type="text" {...register("apellidos")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white outline-none" />
+                  <input type="text" {...register("apellidos")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary outline-none" />
                 </div>
                 {errors.apellidos && <p className="mt-1 text-xs text-red-500">{errors.apellidos.message}</p>}
               </div>
@@ -182,12 +182,12 @@ export const RepartidorProfilePage = () => {
 
             {/* Teléfono */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Teléfono *</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Teléfono *</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                   <Phone size={18} />
                 </div>
-                <input type="tel" {...register("telefono")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white outline-none" />
+                <input type="tel" {...register("telefono")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary outline-none" />
               </div>
               {errors.telefono && <p className="mt-1 text-xs text-red-500">{errors.telefono.message}</p>}
             </div>
@@ -195,10 +195,10 @@ export const RepartidorProfilePage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Tipo de Vehículo */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Tipo de Vehículo *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Tipo de Vehículo *</label>
                 <select
                   {...register("tipoVehiculo")}
-                  className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white outline-none px-4 appearance-none"
+                  className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary outline-none px-4 appearance-none"
                 >
                   <option value="">Selecciona uno...</option>
                   <option value="MOTO">Motocicleta</option>
@@ -211,7 +211,7 @@ export const RepartidorProfilePage = () => {
 
               {/* Placa */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Placa del Vehículo *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Placa del Vehículo *</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                     <Truck size={18} />
@@ -220,7 +220,7 @@ export const RepartidorProfilePage = () => {
                     type="text"
                     {...register("placaVehiculo")}
                     placeholder="Ej: ABC-123 o N/A"
-                    className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white outline-none"
+                    className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary outline-none"
                   />
                 </div>
                 {errors.placaVehiculo && <p className="mt-1 text-xs text-red-500">{errors.placaVehiculo.message}</p>}

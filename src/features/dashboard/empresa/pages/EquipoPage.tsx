@@ -97,12 +97,12 @@ export const EquipoPage = () => {
     return (
         <div className="h-full flex flex-col p-4 md:p-6 gap-4 md:gap-6 overflow-hidden">
             {/* Header */}
-            <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                         Equipo Veterinario
                     </h1>
-                    <p className="text-sm mt-1 text-slate-500 dark:text-slate-400">
+                    <p className="text-sm mt-1 text-slate-500">
                         Gestiona los veterinarios asociados a tu empresa.
                     </p>
                 </div>
@@ -122,7 +122,7 @@ export const EquipoPage = () => {
                     <input
                         type="text"
                         placeholder="Buscar por nombre, especialidad o rol..."
-                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary dark:text-white transition-all outline-none placeholder:text-slate-400 shadow-sm"
+                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-slate-400 shadow-sm"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -130,25 +130,25 @@ export const EquipoPage = () => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="flex-1 overflow-auto custom-scrollbar">
                     {/* Desktop Table */}
                     <div className="hidden md:block min-w-[600px]">
                         <table className="w-full text-left border-collapse">
-                            <thead className="sticky top-0 z-10 bg-slate-50/95 dark:bg-slate-800/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 shadow-sm">
+                            <thead className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
                                 <tr>
-                                    <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Veterinario</th>
-                                    <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Especialidad</th>
-                                    <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Rol Interno</th>
-                                    <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Estado</th>
-                                    <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 text-right">Acciones</th>
+                                    <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500">Veterinario</th>
+                                    <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500">Especialidad</th>
+                                    <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500">Rol Interno</th>
+                                    <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500">Estado</th>
+                                    <th className="px-6 py-4 text-xs uppercase tracking-wider font-semibold text-slate-500 text-right">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                            <tbody className="divide-y divide-slate-100">
                                 {isLoading
                                     ? Array.from({ length: 4 }).map((_, i) => (
                                         <tr key={i} className="animate-pulse">
-                                            <td colSpan={5} className="px-6 py-4 h-16 bg-slate-50/30 dark:bg-slate-800/10" />
+                                            <td colSpan={5} className="px-6 py-4 h-16 bg-slate-50/30" />
                                         </tr>
                                     ))
                                     : filteredStaff.length === 0
@@ -156,11 +156,11 @@ export const EquipoPage = () => {
                                             <tr>
                                                 <td colSpan={5} className="px-6 py-16 text-center">
                                                     <div className="flex flex-col items-center justify-center max-w-sm mx-auto">
-                                                        <div className="h-16 w-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                                                        <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
                                                             <Users size={32} className="text-slate-400" />
                                                         </div>
-                                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-1">Sin miembros</h3>
-                                                        <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-4">
+                                                        <h3 className="text-lg font-semibold text-slate-900 mb-1">Sin miembros</h3>
+                                                        <p className="text-sm text-slate-500 text-center mb-4">
                                                             {searchTerm
                                                                 ? "No encontramos coincidencias para tu búsqueda."
                                                                 : "Invita veterinarios para que se unan a tu equipo."}
@@ -175,10 +175,10 @@ export const EquipoPage = () => {
                                             </tr>
                                         )
                                         : filteredStaff.map((member) => (
-                                            <tr key={member.idStaff} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors group">
+                                            <tr key={member.idStaff} className="hover:bg-slate-50/80 transition-colors group">
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="h-10 w-10 rounded-full overflow-hidden shrink-0 ring-2 ring-slate-100 dark:ring-slate-700">
+                                                        <div className="h-10 w-10 rounded-full overflow-hidden shrink-0 ring-2 ring-slate-100">
                                                             {member.fotoPerfil ? (
                                                                 <img src={member.fotoPerfil} alt={member.nombres} className="h-full w-full object-cover" />
                                                             ) : (
@@ -186,7 +186,7 @@ export const EquipoPage = () => {
                                                             )}
                                                         </div>
                                                         <div className="min-w-0">
-                                                            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                                                            <p className="text-sm font-semibold text-slate-900 truncate">
                                                                 {member.nombres} {member.apellidos}
                                                             </p>
                                                         </div>
@@ -194,7 +194,7 @@ export const EquipoPage = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     {member.especialidad ? (
-                                                        <div className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
+                                                        <div className="flex items-center gap-1.5 text-sm text-slate-600">
                                                             <Stethoscope size={14} className="text-slate-400 shrink-0" />
                                                             <span className="truncate">{member.especialidad}</span>
                                                         </div>
@@ -203,7 +203,7 @@ export const EquipoPage = () => {
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400">
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
                                                         <Briefcase size={12} />
                                                         {member.rolInterno}
                                                     </span>
@@ -211,8 +211,8 @@ export const EquipoPage = () => {
                                                 <td className="px-6 py-4">
                                                     <span
                                                         className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset ${member.activo
-                                                                ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20"
-                                                                : "bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20"
+                                                                ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
+                                                                : "bg-amber-50 text-amber-700 ring-amber-600/20"
                                                             }`}
                                                     >
                                                         {member.activo ? "Activo" : "Pendiente"}
@@ -223,7 +223,7 @@ export const EquipoPage = () => {
                                                         <button
                                                             title="Remover del equipo"
                                                             onClick={() => handleRemove(member)}
-                                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                         >
                                                             <Trash2 size={18} />
                                                         </button>
@@ -239,12 +239,12 @@ export const EquipoPage = () => {
                     <div className="md:hidden flex flex-col p-4 gap-4">
                         {isLoading
                             ? Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="bg-white dark:bg-slate-800/80 p-4 rounded-2xl animate-pulse space-y-4 border border-slate-100 dark:border-slate-700">
+                                <div key={i} className="bg-white p-4 rounded-2xl animate-pulse space-y-4 border border-slate-100">
                                     <div className="flex gap-4">
-                                        <div className="w-12 h-12 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                                        <div className="w-12 h-12 bg-slate-200 rounded-full" />
                                         <div className="flex-1 space-y-3 py-1">
-                                            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
-                                            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
+                                            <div className="h-4 bg-slate-200 rounded w-3/4" />
+                                            <div className="h-3 bg-slate-200 rounded w-1/2" />
                                         </div>
                                     </div>
                                 </div>
@@ -252,15 +252,15 @@ export const EquipoPage = () => {
                             : filteredStaff.length === 0
                                 ? (
                                     <div className="py-12 px-6 rounded-2xl text-center">
-                                        <Users size={40} className="mx-auto mb-3 text-slate-300 dark:text-slate-600" />
+                                        <Users size={40} className="mx-auto mb-3 text-slate-300" />
                                         <p className="text-slate-500 font-medium">No se encontraron miembros.</p>
                                     </div>
                                 )
                                 : filteredStaff.map((member) => (
-                                    <div key={member.idStaff} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 space-y-3">
+                                    <div key={member.idStaff} className="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-3">
                                         {/* Top */}
                                         <div className="flex gap-3 items-center">
-                                            <div className="w-12 h-12 shrink-0 rounded-full overflow-hidden ring-2 ring-slate-200 dark:ring-slate-700">
+                                            <div className="w-12 h-12 shrink-0 rounded-full overflow-hidden ring-2 ring-slate-200">
                                                 {member.fotoPerfil ? (
                                                     <img src={member.fotoPerfil} alt={member.nombres} className="h-full w-full object-cover" />
                                                 ) : (
@@ -268,7 +268,7 @@ export const EquipoPage = () => {
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                                                <h3 className="text-sm font-bold text-slate-900 truncate">
                                                     {member.nombres} {member.apellidos}
                                                 </h3>
                                                 {member.especialidad && (
@@ -280,15 +280,15 @@ export const EquipoPage = () => {
                                         </div>
 
                                         {/* Bottom */}
-                                        <div className="flex items-center justify-between pt-3 border-t border-slate-200/60 dark:border-slate-700">
+                                        <div className="flex items-center justify-between pt-3 border-t border-slate-200/60">
                                             <div className="flex items-center gap-2">
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-400">
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700">
                                                     <Briefcase size={10} /> {member.rolInterno}
                                                 </span>
                                                 <span
                                                     className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${member.activo
-                                                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400"
-                                                            : "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400"
+                                                            ? "bg-emerald-100 text-emerald-700"
+                                                            : "bg-amber-100 text-amber-700"
                                                         }`}
                                                 >
                                                     {member.activo ? "Activo" : "Pendiente"}
@@ -296,7 +296,7 @@ export const EquipoPage = () => {
                                             </div>
                                             <button
                                                 onClick={() => handleRemove(member)}
-                                                className="p-2 bg-white dark:bg-slate-700 text-red-600 dark:text-red-400 rounded-lg active:scale-95 shadow-sm border border-slate-200 dark:border-slate-600 transition-all"
+                                                className="p-2 bg-white text-red-600 rounded-lg active:scale-95 shadow-sm border border-slate-200 transition-all"
                                             >
                                                 <Trash2 size={16} />
                                             </button>
@@ -307,9 +307,9 @@ export const EquipoPage = () => {
                 </div>
 
                 {/* Footer */}
-                <div className="shrink-0 px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 z-10">
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                        Mostrando <span className="text-slate-900 dark:text-white">{filteredStaff.length}</span> miembros del equipo
+                <div className="shrink-0 px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 z-10">
+                    <span className="text-sm font-medium text-slate-500">
+                        Mostrando <span className="text-slate-900">{filteredStaff.length}</span> miembros del equipo
                     </span>
                 </div>
             </div>

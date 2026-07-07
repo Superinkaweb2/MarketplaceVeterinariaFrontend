@@ -29,18 +29,18 @@ const KPICard = ({
       case "revenue":
         return (
           <DollarSign
-            className="text-green-600 dark:text-green-400"
+            className="text-green-600"
             size={24}
           />
         );
       case "appointments":
         return (
-          <Calendar className="text-primary dark:text-blue-400" size={24} />
+          <Calendar className="text-primary" size={24} />
         );
       case "sales":
         return (
           <ShoppingBag
-            className="text-purple-600 dark:text-purple-400"
+            className="text-purple-600"
             size={24}
           />
         );
@@ -50,27 +50,27 @@ const KPICard = ({
   const getBg = () => {
     switch (icon) {
       case "revenue":
-        return "bg-green-50 dark:bg-green-900/20";
+        return "bg-green-50";
       case "appointments":
-        return "bg-blue-50 dark:bg-blue-900/20";
+        return "bg-blue-50";
       case "sales":
-        return "bg-purple-50 dark:bg-purple-900/20";
+        return "bg-purple-50";
     }
   };
 
   return (
-    <div className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
       <div className="flex justify-between items-start mb-4">
         <div className={`p-2 rounded-lg ${getBg()}`}>{getIcon()}</div>
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
           <TrendingUp size={14} className="mr-1" /> {trendLabel}
         </span>
       </div>
       <div>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+        <p className="text-sm font-medium text-slate-500">
           {label}
         </p>
-        <h3 className="text-3xl font-bold text-slate-900 dark:text-white mt-1">
+        <h3 className="text-3xl font-bold text-slate-900 mt-1">
           {value}
         </h3>
       </div>
@@ -114,10 +114,10 @@ export const DashboardHome = () => {
   if (error || !metrics) {
     return (
       <div className="flex-1 p-8">
-        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl p-6 text-center">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
           <AlertCircle size={40} className="text-red-500 mx-auto mb-4" />
-          <h2 className="text-lg font-bold text-red-800 dark:text-red-400">Error</h2>
-          <p className="text-red-600 dark:text-red-400 mt-2">{error || "Algo salió mal"}</p>
+          <h2 className="text-lg font-bold text-red-800">Error</h2>
+          <p className="text-red-600 mt-2">{error || "Algo salió mal"}</p>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -135,10 +135,10 @@ export const DashboardHome = () => {
         {/* Welcome Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
               ¡Buen día, {nombre || "Empresa"}!
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-slate-500 mt-1">
               Esto es lo que está pasando en tu negocio hoy.
             </p>
           </div>
@@ -190,16 +190,16 @@ const FeedbackSection = () => {
   if (ratings.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-            <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h3 className="font-bold text-slate-900 flex items-center gap-2">
                 <Star className="text-amber-500 fill-amber-500" size={20} />
                 Feedback Reciente de Clientes
             </h3>
         </div>
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+        <div className="divide-y divide-slate-100">
             {ratings.slice(0, 5).map(rating => (
-                <div key={rating.idDelivery} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <div key={rating.idDelivery} className="p-6 hover:bg-slate-50 transition-colors">
                     <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center gap-2">
                             <div className="flex text-amber-500">
@@ -207,11 +207,11 @@ const FeedbackSection = () => {
                                     <Star 
                                         key={i} 
                                         size={14} 
-                                        className={i < (rating.calificacionProducto || 0) ? "fill-amber-500" : "text-slate-200 dark:text-slate-700"} 
+                                        className={i < (rating.calificacionProducto || 0) ? "fill-amber-500" : "text-slate-200"} 
                                     />
                                 ))}
                             </div>
-                            <span className="text-sm font-bold text-slate-900 dark:text-white">
+                            <span className="text-sm font-bold text-slate-900">
                                 {rating.clienteNombre || 'Cliente'}
                             </span>
                         </div>
@@ -219,12 +219,12 @@ const FeedbackSection = () => {
                             {rating.entregadoAt ? new Date(rating.entregadoAt).toLocaleDateString() : ''}
                         </span>
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 italic">
+                    <p className="text-sm text-slate-600 italic">
                         "{rating.comentarioProducto || 'Sin comentario'}"
                     </p>
                     <div className="mt-3 flex items-center gap-2">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Entrega:</span>
-                        <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full">
+                        <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full">
                             <Star size={10} className="text-blue-500 fill-blue-500" />
                             <span className="text-[10px] font-bold text-blue-600">{rating.calificacionRepartidor}</span>
                         </div>

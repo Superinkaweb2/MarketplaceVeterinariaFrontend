@@ -25,7 +25,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [items, setItems] = useState<CartItem[]>([]);
     const [isOpen, setIsOpen] = useState(false);
 
-    // Load cart from localStorage
     useEffect(() => {
         const savedCart = localStorage.getItem('vetsaas_cart');
         if (savedCart) {
@@ -37,35 +36,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, []);
 
-    // Save cart to localStorage
     useEffect(() => {
         localStorage.setItem('vetsaas_cart', JSON.stringify(items));
     }, [items]);
 
     const addToCart = useCallback((product: Product, quantity: number = 1) => {
-        const isService = product.itemType === 'service' || String(product.id).startsWith('service_');
-        const finalQuantity = isService ? 1 : quantity;
-
-        // SANITIZACIÓN: Evita que un null o undefined rompa el Math.min
-        const safeStock = (product.stock !== undefined && product.stock !== null) 
-            ? Number(product.stock) 
-            : 99; // Límite por defecto si no hay stock declarado
+        const safeStock = (product.stock !== undefined && product.stock !== null)
+            ? Number(product.stock)
+            : 99;
 
         setItems(currentItems => {
             const existingItem = currentItems.find(item => item.id === product.id);
 
             if (existingItem) {
-                // Services can only have quantity 1
-                if (isService) return currentItems;
-
-                // Don't exceed stock
-                const newQuantity = Math.min(existingItem.quantity + finalQuantity, safeStock);
-
+                const newQuantity = Math.min(existingItem.quantity + quantity, safeStock);
                 return currentItems.map(item =>
                     item.id === product.id ? { ...item, quantity: newQuantity } : item
                 );
             }
-            return [...currentItems, { ...product, quantity: finalQuantity }];
+            return [...currentItems, { ...product, quantity }];
         });
         setIsOpen(true);
     }, []);
@@ -75,7 +64,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const updateQuantity = useCallback((productId: number | string, quantity: number) => {
-        // Prevent negative or zero
         if (quantity <= 0) {
             removeFromCart(productId);
             return;
@@ -85,17 +73,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             prev.map(item => {
                 if (item.id !== productId) return item;
 
-                const isService = item.itemType === 'service' || String(item.id).startsWith('service_');
-
-                // Services always stay at 1
-                if (isService) return item;
-
-                // SANITIZACIÓN: Evita que null/undefined en localStorage rompa el carrito
-                const safeStock = (item.stock !== undefined && item.stock !== null) 
-                    ? Number(item.stock) 
+                const safeStock = (item.stock !== undefined && item.stock !== null)
+                    ? Number(item.stock)
                     : 99;
-                    
-                // Clamp to available stock
+
                 const clampedQty = Math.min(quantity, safeStock);
                 return { ...item, quantity: clampedQty };
             })

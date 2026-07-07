@@ -276,7 +276,7 @@ export const EmpresaConfigPage = () => {
     return (
         <div className="h-full flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto custom-scrollbar">
             <div className="mb-8">
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-2">
                     <Settings className="text-primary" /> Configuración de Empresa
                 </h1>
                 <p className="text-sm text-slate-500 mt-1">
@@ -290,7 +290,7 @@ export const EmpresaConfigPage = () => {
                         onClick={() => setActiveTab("general")}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "general"
                             ? "bg-primary text-white shadow-lg shadow-primary/20"
-                            : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800 hover:bg-slate-50"
+                            : "bg-white text-slate-600 border border-slate-100 hover:bg-slate-50"
                             }`}
                     >
                         <Building2 size={18} />
@@ -300,7 +300,7 @@ export const EmpresaConfigPage = () => {
                         onClick={() => setActiveTab("pago")}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "pago"
                             ? "bg-primary text-white shadow-lg shadow-primary/20"
-                            : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800 hover:bg-slate-50"
+                            : "bg-white text-slate-600 border border-slate-100 hover:bg-slate-50"
                             }`}
                     >
                         <CreditCard size={18} />
@@ -310,7 +310,7 @@ export const EmpresaConfigPage = () => {
                         onClick={() => setActiveTab("seguridad")}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "seguridad"
                             ? "bg-primary text-white shadow-lg shadow-primary/20"
-                            : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800 hover:bg-slate-50"
+                            : "bg-white text-slate-600 border border-slate-100 hover:bg-slate-50"
                             }`}
                     >
                         <Lock size={18} />
@@ -318,15 +318,15 @@ export const EmpresaConfigPage = () => {
                     </button>
                 </div>
 
-                <div className="flex-1 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div className="flex-1 bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
                     {activeTab === "general" ? (
                         <div className="p-6 md:p-8">
                             <div className="flex items-center gap-4 mb-8">
-                                <div className="p-3 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl">
+                                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
                                     <Building2 size={24} />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Perfil de la Empresa</h2>
+                                    <h2 className="text-xl font-bold text-slate-900">Perfil de la Empresa</h2>
                                     <p className="text-sm text-slate-500">Información básica que verán tus clientes.</p>
                                 </div>
                             </div>
@@ -339,7 +339,7 @@ export const EmpresaConfigPage = () => {
                                     </div>
 
                                     {/* Banner Upload */}
-                                    <div className="relative group rounded-3xl overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 h-48">
+                                    <div className="relative group rounded-3xl overflow-hidden bg-slate-100 border-2 border-dashed border-slate-200 h-48">
                                         {bannerPreview ? (
                                             <img src={bannerPreview} alt="Banner" className="w-full h-full object-cover" />
                                         ) : (
@@ -370,7 +370,7 @@ export const EmpresaConfigPage = () => {
 
                                     {/* Logo Upload */}
                                     <div className="flex flex-col sm:flex-row items-center gap-6">
-                                        <div className="relative group w-32 h-32 rounded-3xl overflow-hidden bg-white dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 shrink-0">
+                                        <div className="relative group w-32 h-32 rounded-3xl overflow-hidden bg-white border-2 border-dashed border-slate-200 shrink-0">
                                             {logoPreview ? (
                                                 <img src={logoPreview} alt="Logo" className="w-full h-full object-contain p-2" />
                                             ) : (
@@ -395,13 +395,13 @@ export const EmpresaConfigPage = () => {
                                             </label>
                                         </div>
                                         <div className="space-y-1">
-                                            <h4 className="font-bold text-slate-900 dark:text-white">Logo de la Veterinaria</h4>
+                                            <h4 className="font-bold text-slate-900">Logo de la Veterinaria</h4>
                                             <p className="text-sm text-slate-500">Se recomienda una imagen cuadrada de al menos 400x400px.</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="h-px bg-slate-100 dark:bg-slate-800" />
+                                <div className="h-px bg-slate-100" />
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="md:col-span-2 text-sm font-bold text-slate-400 uppercase tracking-widest">
@@ -409,50 +409,50 @@ export const EmpresaConfigPage = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                        <label className="text-sm font-semibold text-slate-700">
                                             Nombre de la Veterinaria
                                         </label>
                                         <div className="relative group">
                                             <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
                                             <input
                                                 {...registerGeneral("nombreComercial")}
-                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white"
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
                                             />
                                         </div>
                                         {errorsGeneral.nombreComercial && <p className="text-xs text-red-500">{errorsGeneral.nombreComercial.message}</p>}
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Email de Contacto</label>
+                                        <label className="text-sm font-semibold text-slate-700">Email de Contacto</label>
                                         <div className="relative group">
                                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
                                             <input
                                                 {...registerGeneral("emailContacto")}
-                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white"
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
                                             />
                                         </div>
                                         {errorsGeneral.emailContacto && <p className="text-xs text-red-500">{errorsGeneral.emailContacto.message}</p>}
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Teléfono</label>
+                                        <label className="text-sm font-semibold text-slate-700">Teléfono</label>
                                         <div className="relative group">
                                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
                                             <input
                                                 {...registerGeneral("telefono")}
-                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white"
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
                                             />
                                         </div>
                                         {errorsGeneral.telefono && <p className="text-xs text-red-500">{errorsGeneral.telefono.message}</p>}
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tipo de Servicio</label>
+                                        <label className="text-sm font-semibold text-slate-700">Tipo de Servicio</label>
                                         <div className="relative group">
                                             <Settings className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
                                             <select
                                                 {...registerGeneral("tipoServicio")}
-                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white appearance-none"
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none appearance-none"
                                             >
                                                 <option value="VETERINARIA">Veterinaria / Clínica</option>
                                                 <option value="PETSHOP">Pet Shop / Tienda</option>
@@ -465,29 +465,29 @@ export const EmpresaConfigPage = () => {
 
                                     {tipoServicio === "OTRO" && (
                                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Especificar Servicio</label>
+                                            <label className="text-sm font-semibold text-slate-700">Especificar Servicio</label>
                                             <input
                                                 {...registerGeneral("tipoServicioOtro")}
-                                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white"
+                                                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
                                                 placeholder="Ej: Guardería, Adiestramiento..."
                                             />
                                         </div>
                                     )}
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Dirección Física</label>
+                                        <label className="text-sm font-semibold text-slate-700">Dirección Física</label>
                                         <div className="relative group">
                                             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
                                             <input
                                                 {...registerGeneral("direccion")}
-                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none dark:text-white"
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
                                             />
                                         </div>
                                         {errorsGeneral.direccion && <p className="text-xs text-red-500">{errorsGeneral.direccion.message}</p>}
                                     </div>
 
                                     <div className="md:col-span-2 space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ubicación en el Mapa</label>
+                                        <label className="text-sm font-semibold text-slate-700">Ubicación en el Mapa</label>
                                         <p className="text-xs text-slate-500">Mueve el marcador o haz clic en el mapa para indicar dónde se encuentra tu local.</p>
                                         <MapPicker
                                             lat={latitud || 0}
@@ -507,10 +507,10 @@ export const EmpresaConfigPage = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Descripción / Historia</label>
+                                    <label className="text-sm font-semibold text-slate-700">Descripción / Historia</label>
                                     <textarea
                                         {...registerGeneral("descripcion")}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none resize-none h-32 dark:text-white"
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none resize-none h-32"
                                         placeholder="Cuéntanos un poco sobre tu centro..."
                                     />
                                 </div>
@@ -526,42 +526,42 @@ export const EmpresaConfigPage = () => {
                     ) : activeTab === "seguridad" ? (
                         <div className="p-6 md:p-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <div className="flex items-center gap-4 mb-8">
-                                <div className="p-3 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl">
+                                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
                                     <Lock size={24} />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Seguridad de la Cuenta</h2>
+                                    <h2 className="text-xl font-bold text-slate-900">Seguridad de la Cuenta</h2>
                                     <p className="text-sm text-slate-500">Protege tu cuenta y gestiona tus sesiones.</p>
                                 </div>
                             </div>
 
                             <div className="space-y-8 max-w-2xl">
-                                <div className="p-6 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+                                <div className="p-6 rounded-3xl border border-slate-100 space-y-4">
                                     <div>
-                                        <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-lg">Contraseña</h3>
+                                        <h3 className="font-bold text-slate-900 mb-1 text-lg">Contraseña</h3>
                                         <p className="text-sm text-slate-500">Actualiza tu contraseña regularmente para mayor seguridad.</p>
                                     </div>
                                     <Button
                                         variant="outline"
                                         type="button"
                                         onClick={handleChangePassword}
-                                        className="w-full sm:w-auto justify-between items-center group font-medium text-slate-700 dark:text-slate-300 rounded-xl px-6"
+                                        className="w-full sm:w-auto justify-between items-center group font-medium text-slate-700 rounded-xl px-6"
                                     >
                                         <span>Cambiar mi contraseña</span>
                                         <Settings size={16} className="text-slate-400 group-hover:text-primary transition-colors ml-4" />
                                     </Button>
                                 </div>
 
-                                <div className="p-6 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+                                <div className="p-6 rounded-3xl border border-slate-100 space-y-4">
                                     <div>
-                                        <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-lg text-red-500">Cerrar Sesión Global</h3>
+                                        <h3 className="font-bold text-slate-900 mb-1 text-lg text-red-500">Cerrar Sesión Global</h3>
                                         <p className="text-sm text-slate-500 text-pretty">Si sospechas de actividad inusual, puedes cerrar todas las sesiones activas en otros dispositivos.</p>
                                     </div>
                                     <Button
                                         variant="outline"
                                         type="button"
                                         onClick={handleLogoutAll}
-                                        className="w-full sm:w-auto text-red-500 border-red-100 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/20 rounded-xl"
+                                        className="w-full sm:w-auto text-red-500 border-red-100 hover:bg-red-50 rounded-xl"
                                     >
                                         Cerrar todas las sesiones
                                     </Button>
@@ -571,43 +571,43 @@ export const EmpresaConfigPage = () => {
                     ) : (
                         <div className="p-6 md:p-8">
                             <div className="flex items-center gap-4 mb-8">
-                                <div className="p-3 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl">
+                                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
                                     <CreditCard size={24} />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Credenciales de Pago</h2>
+                                    <h2 className="text-xl font-bold text-slate-900">Credenciales de Pago</h2>
                                     <p className="text-sm text-slate-500">Conecta tu cuenta de Mercado Pago para recibir pagos.</p>
                                 </div>
                             </div>
 
                             {import.meta.env.VITE_MP_PUBLIC_KEY?.startsWith("TEST-") && (
-                                <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 p-4 rounded-2xl mb-6 flex gap-4 items-center">
+                                <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl mb-6 flex gap-4 items-center">
                                     <div className="bg-blue-600 p-2 rounded-xl text-white">
                                         <AlertCircle size={20} />
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Modo Sandbox</span>
-                                            <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">Entorno de Pruebas Activo</span>
+                                            <span className="text-xs font-semibold text-blue-700">Entorno de Pruebas Activo</span>
                                         </div>
-                                        <p className="text-sm text-blue-600/80 dark:text-blue-300/80">
+                                        <p className="text-sm text-blue-600/80">
                                             Se detectaron credenciales de prueba. Puedes usar las tarjetas ficticias de Mercado Pago para simular pagos sin costo real.
                                         </p>
                                     </div>
                                 </div>
                             )}
 
-                            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-4 rounded-2xl mb-8 flex gap-4">
-                                <ShieldCheck className="text-amber-600 dark:text-amber-500 shrink-0" size={24} />
-                                <div className="text-sm text-amber-800 dark:text-amber-300">
+                            <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl mb-8 flex gap-4">
+                                <ShieldCheck className="text-amber-600 shrink-0" size={24} />
+                                <div className="text-sm text-amber-800">
                                     <p className="font-bold mb-1">Sobre la seguridad:</p>
                                     <p>Tus credenciales están encriptadas y solo se utilizan para procesar transacciones seguras a través de nuestra plataforma oficial.</p>
                                 </div>
                             </div>
 
                             <div className="mb-10 p-6 bg-primary/5 rounded-3xl border border-primary/20">
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Conexión Recomendada</h3>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                                <h3 className="text-lg font-bold text-slate-900 mb-2">Conexión Recomendada</h3>
+                                <p className="text-sm text-slate-500 mb-6">
                                     Vincular tu cuenta con un solo clic es el método más rápido y seguro.
                                 </p>
                                 <button
@@ -629,38 +629,38 @@ export const EmpresaConfigPage = () => {
 
                             <div className="relative mb-8">
                                 <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t border-slate-100 dark:border-slate-800"></div>
+                                    <div className="w-full border-t border-slate-100"></div>
                                 </div>
                                 <div className="relative flex justify-center text-xs uppercase">
-                                    <span className="bg-white dark:bg-slate-900 px-2 text-slate-500">O configuración manual (Avanzado)</span>
+                                    <span className="bg-white px-2 text-slate-500">O configuración manual (Avanzado)</span>
                                 </div>
                             </div>
 
                             <form onSubmit={handleSubmitMP(onUpdateMP)} className="space-y-6 max-w-2xl">
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex justify-between">
+                                        <label className="text-sm font-semibold text-slate-700 flex justify-between">
                                             Public Key
                                             <span className="text-[10px] text-slate-400 font-normal italic uppercase">Ej: TEST-... o APP_USR-...</span>
                                         </label>
                                         <input
                                             {...registerMP("mpPublicKey")}
                                             type="text"
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none font-mono text-sm"
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none font-mono text-sm"
                                             placeholder="TEST-XXX..."
                                         />
                                         {errorsMP.mpPublicKey && <p className="text-xs text-red-500">{errorsMP.mpPublicKey.message}</p>}
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex justify-between">
+                                        <label className="text-sm font-semibold text-slate-700 flex justify-between">
                                             Access Token
                                             <span className="text-[10px] text-slate-400 font-normal italic uppercase text-right">Tu token privado de seguridad</span>
                                         </label>
                                         <input
                                             {...registerMP("mpAccessToken")}
                                             type="password"
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none font-mono text-sm"
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none font-mono text-sm"
                                             placeholder="TEST-XXX..."
                                         />
                                         {errorsMP.mpAccessToken && <p className="text-xs text-red-500">{errorsMP.mpAccessToken.message}</p>}
@@ -675,16 +675,16 @@ export const EmpresaConfigPage = () => {
                                 </div>
                             </form>
 
-                            <div className="mt-12 pt-12 border-t border-slate-100 dark:border-slate-800">
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">¿Cómo obtener mis credenciales?</h3>
+                            <div className="mt-12 pt-12 border-t border-slate-100">
+                                <h3 className="text-lg font-bold text-slate-900 mb-4">¿Cómo obtener mis credenciales?</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="flex gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
+                                    <div className="flex gap-4 p-4 rounded-2xl bg-slate-50">
                                         <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">1</div>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400">Ingresa a Mercado Pago Developers y crea una aplicación.</p>
+                                        <p className="text-sm text-slate-600">Ingresa a Mercado Pago Developers y crea una aplicación.</p>
                                     </div>
-                                    <div className="flex gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
+                                    <div className="flex gap-4 p-4 rounded-2xl bg-slate-50">
                                         <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">2</div>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400">Ve a la sección 'Credenciales de producción' y copia tu Public Key y Access Token.</p>
+                                        <p className="text-sm text-slate-600">Ve a la sección 'Credenciales de producción' y copia tu Public Key y Access Token.</p>
                                     </div>
                                 </div>
                             </div>

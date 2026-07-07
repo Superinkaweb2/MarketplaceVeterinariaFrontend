@@ -57,7 +57,7 @@ export const VeterinarioProfilePage = () => {
 
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-background-dark flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-500 animate-pulse font-medium">Verificando perfil...</p>
@@ -112,32 +112,32 @@ export const VeterinarioProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-background-dark py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
+    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
       <div className="max-w-2xl w-full">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Perfil Profesional</h2>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">Ingresa tus credenciales veterinarias para activar tu cuenta.</p>
+          <h2 className="text-3xl font-bold text-slate-900">Perfil Profesional</h2>
+          <p className="mt-2 text-slate-600">Ingresa tus credenciales veterinarias para activar tu cuenta.</p>
         </div>
 
-        <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-8 sm:p-10">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 sm:p-10">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Nombres */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Nombres *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Nombres *</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><User size={18} /></div>
-                  <input type="text" {...register("nombres")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white" />
+                  <input type="text" {...register("nombres")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
                 </div>
                 {errors.nombres && <p className="mt-1 text-xs text-red-500">{errors.nombres.message}</p>}
               </div>
 
               {/* Apellidos */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Apellidos *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Apellidos *</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><User size={18} /></div>
-                  <input type="text" {...register("apellidos")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white" />
+                  <input type="text" {...register("apellidos")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
                 </div>
                 {errors.apellidos && <p className="mt-1 text-xs text-red-500">{errors.apellidos.message}</p>}
               </div>
@@ -146,20 +146,20 @@ export const VeterinarioProfilePage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Especialidad */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Especialidad *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Especialidad *</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Stethoscope size={18} /></div>
-                  <input type="text" placeholder="Ej. Medicina Interna" {...register("especialidad")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white" />
+                  <input type="text" placeholder="Ej. Medicina Interna" {...register("especialidad")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
                 </div>
                 {errors.especialidad && <p className="mt-1 text-xs text-red-500">{errors.especialidad.message}</p>}
               </div>
 
               {/* Colegiatura */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Nº Colegiatura Médica *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Nº Colegiatura Médica *</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Award size={18} /></div>
-                  <input type="text" {...register("numeroColegiatura")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white" />
+                  <input type="text" {...register("numeroColegiatura")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
                 </div>
                 {errors.numeroColegiatura && <p className="mt-1 text-xs text-red-500">{errors.numeroColegiatura.message}</p>}
               </div>
@@ -168,19 +168,19 @@ export const VeterinarioProfilePage = () => {
             {/* Años de Experiencia y Biografia */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Años de experiencia *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Años de experiencia *</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Clock size={18} /></div>
-                  <input type="number" {...register("aniosExperiencia", { valueAsNumber: true })} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white" />
+                  <input type="number" {...register("aniosExperiencia", { valueAsNumber: true })} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
                 </div>
                 {errors.aniosExperiencia && <p className="mt-1 text-xs text-red-500">{errors.aniosExperiencia.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">Biografía (opcional)</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Biografía (opcional)</label>
                 <div className="relative">
                   <div className="absolute top-3 left-3 pointer-events-none text-slate-400"><FileText size={18} /></div>
-                  <textarea rows={1} {...register("biografia")} className="block w-full pl-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 focus:ring-2 focus:ring-primary dark:text-white resize-none" />
+                  <textarea rows={1} {...register("biografia")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary resize-none" />
                 </div>
               </div>
             </div>

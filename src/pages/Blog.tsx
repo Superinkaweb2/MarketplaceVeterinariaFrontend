@@ -7,10 +7,10 @@ export const Blog = () => {
                     <span className="inline-block px-3 py-1 rounded-full bg-[#1ea59c]/10 text-[#1ea59c] text-sm font-bold uppercase tracking-wider mb-4">
                         Recursos y Noticias
                     </span>
-                    <h1 className="text-4xl md:text-6xl font-bold mb-6 text-[#2D3E82] dark:text-white tracking-tight">
+                    <h1 className="text-4xl md:text-6xl font-bold mb-6 text-[#2D3E82] tracking-tight">
                         Nuestro <span className="text-[#1ea59c]">Blog</span>
                     </h1>
-                    <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                    <p className="text-lg text-slate-600 max-w-2xl mx-auto">
                         Explora artículos sobre salud animal, gestión de clínicas y las últimas novedades de Huella360.
                     </p>
                 </div>

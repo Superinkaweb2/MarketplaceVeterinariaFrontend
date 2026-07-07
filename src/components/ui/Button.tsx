@@ -11,8 +11,8 @@ export const Button = ({ variant = "primary", children, className = "", ...props
 
   const variants = {
     primary: "bg-primary text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700",
-    secondary: "bg-[#e7ecf3] dark:bg-slate-800 text-[#0d131b] dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700",
-    outline: "bg-white dark:bg-slate-800 border border-[#cfd9e7] dark:border-slate-700 text-[#0d131b] dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700",
+    secondary: "bg-[#e7ecf3] text-[#0d131b] hover:bg-slate-200",
+    outline: "bg-white border border-[#cfd9e7] text-[#0d131b] hover:bg-slate-50",
     ghost: "text-primary hover:underline gap-2"
   };
 

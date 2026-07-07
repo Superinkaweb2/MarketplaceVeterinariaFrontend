@@ -158,7 +158,7 @@ const SelectField = ({
   required,
 }: SelectFieldProps) => (
   <div className="space-y-1.5">
-    <label htmlFor={id} className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+    <label htmlFor={id} className="text-sm font-semibold text-slate-700">
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     <div className="relative">
@@ -168,8 +168,8 @@ const SelectField = ({
         onChange={(e) => onChange(e.target.value)}
         className={`w-full px-4 py-2.5 rounded-xl border transition-all outline-none text-sm appearance-none cursor-pointer
           bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary
-          dark:bg-slate-900 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-primary/20 dark:focus:border-primary
-          ${error ? "border-red-500 focus:ring-red-500/20 focus:border-red-500 dark:border-red-500" : ""}
+         
+          ${error ? "border-red-500 focus:ring-red-500/20 focus:border-red-500" : ""}
         `}
       >
         <option value="">{placeholder}</option>
@@ -206,7 +206,7 @@ interface FormInputProps {
 
 const FormInput = ({ label, id, type = "text", placeholder, error, required, registration }: FormInputProps) => (
   <div className="space-y-1.5">
-    <label htmlFor={id} className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+    <label htmlFor={id} className="text-sm font-semibold text-slate-700">
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     <input
@@ -216,8 +216,8 @@ const FormInput = ({ label, id, type = "text", placeholder, error, required, reg
       {...registration}
       className={`w-full px-4 py-2.5 rounded-xl border transition-all outline-none text-sm
         bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary
-        dark:bg-slate-900 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-primary/20 dark:focus:border-primary
-        ${error ? "border-red-500 focus:ring-red-500/20 focus:border-red-500 dark:border-red-500" : ""}
+       
+        ${error ? "border-red-500 focus:ring-red-500/20 focus:border-red-500" : ""}
       `}
     />
     {error && (
@@ -243,7 +243,7 @@ const SectionHeader = ({ icon, title, step }: SectionHeaderProps) => (
     </div>
     <div>
       <span className="text-xs font-bold text-primary/60 uppercase tracking-wider">Paso {step}</span>
-      <h2 className="text-lg font-bold text-slate-800 dark:text-white">{title}</h2>
+      <h2 className="text-lg font-bold text-slate-800">{title}</h2>
     </div>
   </div>
 );
@@ -416,7 +416,7 @@ export const LibroReclamaciones = () => {
   };
 
   return (
-    <div className="bg-[#f6f8f8] dark:bg-[#12201f] min-h-screen transition-colors duration-300">
+    <div className="bg-[#f6f8f8] min-h-screen transition-colors duration-300">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-primary/5" />
@@ -425,20 +425,20 @@ export const LibroReclamaciones = () => {
             <FileText size={16} />
             Libro de Reclamaciones Virtual
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold mb-4 text-secondary dark:text-white tracking-tight">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 text-secondary tracking-tight">
             Libro de <span className="text-primary">Reclamaciones</span>
           </h1>
-          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
             Conforme al Código de Protección y Defensa del Consumidor del Perú.
             Complete el formulario a continuación para registrar su reclamo o queja.
           </p>
 
           {/* Fecha actual */}
-          <div className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-surface-dark shadow-soft border border-slate-100 dark:border-slate-800">
+          <div className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white shadow-soft border border-slate-100">
             <Info size={16} className="text-primary" />
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+            <span className="text-sm font-medium text-slate-600">
               Fecha de registro:{" "}
-              <span className="text-slate-800 dark:text-white font-bold capitalize">{fechaActual}</span>
+              <span className="text-slate-800 font-bold capitalize">{fechaActual}</span>
             </span>
           </div>
         </div>
@@ -448,7 +448,7 @@ export const LibroReclamaciones = () => {
       <section className="max-w-5xl mx-auto px-4 pb-20">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* ═══════ SECCIÓN 1: DATOS DEL RECLAMANTE ═══════ */}
-          <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-6 md:p-8">
+          <div className="bg-white rounded-2xl shadow-soft border border-slate-100 p-6 md:p-8">
             <SectionHeader icon={<User size={20} />} title="Datos de la persona que presenta el reclamo" step={1} />
 
             <div className="grid md:grid-cols-2 gap-5">
@@ -585,9 +585,9 @@ export const LibroReclamaciones = () => {
                 id="es-menor"
                 type="checkbox"
                 {...register("esMenor")}
-                className="w-5 h-5 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary/30 cursor-pointer accent-primary"
+                className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary/30 cursor-pointer accent-primary"
               />
-              <label htmlFor="es-menor" className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+              <label htmlFor="es-menor" className="text-sm font-medium text-slate-700 cursor-pointer select-none">
                 Soy menor de edad
               </label>
             </div>
@@ -595,12 +595,12 @@ export const LibroReclamaciones = () => {
 
           {/* ═══════ SECCIÓN 2: DATOS DEL APODERADO (CONDICIONAL) ═══════ */}
           {esMenor && (
-            <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-soft border border-amber-200 dark:border-amber-900/40 p-6 md:p-8 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="bg-white rounded-2xl shadow-soft border border-amber-200 p-6 md:p-8 animate-in fade-in slide-in-from-top-2 duration-300">
               <SectionHeader icon={<ShieldCheck size={20} />} title="Datos del apoderado" step={2} />
 
-              <div className="bg-amber-50 dark:bg-amber-900/10 rounded-xl p-4 mb-6 flex items-start gap-3">
+              <div className="bg-amber-50 rounded-xl p-4 mb-6 flex items-start gap-3">
                 <AlertCircle size={18} className="text-amber-500 mt-0.5 shrink-0" />
-                <p className="text-sm text-amber-700 dark:text-amber-400">
+                <p className="text-sm text-amber-700">
                   Al ser menor de edad, es obligatorio proporcionar los datos de su apoderado o representante legal.
                 </p>
               </div>
@@ -692,7 +692,7 @@ export const LibroReclamaciones = () => {
           )}
 
           {/* ═══════ SECCIÓN 3: INFORMACIÓN GENERAL ═══════ */}
-          <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-6 md:p-8">
+          <div className="bg-white rounded-2xl shadow-soft border border-slate-100 p-6 md:p-8">
             <SectionHeader icon={<ShoppingBag size={20} />} title="Información general" step={esMenor ? 3 : 2} />
 
             <div className="grid md:grid-cols-3 gap-5">
@@ -721,7 +721,7 @@ export const LibroReclamaciones = () => {
           </div>
 
           {/* ═══════ SECCIÓN 4: DETALLE DEL RECLAMO ═══════ */}
-          <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-6 md:p-8">
+          <div className="bg-white rounded-2xl shadow-soft border border-slate-100 p-6 md:p-8">
             <SectionHeader
               icon={<ClipboardList size={20} />}
               title="Detalle del reclamo"
@@ -730,7 +730,7 @@ export const LibroReclamaciones = () => {
 
             {/* Tipo: Reclamo o Queja */}
             <div className="mb-6">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 block">
+              <label className="text-sm font-semibold text-slate-700 mb-3 block">
                 Tipo <span className="text-red-500">*</span>
               </label>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -738,8 +738,8 @@ export const LibroReclamaciones = () => {
                   htmlFor="tipo-reclamo"
                   className={`flex-1 flex items-center gap-3 px-5 py-4 rounded-xl border-2 cursor-pointer transition-all select-none
                     ${tipoReclamo === "RECLAMO"
-                      ? "border-primary bg-primary/5 dark:bg-primary/10 shadow-sm"
-                      : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-slate-200 hover:border-slate-300"
                     }
                   `}
                 >
@@ -751,8 +751,8 @@ export const LibroReclamaciones = () => {
                     className="w-5 h-5 text-primary accent-primary"
                   />
                   <div>
-                    <span className="font-bold text-slate-800 dark:text-white">Reclamo</span>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    <span className="font-bold text-slate-800">Reclamo</span>
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Disconformidad con los productos o servicios adquiridos.
                     </p>
                   </div>
@@ -762,8 +762,8 @@ export const LibroReclamaciones = () => {
                   htmlFor="tipo-queja"
                   className={`flex-1 flex items-center gap-3 px-5 py-4 rounded-xl border-2 cursor-pointer transition-all select-none
                     ${tipoReclamo === "QUEJA"
-                      ? "border-primary bg-primary/5 dark:bg-primary/10 shadow-sm"
-                      : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-slate-200 hover:border-slate-300"
                     }
                   `}
                 >
@@ -775,8 +775,8 @@ export const LibroReclamaciones = () => {
                     className="w-5 h-5 text-primary accent-primary"
                   />
                   <div>
-                    <span className="font-bold text-slate-800 dark:text-white">Queja</span>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    <span className="font-bold text-slate-800">Queja</span>
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Malestar o descontento respecto a la atención recibida.
                     </p>
                   </div>
@@ -791,7 +791,7 @@ export const LibroReclamaciones = () => {
 
             {/* Resumen */}
             <div className="space-y-1.5 mb-5">
-              <label htmlFor="resumen" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="resumen" className="text-sm font-semibold text-slate-700">
                 Resumen del reclamo o queja <span className="text-red-500">*</span>
               </label>
               <input
@@ -801,7 +801,7 @@ export const LibroReclamaciones = () => {
                 {...register("resumen")}
                 className={`w-full px-4 py-2.5 rounded-xl border transition-all outline-none text-sm
                   bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary
-                  dark:bg-slate-900 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500
+                 
                   ${errors.resumen ? "border-red-500" : ""}
                 `}
               />
@@ -814,7 +814,7 @@ export const LibroReclamaciones = () => {
 
             {/* Detalle */}
             <div className="space-y-1.5 mb-6">
-              <label htmlFor="detalle-pedido" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="detalle-pedido" className="text-sm font-semibold text-slate-700">
                 Detalle del pedido <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -824,7 +824,7 @@ export const LibroReclamaciones = () => {
                 {...register("detallePedido")}
                 className={`w-full px-4 py-3 rounded-xl border transition-all outline-none text-sm resize-none
                   bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary
-                  dark:bg-slate-900 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500
+                 
                   ${errors.detallePedido ? "border-red-500" : ""}
                 `}
               />
@@ -837,13 +837,13 @@ export const LibroReclamaciones = () => {
 
             {/* Archivo adjunto */}
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label className="text-sm font-semibold text-slate-700">
                 Adjuntar archivo (opcional)
               </label>
               <div
                 className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer
                   hover:border-primary/40 hover:bg-primary/5
-                  ${archivoAdjunto ? "border-primary/30 bg-primary/5" : "border-slate-200 dark:border-slate-700"}
+                  ${archivoAdjunto ? "border-primary/30 bg-primary/5" : "border-slate-200"}
                 `}
                 onClick={() => fileInputRef.current?.click()}
               >
@@ -857,7 +857,7 @@ export const LibroReclamaciones = () => {
                 {archivoAdjunto ? (
                   <div className="flex items-center justify-center gap-3">
                     <CheckCircle2 size={20} className="text-primary" />
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <span className="text-sm font-medium text-slate-700">
                       {archivoAdjunto.name}
                     </span>
                     <span className="text-xs text-slate-400">
@@ -869,7 +869,7 @@ export const LibroReclamaciones = () => {
                         e.stopPropagation();
                         removeFile();
                       }}
-                      className="ml-2 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 transition-colors"
+                      className="ml-2 p-1 rounded-full hover:bg-red-100 text-red-500 transition-colors"
                     >
                       <X size={16} />
                     </button>
@@ -877,7 +877,7 @@ export const LibroReclamaciones = () => {
                 ) : (
                   <div className="flex flex-col items-center gap-2">
                     <Upload size={28} className="text-slate-400" />
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-sm text-slate-500">
                       Haga clic para seleccionar un archivo
                     </p>
                     <p className="text-xs text-slate-400">PDF, JPG, PNG, DOC (máx. 5 MB)</p>
@@ -910,8 +910,8 @@ export const LibroReclamaciones = () => {
         </form>
 
         {/* ═══════ DISCLAIMER LEGAL ═══════ */}
-        <div className="mt-12 px-6 py-5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
-          <p className="text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+        <div className="mt-12 px-6 py-5 bg-slate-50/50 rounded-xl border border-slate-100">
+          <p className="text-[11px] leading-relaxed text-slate-400">
             SUPERINKA.COM E.I.R.L., con RUC N.° 20606677074, con domicilio en Calle Ramón Zavala N.° 790, Urb. Las Moreras, distrito de La Perla, provincia y departamento del Callao, es el titular del banco de datos personales de Quejas y Reclamos. SUPERINKA.COM E.I.R.L. declara que el tratamiento de sus datos personales en este portal tiene por finalidad gestionar de manera adecuada su reclamo o queja conforme a las disposiciones legales vigentes, así como llevar un registro histórico de los casos presentados con el objetivo de mejorar la calidad de atención. La formulación del reclamo no impide acudir a otras vías de solución de controversias ni constituye requisito previo para interponer una denuncia ante el INDECOPI. El proveedor deberá brindar respuesta al reclamo en un plazo no mayor de quince (15) días hábiles improrrogables. Esta cuenta de correo es utilizada únicamente para el envío de constancias de recepción de reclamos, no siendo un medio para la recepción de los mismos; por lo que se solicita no remitir mensajes a dicha cuenta.
           </p>
         </div>

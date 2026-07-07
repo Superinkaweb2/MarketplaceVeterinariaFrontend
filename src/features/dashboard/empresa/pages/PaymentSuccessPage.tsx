@@ -20,10 +20,10 @@ export const PaymentSuccessPage = () => {
     }, []);
 
     return (
-        <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-slate-50 dark:bg-slate-950 min-h-[80vh]">
+        <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-slate-50 min-h-[80vh]">
             {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.1} />}
 
-            <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-8 md:p-12 text-center space-y-8 animate-in zoom-in duration-500">
+            <div className="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl border border-slate-200 p-8 md:p-12 text-center space-y-8 animate-in zoom-in duration-500">
                 <div className="flex justify-center">
                     <div className="w-24 h-24 bg-emerald-500/10 rounded-[2rem] flex items-center justify-center text-emerald-500 border border-emerald-500/20 shadow-xl shadow-emerald-500/10">
                         <CheckCircle2 size={48} strokeWidth={2.5} />
@@ -31,18 +31,18 @@ export const PaymentSuccessPage = () => {
                 </div>
 
                 <div className="space-y-4">
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">
                         ¡Pago Completado!
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 font-medium">
+                    <p className="text-slate-500 font-medium">
                         Tu transacción ha sido procesada exitosamente. Tu cuenta se actualizará en unos instantes.
                     </p>
                 </div>
 
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 text-left space-y-4 border border-slate-100 dark:border-slate-800">
+                <div className="bg-slate-50 rounded-2xl p-6 text-left space-y-4 border border-slate-100">
                     <div className="flex justify-between items-center text-sm">
                         <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">ID de Pago</span>
-                        <span className="text-slate-900 dark:text-white font-mono font-bold">{paymentId || 'N/A'}</span>
+                        <span className="text-slate-900 font-mono font-bold">{paymentId || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
                         <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Estado</span>

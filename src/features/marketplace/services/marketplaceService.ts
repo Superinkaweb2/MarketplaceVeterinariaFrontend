@@ -13,7 +13,7 @@ export const marketplaceService = {
         if (filters.size !== undefined) params.append("size", filters.size.toString());
         if (filters.sort) params.append("sort", filters.sort);
 
-        const { data } = await api.get<ApiResponse<{ content: Product[] }>>("/public/products", { params });
+        const { data } = await api.get<ApiResponse<{ content: Product[]; totalElements: number }>>("/public/products", { params });
         return data.data;
     },
 
@@ -24,6 +24,11 @@ export const marketplaceService = {
 
     getCategories: async (): Promise<Category[]> => {
         const { data } = await api.get<ApiResponse<Category[]>>("/categories");
+        return data.data;
+    },
+
+    getSubcategories: async (padreId: number): Promise<Category[]> => {
+        const { data } = await api.get<ApiResponse<Category[]>>(`/categories/${padreId}/subcategories`);
         return data.data;
     },
 
@@ -92,7 +97,7 @@ export const marketplaceService = {
     },
 
     searchAdoptions: async (page = 0, size = 12) => {
-        const { data } = await api.get<ApiResponse<{ content: any[] }>>("/adoptions", {
+        const { data } = await api.get<ApiResponse<{ content: any[]; totalElements: number }>>("/adoptions", {
             params: { page, size }
         });
         return data.data;
@@ -111,7 +116,7 @@ export const marketplaceService = {
     },
 
     searchServices: async (page = 0, size = 12, q?: string, empresaId?: number) => {
-        const { data } = await api.get<ApiResponse<{ content: any[] }>>("/services", {
+        const { data } = await api.get<ApiResponse<{ content: any[]; totalElements: number }>>("/services", {
             params: { page, size, q, empresaId }
         });
         return data.data;

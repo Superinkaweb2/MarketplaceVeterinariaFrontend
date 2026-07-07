@@ -1,5 +1,4 @@
-import type { Product } from "../types/marketplace";
-import type { AdoptionResponse } from "../../dashboard/shared/adopciones/types/adoption.types";
+import type { Product, ServiceResponse, AdoptionResponse } from "../types/marketplace";
 
 export const mapAdoptionToProduct = (data: AdoptionResponse): Product => ({
     id: `adoption_${data.id}`,
@@ -15,10 +14,10 @@ export const mapAdoptionToProduct = (data: AdoptionResponse): Product => ({
     empresaNombre: data.publicadoPorNombre || "Dueño Particular",
     empresaTipoServicio: data.publicadoPorTipoServicio,
     badge: { text: "Adopción", style: "adoption" },
-    itemType: 'product'
+    itemType: 'adoption'
 });
 
-export const mapServiceToProduct = (data: any): Product => ({
+export const mapServiceToProduct = (data: ServiceResponse): Product => ({
     id: `service_${data.id}`,
     nombre: data.nombre,
     descripcion: data.descripcion || "Sin descripción disponible.",
@@ -27,8 +26,8 @@ export const mapServiceToProduct = (data: any): Product => ({
     stock: 1,
     imagenes: data.imagenUrl ? [data.imagenUrl] : [],
     categoriaId: -2,
-    categoriaNombre: "Cita Médica",
-    empresaId: data.veterinarioId || data.empresaId,
+    categoriaNombre: "Servicio Médico",
+    empresaId: data.veterinarioId || data.empresaId || 0,
     empresaNombre: data.veterinarioId
         ? `${data.veterinarioNombres} ${data.veterinarioApellidos}`
         : (data.empresaNombre || "Veterinario"),

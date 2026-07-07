@@ -10,11 +10,11 @@ export const CTA = () => {
     >
       <h2
         id="cta-heading"
-        className="text-[#0d131b] dark:text-white text-3xl md:text-5xl font-black mb-6 tracking-tight"
+        className="text-[#0d131b] text-3xl md:text-5xl font-black mb-6 tracking-tight"
       >
         ¿Listo para modernizar tu clínica veterinaria?
       </h2>
-      <p className="text-[#4c6c9a] dark:text-slate-400 text-lg mb-8 max-w-2xl mx-auto">
+      <p className="text-[#4c6c9a] text-lg mb-8 max-w-2xl mx-auto">
         Únete a miles de veterinarios y dueños de mascotas que ya usan Huella360
         para conectar, atender y hacer crecer su negocio.
       </p>
@@ -31,7 +31,7 @@ export const CTA = () => {
           variant="outline"
           onClick={() => navigate('/contacto')}
           aria-label="Contactar con el equipo de ventas de Huella360"
-          className="px-8 py-4 h-auto text-lg border-slate-200 dark:border-slate-700"
+          className="px-8 py-4 h-auto text-lg border-slate-200"
         >
           Hablar con ventas
         </Button>
