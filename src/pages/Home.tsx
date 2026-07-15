@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Hero } from "../sections/Hero";
-import { Segments } from "../sections/Segments";
+import { TrustedBy } from "../sections/TrustedBy";
+import { Features } from "../sections/Features";
+import { AudienceSplit } from "../sections/AudienceSplit";
+import { Stats } from "../sections/Stats";
 import { Pricing } from "../sections/Pricing";
 import { CTA } from "../sections/CTA";
-import { ProfilesInfo } from "./ProfileInfo";
 import { Seo } from "../components/Seo";
 
 function Home() {
@@ -13,9 +15,9 @@ function Home() {
   useEffect(() => {
     if (hash) {
       setTimeout(() => {
-        const element = document.getElementById(hash.replace('#', ''));
+        const element = document.getElementById(hash.replace("#", ""));
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
+          element.scrollIntoView({ behavior: "smooth" });
         }
       }, 100);
     } else {
@@ -25,12 +27,15 @@ function Home() {
 
   return (
     <>
-      <Seo title="Inicio" description="Huella360 - Plataforma integral de servicios veterinarios. Encuentra productos, servicios y profesionales para el bienestar de tus mascotas." />
+      <Seo
+        title="Inicio"
+        description="Huella360 - Plataforma integral de servicios veterinarios. Encuentra productos, servicios y profesionales para el bienestar de tus mascotas."
+      />
       <Hero />
-      <Segments />
-
-      <ProfilesInfo />
-
+      <TrustedBy />
+      <Features />
+      <AudienceSplit />
+      <Stats />
       <Pricing />
       <CTA />
     </>

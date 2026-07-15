@@ -12,13 +12,19 @@ import {
  Calendar,
  CalendarCheck,
  Package,
- Award
+ Award,
+ MessageSquare,
+ Bell,
+ Users,
 } from "lucide-react";
 import { useAuth } from "../../../../auth/context/useAuth";
 
 const MENU_ITEMS = [
  { label: "Dashboard", icon: LayoutDashboard, href: "/portal/cliente", end: true },
  { label: "Mis Mascotas", icon: PawPrint, href: "/portal/cliente/mascotas" },
+ { label: "Teleconsultas", icon: MessageSquare, href: "/portal/cliente/teleconsultas" },
+ { label: "Recordatorios", icon: Bell, href: "/portal/cliente/recordatorios" },
+ { label: "Mis Referidos", icon: Users, href: "/portal/cliente/referidos" },
  { label: "Adopciones", icon: Heart, href: "/portal/cliente/adopciones" },
  { label: "Mis Solicitudes", icon: Heart, href: "/portal/cliente/mis-solicitudes" },
  { label: "Mis Servicios", icon: Calendar, href: "/portal/cliente/servicios" },

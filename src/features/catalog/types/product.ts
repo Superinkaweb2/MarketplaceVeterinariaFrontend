@@ -31,7 +31,7 @@ export interface CreateProductRequest {
     ofertaInicio?: string;
     ofertaFin?: string;
     stock: number;
-    sku: string;
+    sku?: string;
     categoriaId: number;
     visible: boolean;
 }

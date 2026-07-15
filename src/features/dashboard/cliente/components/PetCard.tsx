@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Edit2, Trash2, Calendar, Scale, Scissors, Info } from "lucide-react";
 import { type Pet, Sexo } from "../types/pet.types";
 
@@ -8,6 +9,7 @@ interface PetCardProps {
 }
 
 export const PetCard = ({ pet, onEdit, onDelete }: PetCardProps) => {
+ const navigate = useNavigate();
  const calculateAge = (birthday: string) => {
  const ageDifMs = Date.now() - new Date(birthday).getTime();
  const ageDate = new Date(ageDifMs);
@@ -103,9 +105,12 @@ export const PetCard = ({ pet, onEdit, onDelete }: PetCardProps) => {
  )}
  </div>
 
- <button className="w-full py-2.5 mt-2 rounded-xl text-[10px] font-bold text-gray-500 hover:text-white hover:bg-primary transition-all uppercase tracking-widest border border-gray-200 hover:border-primary">
- Ver Perfil Médico
- </button>
+ <button
+   onClick={() => navigate(`/portal/cliente/mascota/${pet.id}`)}
+   className="w-full py-2.5 mt-2 rounded-xl text-[10px] font-bold text-gray-500 hover:text-white hover:bg-primary transition-all uppercase tracking-widest border border-gray-200 hover:border-primary"
+  >
+   Ver Perfil Médico
+  </button>
  </div>
  );
 };

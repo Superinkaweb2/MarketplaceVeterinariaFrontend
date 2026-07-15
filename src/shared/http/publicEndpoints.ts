@@ -3,7 +3,9 @@ export const ALWAYS_PUBLIC_PATTERNS = [
   "/auth/",
   "/public/",
   "/payments/webhook",
+  "/payments/checkout/guest",
   "/reclamos",
+  "/orders/guest",
 ];
 
 // Endpoints públicos solo en GET
@@ -23,6 +25,7 @@ export const ALWAYS_PROTECTED_PATTERNS = [
   "/veterinarians/me",
   "/repartidores/me",
   "/applications",
+  "/adoptions/me",
 ];
 
 /**

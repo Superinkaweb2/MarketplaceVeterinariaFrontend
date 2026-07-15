@@ -114,6 +114,11 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 to="/portal/empresa/mis-adopciones"
               />
               <NavItem
+                icon={<Inbox size={20} />}
+                label="Leads"
+                to="/portal/empresa/leads"
+              />
+              <NavItem
                 icon={<Package size={20} />}
                 label="Productos"
                 to="/portal/empresa/productos"

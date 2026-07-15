@@ -1,136 +1,98 @@
-import { Globe, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 export const Footer = () => {
   return (
-    <footer className="w-full bg-white border-t border-[#e7ecf3] pt-16 pb-8 px-10">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2 text-[#0d131b]">
-            <img
-              src="/LOGO HUELLA360_logo primario.png"
-              alt="Logo Huella360"
-              className="h-8 w-auto object-contain"
-            />
-            <span className="text-xl font-bold">Huella360</span>
+    <footer className="bg-white border-t border-border pt-16 pb-8">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-14">
+          <div className="lg:col-span-2">
+            <Link to="/" className="inline-flex items-center gap-2 mb-5">
+              <img
+                src="/LOGO HUELLA360_logo primario.png"
+                alt="Huella360 Logo"
+                className="h-10 w-auto object-contain"
+              />
+            </Link>
+            <p className="text-text-secondary text-sm mb-6 max-w-xs leading-relaxed">
+              Construyendo la infraestructura digital para el cuidado moderno de
+              las mascotas en Latinoamérica.
+            </p>
+            <div className="flex items-center border border-slate-200 rounded-full p-1 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all max-w-xs">
+              <input
+                className="flex-1 bg-transparent border-none focus:ring-0 text-sm px-4 py-2 outline-none placeholder:text-slate-400"
+                placeholder="Tu correo electrónico"
+                type="email"
+              />
+              <button className="bg-text-primary text-white p-2 rounded-full hover:bg-primary transition-colors">
+                <ArrowRight size={14} />
+              </button>
+            </div>
           </div>
-          <p className="text-[#4c6c9a] text-sm leading-relaxed">
-            Empoderando a la comunidad veterinaria con tecnología que conecta corazones y salud.
-          </p>
-          <div className="flex gap-4 mt-2">
-            <a
-              className="text-slate-400 hover:text-primary transition-colors"
-              href="#"
-            >
-              <Globe size={20} />
-            </a>
-            <a
-              className="text-slate-400 hover:text-primary transition-colors"
-              href="#"
-            >
-              <Mail size={20} />
-            </a>
+
+          <div>
+            <h4 className="font-bold text-text-primary text-sm mb-4">Plataforma</h4>
+            <ul className="space-y-2.5">
+              {["Para Dueños", "Software Veterinario", "Marketplace B2B", "Precios"].map((item) => (
+                <li key={item}>
+                  <a className="text-text-secondary text-sm hover:text-primary transition-colors" href="#">
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-text-primary text-sm mb-4">Empresa</h4>
+            <ul className="space-y-2.5">
+              {["Sobre Nosotros", "Blog", "Carreras", "Contacto"].map((item) => (
+                <li key={item}>
+                  <a className="text-text-secondary text-sm hover:text-primary transition-colors" href="#">
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-text-primary text-sm mb-4">Legal</h4>
+            <ul className="space-y-2.5">
+              {[
+                { name: "Privacidad", to: "/privacidad" },
+                { name: "Términos de Servicio", to: "/terminos" },
+                { name: "Política de Cookies", to: "/cookies" },
+                { name: "Libro de Reclamaciones", to: "/libro-reclamaciones" },
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link className="text-text-secondary text-sm hover:text-primary transition-colors" to={item.to}>
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        {[
-          {
-            title: "Plataforma",
-            links: [
-              { name: "Para Veterinarios", href: "/#veterinarios" },
-              { name: "Para Dueños", href: "/#duenos" },
-              { name: "Marketplace", href: "/marketplace" },
-              { name: "Precios", href: "/#pricing" }
-            ],
-          },
-          {
-            title: "Empresa",
-            links: [
-              { name: "Sobre Nosotros", href: "/sobre-nosotros" },
-              { name: "Empleos", href: "/empleos" },
-              { name: "Blog", href: "/blog" },
-              { name: "Contacto", href: "/contacto" }
-            ],
-          },
-        ].map((section) => (
-          <div key={section.title} className="flex flex-col gap-4">
-            <h4 className="font-bold text-[#0d131b]">
-              {section.title}
-            </h4>
-            {section.links.map((link) => (
-              link.href.startsWith("/#") ? (
-                <a
-                  key={link.name}
-                  className="text-[#4c6c9a] text-sm hover:text-primary transition-colors"
-                  href={link.href}
-                >
-                  {link.name}
-                </a>
-              ) : (
-                <Link
-                  key={link.name}
-                  className="text-[#4c6c9a] text-sm hover:text-primary transition-colors"
-                  to={link.href}
-                >
-                  {link.name}
-                </Link>
-              )
+        <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-xs text-text-secondary">
+            © 2026 Huella360 Inc. Todos los derechos reservados.
+          </p>
+          <div className="flex gap-3">
+            {["Twitter", "Instagram", "LinkedIn"].map((social) => (
+              <a
+                key={social}
+                className="text-slate-400 hover:text-primary transition-colors"
+                href="#"
+                aria-label={social}
+              >
+                <span className="sr-only">{social}</span>
+                <div className="w-5 h-5 bg-current rounded opacity-40" />
+              </a>
             ))}
           </div>
-        ))}
-
-        <div className="flex flex-col gap-4">
-          <h4 className="font-bold text-[#0d131b]">
-            Mantente al Día
-          </h4>
-          <p className="text-[#4c6c9a] text-sm">
-            Suscríbete a nuestro boletín para recibir las últimas novedades.
-          </p>
-          <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); alert('¡Gracias por suscribirte!'); }}>
-            <input
-              className="flex-1 rounded-lg border border-[#cfd9e7] bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:border-primary"
-              placeholder="Ingresa tu correo"
-              type="email"
-            />
-            <button type="submit" className="bg-primary text-white rounded-lg px-4 py-2 font-bold text-sm hover:bg-blue-700 transition-colors cursor-pointer">
-              Unirse
-            </button>
-          </form>
         </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto pt-8 border-t border-[#e7ecf3] flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="flex flex-col gap-2 md:gap-0">
-          <p className="text-[#4c6c9a] text-sm mb-2">
-            © 2026 Huella360. Todos los derechos reservados.
-          </p>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-[#4c6c9a] text-sm">
-            <Link className="hover:text-primary transition-colors" to="/privacidad">
-              Política de Privacidad
-            </Link>
-            <Link className="hover:text-primary transition-colors" to="/terminos">
-              Términos de Servicio
-            </Link>
-            <Link className="hover:text-primary transition-colors" to="/cookies">
-              Política de Cookies
-            </Link>
-            <Link className="hover:text-primary transition-colors" to="/devoluciones">
-              Políticas de Devoluciones y Reembolsos
-            </Link>
-          </div>
-        </div>
-
-        <Link
-          to="/libro-reclamaciones"
-          className="flex flex-col items-center justify-center p-3 border-2 border-slate-200 rounded-lg hover:border-primary transition-colors group bg-white shadow-sm"
-        >
-            <div className="font-bold text-lg text-slate-800 group-hover:text-primary transition-colors text-center tracking-tight leading-tight">
-            LIBRO DE <br /> RECLAMACIONES
-          </div>
-          <div className="text-[10px] text-slate-500 mt-1 font-medium tracking-wider uppercase">
-            Quejas y Reclamos
-          </div>
-        </Link>
       </div>
     </footer>
   );

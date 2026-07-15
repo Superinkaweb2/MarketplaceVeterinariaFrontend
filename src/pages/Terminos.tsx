@@ -1,6 +1,6 @@
 export const Terminos = () => {
     return (
-        <div className="max-w-4xl mx-auto px-4 py-16 flex-1 w-full bg-white">
+        <div className="max-w-3xl mx-auto px-6 py-16 flex-1 w-full bg-white">
             <h1 className="text-3xl md:text-5xl font-bold mb-8 text-[#0d131b] border-b pb-4">Términos y Condiciones</h1>
             <div className="prose max-w-none text-slate-600 space-y-6">
                 <p>

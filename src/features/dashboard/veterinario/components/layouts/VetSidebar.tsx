@@ -10,6 +10,7 @@ import {
  X,
  Clock,
  PawPrint,
+ MessageSquare,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -17,6 +18,7 @@ const MENU_ITEMS = [
  { label: "Dashboard", icon: LayoutDashboard, href: "/portal/veterinario", end: true },
  { label: "Agenda", icon: Clock, href: "/portal/veterinario/citas" },
  { label: "Pacientes", icon: PawPrint, href: "/portal/veterinario/pacientes" },
+ { label: "Teleconsultas", icon: MessageSquare, href: "/portal/veterinario/teleconsultas" },
  { label: "Mis Servicios", icon: Stethoscope, href: "/portal/veterinario/servicios" },
  { label: "Invitaciones", icon: Mail, href: "/portal/veterinario/invitaciones" },
 ];

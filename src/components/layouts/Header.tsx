@@ -1,80 +1,103 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Button } from "../ui/Button";
 import { useAuth } from "../../features/auth/context/useAuth";
 import { UserDropdown } from "../UserDropdown";
 import { useClientPointsDashboard } from "../../features/dashboard/gamification/hooks/useGamification";
-import { Gift } from "lucide-react";
+import { Gift, Menu, X } from "lucide-react";
 
 export const Header = () => {
   const location = useLocation();
   const { isAuthenticated, role } = useAuth();
-  
-  // Solo cargamos los puntos si es un cliente autenticado
-  const isCliente = role === 'CLIENTE';
+  const isCliente = role === "CLIENTE";
   const { data: pointsData } = useClientPointsDashboard(isAuthenticated && isCliente);
+
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const navItems = [
     { name: "Inicio", path: "/" },
-    { name: "Empresas", path: "/empresas" },
-    { name: "Marketplace", path: "/marketplace" },
+    { name: "Para Dueños", path: "/#duenos" },
+    { name: "Veterinarios", path: "/#veterinarios" },
+    { name: "Negocios", path: "/#negocios" },
+    { name: "Precios", path: "/#pricing" },
   ];
 
+  const handleNavClick = (path: string) => {
+    if (path.startsWith("/#")) {
+      if (location.pathname !== "/") {
+        window.location.href = path;
+      } else {
+        const el = document.getElementById(path.replace("/#", ""));
+        el?.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7ecf3] bg-white/90 backdrop-blur-md px-10 py-3">
-      <Link
-        to="/home"
-        className="flex items-center hover:opacity-80 transition-opacity"
-      >
-        <div className="flex items-center justify-center">
+    <nav
+      className={`fixed top-0 w-full z-[100] transition-all duration-300 glass-nav ${
+        scrolled
+          ? "shadow-md border-transparent"
+          : "border-b border-border/50"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <img
             src="/LOGO HUELLA60-logo secundario.png"
             alt="Logo Huella360"
-            className="h-12 sm:h-14 w-auto object-contain"
+            className="h-10 w-auto object-contain"
           />
-        </div>
-      </Link>
+        </Link>
 
-      <div className="flex flex-1 justify-end gap-8">
-        <div className="hidden md:flex items-center gap-9">
+        <div className="hidden md:flex items-center gap-8">
           {navItems.map((item) => (
             <Link
               key={item.name}
               to={item.path}
-              className={`text-sm font-medium leading-normal transition-colors ${location.pathname === item.path
-                ? "text-primary font-bold"
-                : "text-[#0d131b] hover:text-primary"
-                }`}
+              onClick={() => handleNavClick(item.path)}
+              className={`nav-link font-medium transition-colors ${
+                location.pathname === item.path
+                  ? "active font-semibold text-text-primary"
+                  : "text-text-secondary hover:text-text-primary"
+              }`}
             >
               {item.name}
             </Link>
           ))}
         </div>
 
-        <div className="flex gap-2">
+        <div className="hidden md:flex items-center gap-4">
           {!isAuthenticated ? (
             <>
-              <Link to="/register">
-                <Button
-                  variant="primary"
-                  className="min-w-21 h-10 px-4 text-sm"
-                >
-                  Prueba Gratis
-                </Button>
+              <Link
+                to="/login"
+                className="font-medium text-text-primary hover:text-primary transition-colors"
+              >
+                Iniciar sesión
               </Link>
-              <Link to="/login">
-                <Button
-                  variant="secondary"
-                  className="min-w-21 h-10 px-4 text-sm"
-                >
-                  Iniciar Sesión
-                </Button>
+              <Link
+                to="/register"
+                className="bg-primary text-white px-6 py-2.5 rounded-full font-semibold hover:bg-primary-dark hover:shadow-md transition-all duration-300"
+              >
+                Prueba Gratis
               </Link>
             </>
           ) : (
             <div className="flex items-center gap-4">
               {isCliente && pointsData && (
-                <Link 
-                  to="/portal/cliente/puntos" 
+                <Link
+                  to="/portal/cliente/puntos"
                   className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 border border-yellow-200 rounded-full hover:bg-yellow-100 transition-colors group"
                   title="Tus puntos Huella360"
                 >
@@ -88,7 +111,46 @@ export const Header = () => {
             </div>
           )}
         </div>
+
+        <button
+          className="md:hidden text-text-primary"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+        >
+          {mobileOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
       </div>
-    </header>
+
+      {mobileOpen && (
+        <div className="md:hidden glass-nav border-t border-border/50 px-6 py-6 space-y-4">
+          {navItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path}
+              onClick={() => handleNavClick(item.path)}
+              className="block font-medium text-text-secondary hover:text-text-primary transition-colors"
+            >
+              {item.name}
+            </Link>
+          ))}
+          <hr className="border-border" />
+          {!isAuthenticated ? (
+            <div className="flex flex-col gap-3">
+              <Link to="/login" className="font-medium text-text-primary hover:text-primary transition-colors">
+                Iniciar sesión
+              </Link>
+              <Link
+                to="/register"
+                className="bg-primary text-white px-6 py-2.5 rounded-full font-semibold text-center hover:bg-primary-dark transition-all"
+              >
+                Prueba Gratis
+              </Link>
+            </div>
+          ) : (
+            <UserDropdown />
+          )}
+        </div>
+      )}
+    </nav>
   );
 };

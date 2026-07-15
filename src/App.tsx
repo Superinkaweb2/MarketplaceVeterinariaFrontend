@@ -106,6 +106,16 @@ const InvitacionesPage = lazyPage(() => import("./features/dashboard/veterinario
 const VetConfiguracionPage = lazyPage(() => import("./features/dashboard/veterinario/pages/VetConfiguracionPage"), "VetConfiguracionPage");
 const VetCitasPage = lazyPage(() => import("./features/dashboard/veterinario/pages/VetCitasPage"), "VetCitasPage");
 const VetPacientesPage = lazyPage(() => import("./features/dashboard/veterinario/pages/VetPacientesPage"), "VetPacientesPage");
+const TeleconsultasVetPage = lazyPage(() => import("./features/dashboard/veterinario/pages/TeleconsultasVetPage"), "TeleconsultasVetPage");
+
+// NEW: Client Feature Pages
+const MascotaDetailPage = lazyPage(() => import("./features/dashboard/cliente/pages/MascotaDetailPage"), "MascotaDetailPage");
+const RecordatoriosPage = lazyPage(() => import("./features/dashboard/cliente/pages/RecordatoriosPage"), "RecordatoriosPage");
+const ReferralsPage = lazyPage(() => import("./features/dashboard/cliente/pages/ReferralsPage"), "ReferralsPage");
+const TeleconsultasClientePage = lazyPage(() => import("./features/dashboard/cliente/pages/TeleconsultasClientePage"), "TeleconsultasClientePage");
+
+// NEW: Empresa Feature Pages
+const LeadsPage = lazyPage(() => import("./features/dashboard/empresa/pages/LeadsPage"), "LeadsPage");
 
 // Repartidor Pages
 const RepartidorDashboard = lazyPage(() => import("./features/dashboard/repartidor/components/RepartidorDashboard"), "RepartidorDashboard");
@@ -191,6 +201,7 @@ function App() {
                     <Route path="servicios" element={<ServiciosPage />} />
                     <Route path="productos" element={<ProductosPage />} />
                     <Route path="equipo" element={<EquipoPage />} />
+                    <Route path="leads" element={<LeadsPage />} />
                     <Route path="suscripcion" element={<MySubscriptionPage />} />
                     <Route path="facturacion" element={<FacturacionPage />} />
                     <Route path="adopciones" element={<AdopcionesPage />} />
@@ -214,6 +225,7 @@ function App() {
                     <Route path="citas" element={<VetCitasPage />} />
                     <Route path="pacientes" element={<VetPacientesPage />} />
                     <Route path="servicios" element={<VetServiciosPage />} />
+                    <Route path="teleconsultas" element={<TeleconsultasVetPage />} />
                     <Route path="invitaciones" element={<InvitacionesPage />} />
                     <Route path="configuracion" element={<VetConfiguracionPage />} />
                   </Route>
@@ -226,11 +238,15 @@ function App() {
                   <Route path="/portal/cliente" element={<DashboardCliente />}>
                     <Route index element={<MascotasPage />} />
                     <Route path="mascotas" element={<MascotasPage />} />
+                    <Route path="mascota/:id" element={<MascotaDetailPage />} />
                     <Route path="adopciones" element={<AdopcionesPage />} />
                     <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
                     <Route path="mis-solicitudes" element={<MisSolicitudesPage />} />
                     <Route path="servicios" element={<ClienteMisServiciosPage />} />
                     <Route path="citas" element={<MisCitasPage />} />
+                    <Route path="teleconsultas" element={<TeleconsultasClientePage />} />
+                    <Route path="recordatorios" element={<RecordatoriosPage />} />
+                    <Route path="referidos" element={<ReferralsPage />} />
                     <Route path="configuracion" element={<ClienteConfigPage />} />
                     <Route path="compras" element={<MisCompras />} />
                     <Route path="puntos" element={<ClientPointsDashboard />} />

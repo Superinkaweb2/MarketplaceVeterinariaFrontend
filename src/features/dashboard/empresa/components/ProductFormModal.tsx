@@ -18,7 +18,6 @@ const productSchema = z.object({
   ofertaInicio: z.string().optional().nullable(),
   ofertaFin: z.string().optional().nullable(),
   stock: z.number().min(0, "El stock no puede ser negativo"),
-  sku: z.string().min(3, "El SKU debe tener al menos 3 caracteres"),
   categoriaId: z.number().positive("Selecciona una categoría"),
   visible: z.boolean(),
 }).refine((data) => {
@@ -70,14 +69,13 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
           ofertaInicio: product.ofertaInicio?.substring(0, 16) ?? null,
           ofertaFin: product.ofertaFin?.substring(0, 16) ?? null,
           stock: product.stock,
-          sku: product.sku,
           categoriaId: product.categoriaId,
           visible: product.visible,
         });
         setPreviews(product.imagenes);
         if (product.precioOferta) setShowOffer(true);
       } else {
-        reset({ nombre: "", descripcion: "", precio: 0, stock: 0, sku: "", visible: true });
+        reset({ nombre: "", descripcion: "", precio: 0, stock: 0, visible: true });
         setPreviews([]);
         setSelectedImages([]);
         setShowOffer(false);
@@ -209,11 +207,6 @@ export const ProductFormModal = ({ isOpen, onClose, onSuccess, product }: Produc
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Nombre del Producto</label>
                 <input {...register("nombre")} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="Ej. Smartwatch Series 7" />
                 {errors.nombre && <p className="text-xs text-red-500 mt-1">{errors.nombre.message}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">SKU</label>
-                <input {...register("sku")} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary/50 outline-none transition-all" placeholder="PROD-001" />
-                {errors.sku && <p className="text-xs text-red-500 mt-1">{errors.sku.message}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Categoría</label>

@@ -1,4 +1,4 @@
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { marketplaceService } from "../services/marketplaceService";
 import { useState, useMemo } from "react";
@@ -8,9 +8,12 @@ import { useAvailableCheckoutRewards } from "../../dashboard/gamification/hooks/
 export const CheckoutPage = () => {
     const { items, cartTotal } = useCart();
     const { isAuthenticated } = useAuth();
-    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Guest checkout fields
+    const [guestEmail, setGuestEmail] = useState("");
+    const [guestNombre, setGuestNombre] = useState("");
 
     // Estados de Envío
     const [deliveryMode, setDeliveryMode] = useState<'pickup' | 'delivery'>('pickup');
@@ -32,7 +35,7 @@ export const CheckoutPage = () => {
     }, [items]);
 
     // Fetch available redeemed rewards for this company
-    const { data: availableRewards } = useAvailableCheckoutRewards(currentEmpresaId);
+    const { data: availableRewards } = useAvailableCheckoutRewards(isAuthenticated ? currentEmpresaId : 0);
 
     // Calculate discount from selected reward
     const rewardDiscount = useMemo(() => {
@@ -95,11 +98,6 @@ export const CheckoutPage = () => {
     };
 
     const handleCheckout = async () => {
-        if (!isAuthenticated) {
-            navigate("/login?redirect=/marketplace/checkout");
-            return;
-        }
-
         setLoading(true);
         setError(null);
 
@@ -143,20 +141,53 @@ export const CheckoutPage = () => {
                 }
             }
 
-            const orderId = await marketplaceService.createOrder({
-                empresaId,
-                veterinarioId: null,
-                costoEnvio: shippingCost,
-                destinoLat: deliveryMode === 'delivery' && location ? location.lat : undefined,
-                destinoLng: deliveryMode === 'delivery' && location ? location.lng : undefined,
-                destinoDireccion: deliveryMode === 'delivery' ? address : undefined,
-                destinoReferencia: deliveryMode === 'delivery' ? reference : undefined,
-                canjeRecompensaId: selectedRewardId || undefined,
-                items: orderItems
-            });
+            // Validate guest fields if not authenticated
+            if (!isAuthenticated) {
+                if (!guestEmail.trim()) {
+                    setError("El email es obligatorio para compras sin sesión");
+                    setLoading(false);
+                    return;
+                }
+                if (!guestNombre.trim()) {
+                    setError("El nombre es obligatorio para compras sin sesión");
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            let orderId: number;
+
+            if (isAuthenticated) {
+                orderId = await marketplaceService.createOrder({
+                    empresaId,
+                    veterinarioId: null,
+                    costoEnvio: shippingCost,
+                    destinoLat: deliveryMode === 'delivery' && location ? location.lat : undefined,
+                    destinoLng: deliveryMode === 'delivery' && location ? location.lng : undefined,
+                    destinoDireccion: deliveryMode === 'delivery' ? address : undefined,
+                    destinoReferencia: deliveryMode === 'delivery' ? reference : undefined,
+                    canjeRecompensaId: selectedRewardId || undefined,
+                    items: orderItems
+                });
+            } else {
+                orderId = await marketplaceService.createGuestOrder({
+                    empresaId,
+                    veterinarioId: null,
+                    guestEmail,
+                    guestNombre,
+                    costoEnvio: shippingCost,
+                    destinoLat: deliveryMode === 'delivery' && location ? location.lat : undefined,
+                    destinoLng: deliveryMode === 'delivery' && location ? location.lng : undefined,
+                    destinoDireccion: deliveryMode === 'delivery' ? address : undefined,
+                    destinoReferencia: deliveryMode === 'delivery' ? reference : undefined,
+                    items: orderItems
+                });
+            }
 
             // 2. Get Payment Preference
-            const { initPoint, sandboxInitPoint } = await marketplaceService.getPaymentLink(orderId);
+            const { initPoint, sandboxInitPoint } = isAuthenticated
+                ? await marketplaceService.getPaymentLink(orderId)
+                : await marketplaceService.getGuestPaymentLink(orderId);
 
             // 3. Redirect to Mercado Pago.
             // IMPORTANT: sandboxInitPoint only works when the seller has TEST-type credentials.
@@ -414,9 +445,31 @@ export const CheckoutPage = () => {
                             )}
 
                             {!isAuthenticated && (
-                                <p className="text-xs text-center text-slate-500 mb-4">
-                                    Debes <Link to="/login" className="text-blue-600 font-bold hover:underline">Iniciar Sesión</Link> para completar el pedido.
-                                </p>
+                                <div className="mb-6 space-y-4">
+                                    <p className="text-xs text-center text-slate-500">
+                                        Completa tus datos para continuar como invitado
+                                    </p>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Nombre completo</label>
+                                        <input
+                                            type="text"
+                                            value={guestNombre}
+                                            onChange={(e) => setGuestNombre(e.target.value)}
+                                            placeholder="Juan Pérez"
+                                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 placeholder:text-slate-400 outline-none focus:border-blue-500 transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                                        <input
+                                            type="email"
+                                            value={guestEmail}
+                                            onChange={(e) => setGuestEmail(e.target.value)}
+                                            placeholder="tu@email.com"
+                                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 placeholder:text-slate-400 outline-none focus:border-blue-500 transition-colors"
+                                        />
+                                    </div>
+                                </div>
                             )}
 
                             <button

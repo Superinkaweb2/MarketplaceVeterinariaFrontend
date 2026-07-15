@@ -1,6 +1,6 @@
 export const Empleos = () => {
     return (
-        <div className="max-w-4xl mx-auto px-4 py-24 text-center flex-1">
+        <div className="max-w-3xl mx-auto px-6 py-24 text-center flex-1">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-[#0d131b]">Empleos</h1>
             <p className="text-lg text-slate-600 mb-8">
                 Únete a nuestro equipo y ayuda a construir el futuro del bienestar animal.

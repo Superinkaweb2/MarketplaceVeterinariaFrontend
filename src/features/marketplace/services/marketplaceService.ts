@@ -64,6 +64,22 @@ export const marketplaceService = {
         return data.data;
     },
 
+    createGuestOrder: async (orderData: {
+        empresaId: number | null;
+        veterinarioId: number | null;
+        guestEmail: string;
+        guestNombre: string;
+        costoEnvio?: number;
+        destinoLat?: number;
+        destinoLng?: number;
+        destinoDireccion?: string;
+        destinoReferencia?: string;
+        items: { productoId: number | null; servicioId: number | null; cantidad: number }[]
+    }): Promise<number> => {
+        const { data } = await api.post<ApiResponse<number>>("/orders/guest", orderData);
+        return data.data;
+    },
+
     getMyOrders: async (
         page = 0,
         size = 10,
@@ -84,6 +100,11 @@ export const marketplaceService = {
 
     getPaymentLink: async (orderId: number): Promise<{ preferenceId: string; initPoint: string; sandboxInitPoint: string }> => {
         const { data } = await api.post<ApiResponse<{ preferenceId: string; initPoint: string; sandboxInitPoint: string }>>(`/payments/checkout/${orderId}`);
+        return data.data;
+    },
+
+    getGuestPaymentLink: async (orderId: number): Promise<{ preferenceId: string; initPoint: string; sandboxInitPoint: string }> => {
+        const { data } = await api.post<ApiResponse<{ preferenceId: string; initPoint: string; sandboxInitPoint: string }>>(`/payments/checkout/guest/${orderId}`);
         return data.data;
     },
 

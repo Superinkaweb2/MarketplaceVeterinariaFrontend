@@ -11,6 +11,7 @@ const STORAGE_KEYS = {
     USER_ROLE: "userRole",
     EMPRESA_ID: "empresaId",
     USER_NOMBRE: "userNombre",
+    USER_ID: "userId",
 } as const;
 
 const AUTH_STORAGE_KEYS = [
@@ -19,6 +20,7 @@ const AUTH_STORAGE_KEYS = [
     STORAGE_KEYS.EMPRESA_ID,
     STORAGE_KEYS.USER_NOMBRE,
     STORAGE_KEYS.PERFIL_COMPLETO,
+    STORAGE_KEYS.USER_ID,
 ];
 
 // ── Claims de Auth0 (namespace del Post Login Action) ────────────────────────
@@ -39,6 +41,7 @@ export interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     role: string | null;
+    userId: number | null;
     empresaId: number | null;
     nombre: string | null;
     perfilCompleto: boolean;
@@ -83,6 +86,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [perfilCompleto, setPerfilCompletoState] = useState<boolean>(
         localStorage.getItem(STORAGE_KEYS.PERFIL_COMPLETO) === "true"
     );
+    const [userId, setUserId] = useState<number | null>(() => {
+        const stored = localStorage.getItem(STORAGE_KEYS.USER_ID);
+        return stored ? Number(stored) : null;
+    });
 
     const syncRef = useRef(false);
 
@@ -129,7 +136,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
                 const userRes = await api.get("/users/me", config);
                 const backendRole = userRes.data.data.rol;
+                const backendUserId = userRes.data.data.id;
                 const VALID_ROLES = ["CLIENTE", "VETERINARIO", "EMPRESA", "REPARTIDOR", "ADMIN"];
+
+                if (backendUserId) {
+                    localStorage.setItem(STORAGE_KEYS.USER_ID, String(backendUserId));
+                    setUserId(backendUserId);
+                }
 
                 if (backendRole && VALID_ROLES.includes(backendRole)) {
                     localStorage.setItem(STORAGE_KEYS.USER_ROLE, backendRole);
@@ -228,6 +241,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 isAuthenticated,
                 isLoading,
                 role,
+                userId,
                 empresaId,
                 nombre,
                 perfilCompleto,

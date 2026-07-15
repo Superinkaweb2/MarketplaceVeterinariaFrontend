@@ -1,61 +1,34 @@
-import {
-  PawPrint,
-  Stethoscope,
-  HeartPulse,
-  ShieldCheck,
-  Activity,
-  type LucideIcon,
-} from "lucide-react";
+import { PawPrint, Stethoscope, Store, ShieldCheck, HeartPulse } from "lucide-react";
 
-interface TrustedLogo {
-  icon: LucideIcon;
-  name: string;
-}
-
-const LOGOS: TrustedLogo[] = [
-  { icon: PawPrint, name: "PetCare+" },
-  { icon: Stethoscope, name: "VetHealth" },
-  { icon: HeartPulse, name: "Paws&Claws" },
-  { icon: ShieldCheck, name: "SafePet" },
-  { icon: Activity, name: "HeartVet" },
+const FEATURES = [
+  { icon: PawPrint, label: "Gestión de Mascotas" },
+  { icon: Stethoscope, label: "Historial Clínico" },
+  { icon: Store, label: "Marketplace" },
+  { icon: ShieldCheck, label: "Teleconsultas" },
+  { icon: HeartPulse, label: "Alertas de Salud" },
 ];
 
 export const TrustedBy = () => {
   return (
-    <section
-      aria-label="Clínicas y empresas que confían en Huella360"
-      className="w-full border-y border-[#e7ecf3] bg-white py-10 overflow-hidden"
-    >
-      <div className="max-w-7xl mx-auto px-4 md:px-10 flex flex-col lg:flex-row items-center gap-10">
-        {/* Texto de confianza */}
-        <p className="text-xs md:text-sm font-bold text-[#4c6c9a] whitespace-nowrap tracking-widest uppercase">
-          Más de 2.000 clínicas confían en nosotros
+    <section className="py-14 border-y border-border bg-white">
+      <div className="px-6 text-center">
+        <p className="text-xs font-semibold text-text-secondary tracking-widest uppercase mb-8">
+          Todo lo que necesitas en una sola plataforma
         </p>
-
-        {/* Logos */}
-        <ul
-          role="list"
-          aria-label="Empresas asociadas"
-          className="flex flex-wrap justify-center lg:justify-between items-center flex-1 gap-x-12 gap-y-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-700 list-none p-0 m-0"
-        >
-          {LOGOS.map((logo) => {
-            const Icon = logo.icon;
+        <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-5">
+          {FEATURES.map((f) => {
+            const Icon = f.icon;
             return (
-              <li
-                key={logo.name}
-                className="flex items-center gap-2.5 font-bold text-lg md:text-xl text-slate-600 group cursor-default"
+              <div
+                key={f.label}
+                className="flex items-center gap-2 text-slate-400 hover:text-secondary transition-colors duration-300"
               >
-                <Icon
-                  size={24}
-                  strokeWidth={2.5}
-                  aria-hidden="true"
-                  className="group-hover:text-primary transition-colors"
-                />
-                <span className="tracking-tight">{logo.name}</span>
-              </li>
+                <Icon size={20} strokeWidth={2} />
+                <span className="text-sm font-bold tracking-tight">{f.label}</span>
+              </div>
             );
           })}
-        </ul>
+        </div>
       </div>
     </section>
   );
