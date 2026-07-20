@@ -1,0 +1,396 @@
+import { useState, useRef, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { ArrowRight, Building2, Phone, Mail, MapPin, Search, UploadCloud, X } from "lucide-react";
+import { Button } from "../../../../components/ui/Button";
+import { profileService } from "../../services/profileService";
+import { useAuth } from "../../context/useAuth";
+import { useNavigate, Navigate } from "react-router-dom";
+import Swal from "sweetalert2";
+
+const MAX_FILE_SIZE = 1024 * 1024; // 1MB - límite del backend
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+const empresaSchema = z.object({
+  nombreComercial: z.string().min(2, "Requerido"),
+  razonSocial: z.string().min(2, "Requerido"),
+  ruc: z.string().min(11, "Mínimo 11 dígitos"),
+  tipoServicio: z.string().min(2, "Requerido"),
+  tipoServicioOtro: z.string().optional(),
+  telefono: z.string().min(6, "Requerido").regex(/^\d+$/, "Solo números permitidos"),
+  emailContacto: z.string().email("Correo inválido"),
+  direccion: z.string().min(5, "Requerido"),
+  ciudad: z.string().min(2, "Requerido"),
+  descripcion: z.string().optional(),
+}).refine((data) => data.tipoServicio !== "OTRO" || (data.tipoServicioOtro && data.tipoServicioOtro.trim().length > 0), {
+  message: "Debe especificar el tipo de servicio",
+  path: ["tipoServicioOtro"],
+});
+
+type EmpresaFormData = z.infer<typeof empresaSchema>;
+
+export const EmpresaProfilePage = () => {
+  const { perfilCompleto, setPerfilCompleto } = useAuth();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<EmpresaFormData>({
+    resolver: zodResolver(empresaSchema),
+    defaultValues: { tipoServicio: "VETERINARIA" }
+  });
+
+  useEffect(() => {
+    const checkProfile = async () => {
+      try {
+        await profileService.getEmpresaProfile();
+        setPerfilCompleto(true);
+        navigate("/portal/empresa", { replace: true });
+      } catch {
+        setIsChecking(false);
+      }
+    };
+    if (!perfilCompleto) {
+      checkProfile();
+    } else {
+      setIsChecking(false);
+    }
+  }, [perfilCompleto, setPerfilCompleto, navigate]);
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-500 animate-pulse font-medium">Verificando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (perfilCompleto) {
+    return <Navigate to="/portal/empresa" replace />;
+  }
+
+  const tipoServicio = watch("tipoServicio");
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Formato no válido",
+        text: "Solo se permiten archivos JPG, PNG o WEBP.",
+      });
+      e.target.value = '';
+      return;
+    }
+
+    // Validar tamaño del archivo (máx 1MB)
+    if (file.size > MAX_FILE_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      Swal.fire({
+        icon: "warning",
+        title: "Imagen demasiado grande",
+        text: `El archivo pesa ${sizeMB}MB. El límite es 1MB. Por favor, comprime la imagen e intenta de nuevo.`,
+      });
+      e.target.value = '';
+      return;
+    }
+
+    // Crear preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (type === 'logo') setLogoPreview(e.target?.result as string);
+      else setBannerPreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = (type: 'logo' | 'banner') => {
+    if (type === 'logo') {
+      setLogoPreview(null);
+      if (logoInputRef.current) logoInputRef.current.value = '';
+    } else {
+      setBannerPreview(null);
+      if (bannerInputRef.current) bannerInputRef.current.value = '';
+    }
+  };
+
+  const onSubmit = async (data: EmpresaFormData) => {
+    setIsSubmitting(true);
+    try {
+      const finalData = {
+        ...data,
+        tipoServicio: data.tipoServicio === "OTRO" ? data.tipoServicioOtro || "OTRO" : data.tipoServicio
+      };
+
+      const logoFile = logoInputRef.current?.files?.[0];
+      const bannerFile = bannerInputRef.current?.files?.[0];
+
+      // Validar tamaño de archivos ANTES de enviar al backend
+      if (logoFile && logoFile.size > MAX_FILE_SIZE) {
+        const sizeMB = (logoFile.size / (1024 * 1024)).toFixed(2);
+        Swal.fire({
+          icon: "warning",
+          title: "Logo demasiado grande",
+          text: `El logo pesa ${sizeMB}MB. El límite es 1MB. Por favor, comprime la imagen.`,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (bannerFile && bannerFile.size > MAX_FILE_SIZE) {
+        const sizeMB = (bannerFile.size / (1024 * 1024)).toFixed(2);
+        Swal.fire({
+          icon: "warning",
+          title: "Banner demasiado grande",
+          text: `El banner pesa ${sizeMB}MB. El límite es 1MB. Por favor, comprime la imagen.`,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log("Submitting profile with data:", finalData);
+      await profileService.createEmpresaProfile(finalData, logoFile, bannerFile);
+      setPerfilCompleto(true);
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: "¡Empresa registrada!",
+        timer: 3000,
+        showConfirmButton: false,
+      });
+      navigate("/portal/empresa", { replace: true });
+    } catch (error: any) {
+      console.error("Error creating profile:", error);
+
+      let message = "Ocurrió un error inesperado al crear el perfil.";
+      let footer = undefined;
+
+      // Detectar error de tamaño de archivo del backend
+      const errorText = error?.response?.data?.message || error?.message || "";
+      const isSizeError =
+        error?.response?.status === 413 ||
+        errorText.includes("Maximum upload size exceeded") ||
+        errorText.includes("exceeds its maximum permitted size") ||
+        errorText.includes("FileSizeLimitExceededException") ||
+        error?.response?.status === 500 && errorText.includes("upload");
+
+      if (isSizeError) {
+        Swal.fire({
+          icon: "warning",
+          title: "Imagen demasiado grande",
+          text: "Una de las imágenes supera el límite de 1MB. Por favor, comprime las imágenes e intenta de nuevo.",
+          confirmButtonColor: "#3b82f6",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (error.response?.data) {
+        const data = error.response.data;
+        message = data.message || message;
+
+        if (data.validationErrors) {
+          const errors = Object.values(data.validationErrors).map(err => `<li>${err}</li>`).join("");
+          footer = `<div class="text-left"><p class="font-bold mb-2">Errores de validación:</p><ul class="list-disc pl-4 space-y-1">${errors}</ul></div>`;
+        }
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "Error al crear perfil",
+        text: message,
+        html: footer || undefined,
+        footer: footer ? undefined : undefined
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
+      <div className="max-w-4xl w-full">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold text-slate-900">Perfil de Empresa</h2>
+          <p className="mt-2 text-slate-600">Registra tu clínica o veterinaria para comenzar a operar en la plataforma.</p>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <form onSubmit={handleSubmit(onSubmit)} className="p-8 sm:p-10 space-y-8">
+
+            {/* ── Subida de Imágenes ── */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Imágenes de Marca</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Logo */}
+                <div className="col-span-1">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Logo</label>
+                  <div className="relative group border-2 border-dashed border-slate-300 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" ref={logoInputRef} onChange={(e) => handleImageChange(e, 'logo')} />
+
+                    {logoPreview ? (
+                      <>
+                        <img src={logoPreview} alt="Logo preview" className="h-full w-full object-contain p-2" />
+                        <button type="button" onClick={() => removeImage('logo')} className="absolute top-2 right-2 bg-slate-900/50 hover:bg-red-500 text-white p-1.5 rounded-full transition-colors backdrop-blur-sm">
+                          <X size={16} />
+                        </button>
+                      </>
+                    ) : (
+                      <button type="button" onClick={() => logoInputRef.current?.click()} className="flex flex-col items-center text-slate-500 hover:text-primary transition-colors">
+                        <UploadCloud size={28} className="mb-2" />
+                        <span className="text-sm font-medium">Subir logo</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Banner */}
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Banner (Portada)</label>
+                  <div className="relative group border-2 border-dashed border-slate-300 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" ref={bannerInputRef} onChange={(e) => handleImageChange(e, 'banner')} />
+
+                    {bannerPreview ? (
+                      <>
+                        <img src={bannerPreview} alt="Banner preview" className="h-full w-full object-cover" />
+                        <button type="button" onClick={() => removeImage('banner')} className="absolute top-2 right-2 bg-slate-900/50 hover:bg-red-500 text-white p-1.5 rounded-full transition-colors backdrop-blur-sm">
+                          <X size={16} />
+                        </button>
+                      </>
+                    ) : (
+                      <button type="button" onClick={() => bannerInputRef.current?.click()} className="flex flex-col items-center text-slate-500 hover:text-primary transition-colors">
+                        <UploadCloud size={28} className="mb-2" />
+                        <span className="text-sm font-medium">Subir imagen panorámica</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-slate-400 mt-2">
+                Formatos aceptados: JPG, PNG, WEBP. Tamaño máximo: 1MB por imagen.
+              </p>
+            </div>
+
+            {/* ── Datos Legales ── */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Información Legal</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Razón Social *</label>
+                  <input type="text" {...register("razonSocial")} className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary" />
+                  {errors.razonSocial && <p className="mt-1 text-xs text-red-500">{errors.razonSocial.message}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">RUC / NIT *</label>
+                  <input type="text" {...register("ruc")} className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary" />
+                  {errors.ruc && <p className="mt-1 text-xs text-red-500">{errors.ruc.message}</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Datos Comerciales ── */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Perfil Público</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Nombre Comercial *</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Building2 size={18} /></div>
+                    <input type="text" {...register("nombreComercial")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
+                  </div>
+                  {errors.nombreComercial && <p className="mt-1 text-xs text-red-500">{errors.nombreComercial.message}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Tipo de Servicio *</label>
+                  <select {...register("tipoServicio")} className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary">
+                    <option value="VETERINARIA">Veterinaria / Clínica</option>
+                    <option value="PETSHOP">Pet Shop / Tienda</option>
+                    <option value="GROOMING">Peluquería / Grooming</option>
+                    <option value="HIBRIDO">Servicio Híbrido (Todo junto)</option>
+                    <option value="OTRO">Otros (Especificar)</option>
+                  </select>
+                </div>
+
+                {tipoServicio === "OTRO" && (
+                  <div className="animate-in fade-in slide-in-from-top-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">Especifique el Tipo de Servicio *</label>
+                    <input
+                      type="text"
+                      {...register("tipoServicioOtro", { required: tipoServicio === "OTRO" })}
+                      placeholder="Ej: Guardería, Adiestramiento, etc."
+                      className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary"
+                    />
+                    {errors.tipoServicioOtro && <p className="mt-1 text-xs text-red-500">Campo requerido cuando selecciona Otros</p>}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Teléfono de Contacto *</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Phone size={18} /></div>
+                    <input type="tel" {...register("telefono")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
+                  </div>
+                  {errors.telefono && <p className="mt-1 text-xs text-red-500">{errors.telefono.message}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Email de Contacto *</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Mail size={18} /></div>
+                    <input type="email" {...register("emailContacto")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
+                  </div>
+                  {errors.emailContacto && <p className="mt-1 text-xs text-red-500">{errors.emailContacto.message}</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Ubicación ── */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Ubicación</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Ciudad *</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Search size={18} /></div>
+                    <input type="text" {...register("ciudad")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
+                  </div>
+                  {errors.ciudad && <p className="mt-1 text-xs text-red-500">{errors.ciudad.message}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Dirección exacta *</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><MapPin size={18} /></div>
+                    <input type="text" {...register("direccion")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
+                  </div>
+                  {errors.direccion && <p className="mt-1 text-xs text-red-500">{errors.direccion.message}</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-6">
+              <Button type="submit" disabled={isSubmitting} variant="primary" className="w-full py-4 text-lg font-bold rounded-xl shadow-lg">
+                {isSubmitting ? "Creando perfil de empresa..." : "Activar Empresa en VetSaaS"} <ArrowRight size={20} className="ml-2" />
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
