@@ -18,8 +18,8 @@ export const TopHeader = ({ onMenuClick }: TopHeaderProps) => {
       try {
         const data = await clienteService.getMyProfile();
         setProfile(data);
-      } catch (error) {
-        console.error("Error fetching cliente profile:", error);
+      } catch {
+        // Profile not yet created — fallback to Auth0 name
       } finally {
         setIsLoading(false);
       }

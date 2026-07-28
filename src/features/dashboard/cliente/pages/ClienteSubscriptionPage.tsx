@@ -194,7 +194,9 @@ export const ClienteSubscriptionPage = () => {
                                     )}
                                 </div>
                                 <div className="space-y-3 mb-8 flex-1 text-sm">
-                                    <FeatureItem text={mySub.plan.limiteMascotas === 0 ? 'Mascotas Ilimitadas' : `Hasta ${mySub.plan.limiteMascotas} mascotas`} />
+                                    <FeatureItem text={mySub.plan.limiteMascotas === 0 ? 'Mascotas Ilimitadas' : `Hasta ${mySub.plan.limiteMascotas} mascota${mySub.plan.limiteMascotas > 1 ? 's' : ''}`} />
+                                    <FeatureItem text="Historial médico básico" />
+                                    <FeatureItem text="Reservas de citas" />
                                     <FeatureItem text={mySub.plan.limiteRecordatorios === -1 ? 'Recordatorios ilimitados' : mySub.plan.limiteRecordatorios > 0 ? `${mySub.plan.limiteRecordatorios} recordatorios/mes` : 'Sin recordatorios'} />
                                     <FeatureItem text={mySub.plan.limiteIaUso === 0 ? 'Sin asistente IA' : mySub.plan.limiteIaUso > 0 ? `${mySub.plan.limiteIaUso} consultas IA/mes` : 'Asistente IA ilimitado'} />
                                     {mySub.plan.precioMensual > 0 && <FeatureItem text="Teleconsultas incluidas" />}
@@ -219,7 +221,9 @@ export const ClienteSubscriptionPage = () => {
                                         <span className="text-xs text-slate-400 font-bold uppercase">/mes</span>
                                     </div>
                                     <div className="space-y-3 mb-8 flex-1 text-sm">
-                                        <FeatureItem text={plan.limiteMascotas === 0 ? 'Mascotas Ilimitadas' : `Hasta ${plan.limiteMascotas} mascotas`} />
+                                        <FeatureItem text={plan.limiteMascotas === 0 ? 'Mascotas Ilimitadas' : `Hasta ${plan.limiteMascotas} mascota${plan.limiteMascotas > 1 ? 's' : ''}`} />
+                                        <FeatureItem text="Historial médico completo" />
+                                        <FeatureItem text="Reservas de citas" />
                                         <FeatureItem text={plan.limiteRecordatorios === -1 ? 'Recordatorios ilimitados' : plan.limiteRecordatorios > 0 ? `${plan.limiteRecordatorios} recordatorios/mes` : 'Sin recordatorios'} />
                                         <FeatureItem text={plan.limiteIaUso === 0 ? 'Sin asistente IA' : plan.limiteIaUso > 0 ? `${plan.limiteIaUso} consultas IA/mes` : 'Asistente IA ilimitado'} />
                                         {plan.precioMensual > 0 && <FeatureItem text="Teleconsultas incluidas" />}
