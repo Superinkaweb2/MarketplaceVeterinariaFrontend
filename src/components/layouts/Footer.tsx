@@ -52,13 +52,13 @@ export const Footer = () => {
     if (!email.trim()) return;
     setSubscribing(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8080"}/api/v1/newsletter/subscribe`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8080"}/newsletter/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
       });
       if (res.ok) {
-        toast.success("Te has suscrito correctamente");
+        toast.success("Revisa tu correo para confirmar tu suscripción");
         setEmail("");
       } else {
         const data = await res.json().catch(() => null);
