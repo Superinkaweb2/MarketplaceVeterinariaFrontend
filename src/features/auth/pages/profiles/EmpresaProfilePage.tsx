@@ -7,7 +7,6 @@ import {
   Phone,
   Mail,
   MapPin,
-  Search,
   UploadCloud,
   X,
   Check,

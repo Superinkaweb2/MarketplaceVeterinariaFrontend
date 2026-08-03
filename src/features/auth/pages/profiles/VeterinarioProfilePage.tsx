@@ -42,7 +42,7 @@ export const VeterinarioProfilePage = () => {
     trigger,
     formState: { errors },
   } = useForm<VetFormData>({
-    resolver: zodResolver(vetSchema),
+    resolver: zodResolver(vetSchema) as any,
     defaultValues: { aniosExperiencia: 0 },
   });
 
@@ -105,7 +105,7 @@ export const VeterinarioProfilePage = () => {
       subtitle="Ingresa tus datos para que los pacientes te encuentren"
       onBack={step > 0 && step < 2 ? handleBack : undefined}
       onNext={step < 2 ? handleNext : undefined}
-      onSubmit={step === 2 ? handleSubmit(onSubmit) : undefined}
+      onSubmit={step === 2 ? handleSubmit(onSubmit as any) : undefined}
       isSubmitting={isSubmitting}
       isLastStep={step === 2}
       nextLabel="Ir al Portal Médico"

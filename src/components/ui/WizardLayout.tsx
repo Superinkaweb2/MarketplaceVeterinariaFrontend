@@ -65,7 +65,6 @@ export const WizardLayout = ({
             const StepIcon = step.icon;
             const isCompleted = index < currentStep;
             const isCurrent = index === currentStep;
-            const isUpcoming = index > currentStep;
 
             return (
               <div key={index} className="flex items-center flex-1 last:flex-none">

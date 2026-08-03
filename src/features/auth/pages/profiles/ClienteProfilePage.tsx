@@ -6,7 +6,7 @@ import { User, Phone, MapPin, Check, Home, Globe } from "lucide-react";
 import { WizardLayout } from "../../../../components/ui/WizardLayout";
 import { profileService } from "../../services/profileService";
 import { useAuth } from "../../../auth/context/useAuth";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const clienteSchema = z.object({
@@ -42,7 +42,7 @@ export const ClienteProfilePage = () => {
     trigger,
     formState: { errors },
   } = useForm<ClienteFormData>({
-    resolver: zodResolver(clienteSchema),
+    resolver: zodResolver(clienteSchema) as any,
     defaultValues: { pais: "Peru" },
   });
 
@@ -105,7 +105,7 @@ export const ClienteProfilePage = () => {
       subtitle="Cuéntanos sobre ti para personalizar tu experiencia"
       onBack={step > 0 && step < 2 ? handleBack : undefined}
       onNext={step < 2 ? handleNext : undefined}
-      onSubmit={step === 2 ? handleSubmit(onSubmit) : undefined}
+      onSubmit={step === 2 ? handleSubmit(onSubmit as any) : undefined}
       isSubmitting={isSubmitting}
       isLastStep={step === 2}
       nextLabel="Crear mi cuenta"
