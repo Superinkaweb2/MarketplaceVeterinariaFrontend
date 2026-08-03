@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { X, Upload, Trash2, Plus, ImageIcon, Tag, Package } from "lucide-react";
+import { X, Upload, Trash2, Tag, Package } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { CategoryCombobox } from "../../../../components/ui/CategoryCombobox";
 import type { Category } from "../../../catalog/types/category";

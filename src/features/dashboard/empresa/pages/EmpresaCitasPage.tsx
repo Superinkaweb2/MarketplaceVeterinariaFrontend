@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Calendar, Clock, Check, X, Loader2, Info, Plus } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { appointmentService } from "../../shared/appointments/appointmentService";
-import type { CitaResponse } from "../../shared/appointments/appointmentService";
 import { useAuth } from "../../../auth/context/AuthContext";
 import { CrearCitaEmpresaModal } from "../components/CrearCitaEmpresaModal";
 import Swal from "sweetalert2";

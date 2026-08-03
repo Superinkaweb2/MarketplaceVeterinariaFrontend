@@ -20,7 +20,7 @@ export interface Cita {
 }
 
 export const VetCitasPage = () => {
- const { data: profile, isLoading: isLoadingProfile } = useVetProfile();
+ const { data: profile } = useVetProfile();
  const queryClient = useQueryClient();
 
  const { data: citas = [], isLoading } = useQuery({

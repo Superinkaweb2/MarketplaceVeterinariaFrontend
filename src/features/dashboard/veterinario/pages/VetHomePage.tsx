@@ -1,7 +1,4 @@
 import {
-  Stethoscope,
-  Award,
-  Clock,
   Shield,
   ShieldCheck,
   ShieldX,
@@ -10,7 +7,6 @@ import {
   X,
   Briefcase,
   Calendar,
-  Users,
   Package,
   AlertCircle,
 } from "lucide-react";
@@ -19,7 +15,7 @@ import { useVetProfile } from "../hooks/useVetProfile";
 import { vetService } from "../services/vetService";
 import { api } from "../../../../shared/http/api";
 import type { ApiResponse } from "../../../../shared/types/api";
-import type { StaffInvitation, VerificationStatus } from "../types/vet.types";
+import type { VerificationStatus } from "../types/vet.types";
 import Swal from "sweetalert2";
 
 const VERIFICATION_CONFIG: Record<VerificationStatus, { label: string; icon: typeof Shield; color: string }> = {

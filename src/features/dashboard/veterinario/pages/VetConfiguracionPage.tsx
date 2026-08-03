@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { User, Settings, Save, ShieldCheck, Briefcase, Award, FileText, Camera, Lock, CreditCard } from "lucide-react";
 import { z } from "zod";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "../../../../components/ui/Button";
 import { vetService } from "../services/vetService";
 import { authService } from "../../../auth/services/authService";
 import { useAuth } from "../../../auth/context/useAuth";
 import { useVetProfile } from "../hooks/useVetProfile";
-import type { VetProfile } from "../types/vet.types";
 import Swal from "sweetalert2";
 
 const vetProfileSchema = z.object({

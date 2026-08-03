@@ -1,11 +1,6 @@
 import { StatsGrid } from "../components/StatsGrid";
 import { ActivityTable } from "../components/ActivityTable";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   PieChart,
@@ -62,7 +57,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Grid */}
-      <StatsGrid stats={stats} loading={isLoading} />
+      <StatsGrid stats={stats ?? null} loading={isLoading} />
 
       {/* Charts Area */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">

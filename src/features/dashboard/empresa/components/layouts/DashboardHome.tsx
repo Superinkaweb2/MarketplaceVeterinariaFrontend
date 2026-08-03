@@ -11,8 +11,6 @@ import {
   Activity,
   Package,
   Stethoscope,
-  Clock,
-  ArrowRight,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useDashboardMetrics, useDashboardChartData, useDashboardActivity } from "../../hooks/useDashboardMetrics";
@@ -213,7 +211,7 @@ export const DashboardHome = () => {
                   <Tooltip
                     cursor={{ stroke: "#1ea59c", strokeWidth: 1, opacity: 0.1 }}
                     contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
-                    formatter={(value: number) => [`S/ ${value.toLocaleString("es-EC", { minimumFractionDigits: 2 })}`, "Ingresos"]}
+                    formatter={(value: any) => [`S/ ${Number(value).toLocaleString("es-EC", { minimumFractionDigits: 2 })}`, "Ingresos"]}
                   />
                   <Area
                     type="monotone"

@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
-import type { Category } from "../../catalog/types/category";
+import type { Category } from "../../features/catalog/types/category";
 
 interface CategoryComboboxProps {
   categories: Category[];
@@ -18,9 +18,6 @@ export const CategoryCombobox = ({ categories, value, onChange, error }: Categor
   const selected = categories.find(c => c.id === value);
 
   const grouped = useMemo(() => {
-    const parents = categories.filter(c => !c.padreId);
-    const children = categories.filter(c => c.padreId);
-
     let filtered = categories;
     if (search.trim()) {
       const q = search.toLowerCase();

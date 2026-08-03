@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Filter, Package, AlertTriangle, Eye, Edit2, Trash2, ArrowRight, Lock } from "lucide-react";
+import { Plus, Search, Filter, Package, AlertTriangle, Eye, Edit2, Trash2, ArrowRight } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "../../../../components/ui/Button";
 import { productService } from "../services/productService";

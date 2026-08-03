@@ -49,7 +49,7 @@ export const CrearCitaEmpresaModal = ({ isOpen, onClose, onSuccess }: CrearCitaE
         reset,
         formState: { errors },
     } = useForm<CitaFormData>({
-        resolver: zodResolver(citaSchema),
+        resolver: zodResolver(citaSchema) as any,
     });
 
     const createMutation = useMutation({

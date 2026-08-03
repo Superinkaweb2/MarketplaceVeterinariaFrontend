@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
-import { ChevronDown, Search, SlidersHorizontal, X, ChevronRight } from "lucide-react";
+import { ChevronDown, Search, SlidersHorizontal, ChevronRight } from "lucide-react";
 import { ProductCard } from "../components/ProductCard";
 import { marketplaceService } from "../services/marketplaceService";
 import { mapAdoptionToProduct, mapServiceToProduct } from "../utils/productAdapter";
@@ -156,13 +156,6 @@ export const Marketplace = () => {
 
   const categoryTitle =
     filters.category === -1 ? "Adopciones" : filters.category === -2 ? "Servicios Médicos" : "Marketplace";
-
-  const categorySubtitle =
-    filters.category === -1
-      ? "Encuentra a tu nuevo mejor amigo."
-      : filters.category === -2
-        ? "Reserva citas con los mejores especialistas."
-        : "Productos y servicios para tu mascota.";
 
   const getActiveCategoryLabel = () => {
     if (!filters.category || filters.category < 0) return null;

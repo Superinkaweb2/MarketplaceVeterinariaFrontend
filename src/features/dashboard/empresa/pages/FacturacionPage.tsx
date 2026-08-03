@@ -16,7 +16,7 @@ import {
 import { Button } from "../../../../components/ui/Button";
 import { billingService } from "../services/billingService";
 import { deliveryEmpresaService } from "../services/deliveryEmpresaService";
-import type { OrderSummary, EstadoOrden } from "../types/billing.types";
+import type { OrderSummary } from "../types/billing.types";
 import Swal from "sweetalert2";
 
 /* ── Helpers ────────────────────────────────────────────────── */
