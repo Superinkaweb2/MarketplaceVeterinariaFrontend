@@ -2,16 +2,15 @@ import { api } from "../../../../shared/http/api";
 import type { ApiResponse, PageResponse } from "../../../../shared/types/api";
 import type { OrderSummary } from "../types/billing.types";
 
+interface PaymentPreferenceResponse {
+  preferenceId: string;
+  initPoint: string;
+  sandboxInitPoint: string;
+}
+
 export const billingService = {
   /**
    * Obtiene las órdenes de la empresa autenticada (paginado).
-   *
-   * TODO: Backend pendiente — Este endpoint aún no está implementado en el backend.
-   * Cuando se cree el endpoint GET /orders/me en OrderController, este servicio
-   * funcionará automáticamente sin cambios en el frontend.
-   *
-   * Endpoint esperado: GET /orders/me?page={page}&size={size}
-   * Respuesta esperada: ApiResponse<PageResponse<OrderSummary>>
    */
   getMyOrders: async (
     page = 0, 
@@ -27,9 +26,11 @@ export const billingService = {
   /**
    * Genera un link de pago (checkout) de MercadoPago para una orden.
    * Endpoint: POST /payments/checkout/{orderId}
+   * Retorna la URL de checkout (initPoint o sandboxInitPoint).
    */
   generateCheckout: async (orderId: number): Promise<string> => {
-    const { data } = await api.post<ApiResponse<string>>(`/payments/checkout/${orderId}`);
-    return data.data;
+    const { data } = await api.post<ApiResponse<PaymentPreferenceResponse>>(`/payments/checkout/${orderId}`);
+    const response = data.data;
+    return response.sandboxInitPoint || response.initPoint;
   },
 };

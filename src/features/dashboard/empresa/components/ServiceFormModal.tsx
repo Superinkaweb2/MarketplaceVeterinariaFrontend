@@ -201,6 +201,7 @@ export const ServiceFormModal = ({
                                 <input
                                     type="number"
                                     step="0.01"
+                                    min="0"
                                     {...register("precio", { valueAsNumber: true })}
                                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white font-mono transition-all focus:ring-2 focus:ring-primary/20 outline-none"
                                 />

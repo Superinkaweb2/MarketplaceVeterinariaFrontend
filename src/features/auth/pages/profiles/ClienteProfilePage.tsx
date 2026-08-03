@@ -21,7 +21,7 @@ const clienteSchema = z.object({
 type ClienteFormData = z.infer<typeof clienteSchema>;
 
 export const ClienteProfilePage = () => {
-  const { perfilCompleto, setPerfilCompleto } = useAuth();
+  const { perfilCompleto, setPerfilCompleto, setClienteId } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
@@ -34,7 +34,11 @@ export const ClienteProfilePage = () => {
   useEffect(() => {
     const checkProfile = async () => {
       try {
-        await profileService.getClienteProfile();
+        const res = await profileService.getClienteProfile();
+        const clienteId = res?.data?.id;
+        if (clienteId) {
+          setClienteId(Number(clienteId));
+        }
         setPerfilCompleto(true);
         navigate("/portal/cliente", { replace: true });
       } catch {
@@ -46,7 +50,7 @@ export const ClienteProfilePage = () => {
     } else {
       setIsChecking(false);
     }
-  }, [perfilCompleto, setPerfilCompleto, navigate]);
+  }, [perfilCompleto, setPerfilCompleto, navigate, setClienteId]);
 
   if (isChecking) {
     return (
@@ -66,7 +70,11 @@ export const ClienteProfilePage = () => {
   const onSubmit = async (data: ClienteFormData) => {
     setIsSubmitting(true);
     try {
-      await profileService.createClienteProfile(data);
+      const response = await profileService.createClienteProfile(data);
+      const clienteId = response?.data?.id;
+      if (clienteId) {
+        setClienteId(Number(clienteId));
+      }
       setPerfilCompleto(true);
       Swal.fire({
         toast: true,

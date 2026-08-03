@@ -194,13 +194,22 @@ export const ClienteSubscriptionPage = () => {
                                     )}
                                 </div>
                                 <div className="space-y-3 mb-8 flex-1 text-sm">
-                                    <FeatureItem text={mySub.plan.limiteMascotas === 0 ? 'Mascotas Ilimitadas' : `Hasta ${mySub.plan.limiteMascotas} mascota${mySub.plan.limiteMascotas > 1 ? 's' : ''}`} />
-                                    <FeatureItem text="Historial médico básico" />
-                                    <FeatureItem text="Reservas de citas" />
+                                    <FeatureItem text={mySub.plan.limiteMascotas <= 0 ? 'Mascotas Ilimitadas' : `Hasta ${mySub.plan.limiteMascotas} mascota${mySub.plan.limiteMascotas > 1 ? 's' : ''}`} />
+                                    <FeatureItem text="Historial médico digital básico" />
+                                    <FeatureItem text="Reserva de citas en veterinarias cercanas" />
+                                    <FeatureItem text="Directorio de servicios pet" />
                                     <FeatureItem text={mySub.plan.limiteRecordatorios === -1 ? 'Recordatorios ilimitados' : mySub.plan.limiteRecordatorios > 0 ? `${mySub.plan.limiteRecordatorios} recordatorios/mes` : 'Sin recordatorios'} />
-                                    <FeatureItem text={mySub.plan.limiteIaUso === 0 ? 'Sin asistente IA' : mySub.plan.limiteIaUso > 0 ? `${mySub.plan.limiteIaUso} consultas IA/mes` : 'Asistente IA ilimitado'} />
-                                    {mySub.plan.precioMensual > 0 && <FeatureItem text="Teleconsultas incluidas" />}
-                                    {mySub.plan.precioMensual > 0 && <FeatureItem text="Descuentos en marketplace" />}
+                                    <FeatureItem text={mySub.plan.limiteIaUso === 0 ? 'Sin asistente IA' : `${mySub.plan.limiteIaUso} consultas IA/mes`} />
+                                    {mySub.plan.nombre.includes('Care') && <FeatureItem text="Teleconsultas veterinarias ilimitadas" />}
+                                    {mySub.plan.nombre.includes('Care') && <FeatureItem text="Carnet digital de salud compartible" />}
+                                    {mySub.plan.nombre.includes('Care') && <FeatureItem text="Mapa en tiempo real de paseadores y emergencias" />}
+                                    {mySub.plan.nombre.includes('Care') && <FeatureItem text="Descuentos exclusivos en marketplace" />}
+                                    {mySub.plan.nombre.includes('Premium') && <FeatureItem text="Usuarios familiares" />}
+                                    {mySub.plan.nombre.includes('Premium') && <FeatureItem text="Alertas compartidas y álbum de recuerdos" />}
+                                    {mySub.plan.nombre.includes('Premium') && <FeatureItem text="GPS + collar inteligente integración" />}
+                                    {mySub.plan.nombre.includes('Premium') && <FeatureItem text="Seguro pet básico incluido" />}
+                                    {mySub.plan.nombre.includes('Premium') && <FeatureItem text="Consultas prioritarias + segunda opinión" />}
+                                    {mySub.plan.nombre.includes('Premium') && <FeatureItem text="Comunidad exclusiva + IA personalizada" />}
                                 </div>
                                 <Button disabled className="w-full py-4 rounded-xl font-bold text-sm bg-slate-50 border-slate-200 text-slate-400">
                                     Plan Actual
@@ -210,7 +219,7 @@ export const ClienteSubscriptionPage = () => {
 
                         {/* Planes superiores */}
                         {upgradePlans.map((plan) => {
-                            const isPopular = plan.nombre.toLowerCase() === 'care';
+                            const isPopular = plan.nombre.toLowerCase().includes('care');
                             return (
                                 <div key={plan.id} className={`rounded-2xl border bg-white p-6 md:p-8 flex flex-col transition-all hover:shadow-lg ${isPopular ? 'border-primary-dark shadow-md' : 'border-slate-200 hover:border-slate-300'}`}>
                                     {isPopular && <span className="text-[10px] font-black uppercase tracking-widest text-primary mb-2">RECOMENDADO</span>}
@@ -221,13 +230,20 @@ export const ClienteSubscriptionPage = () => {
                                         <span className="text-xs text-slate-400 font-bold uppercase">/mes</span>
                                     </div>
                                     <div className="space-y-3 mb-8 flex-1 text-sm">
-                                        <FeatureItem text={plan.limiteMascotas === 0 ? 'Mascotas Ilimitadas' : `Hasta ${plan.limiteMascotas} mascota${plan.limiteMascotas > 1 ? 's' : ''}`} />
-                                        <FeatureItem text="Historial médico completo" />
-                                        <FeatureItem text="Reservas de citas" />
-                                        <FeatureItem text={plan.limiteRecordatorios === -1 ? 'Recordatorios ilimitados' : plan.limiteRecordatorios > 0 ? `${plan.limiteRecordatorios} recordatorios/mes` : 'Sin recordatorios'} />
-                                        <FeatureItem text={plan.limiteIaUso === 0 ? 'Sin asistente IA' : plan.limiteIaUso > 0 ? `${plan.limiteIaUso} consultas IA/mes` : 'Asistente IA ilimitado'} />
-                                        {plan.precioMensual > 0 && <FeatureItem text="Teleconsultas incluidas" />}
-                                        {plan.precioMensual > 0 && <FeatureItem text="Descuentos en marketplace" />}
+                                        <FeatureItem text={plan.limiteMascotas <= 0 ? 'Mascotas Ilimitadas' : `Hasta ${plan.limiteMascotas} mascota${plan.limiteMascotas > 1 ? 's' : ''}`} />
+                                        <FeatureItem text={plan.nombre.includes('Care') || plan.nombre.includes('Premium') ? 'Historial médico completo con IA' : 'Historial médico digital básico'} />
+                                        <FeatureItem text="Reserva de citas en veterinarias cercanas" />
+                                        <FeatureItem text={plan.limiteRecordatorios === -1 ? 'Recordatorios inteligentes ilimitados' : plan.limiteRecordatorios > 0 ? `${plan.limiteRecordatorios} recordatorios/mes` : 'Sin recordatorios'} />
+                                        <FeatureItem text={plan.limiteIaUso === 0 ? 'Sin asistente IA' : `${plan.limiteIaUso} consultas IA/mes`} />
+                                        {(plan.nombre.includes('Care') || plan.nombre.includes('Premium')) && <FeatureItem text="Teleconsultas veterinarias ilimitadas" />}
+                                        {plan.nombre.includes('Care') && <FeatureItem text="Carnet digital de salud compartible" />}
+                                        {plan.nombre.includes('Care') && <FeatureItem text="Mapa en tiempo real de paseadores y emergencias" />}
+                                        {plan.nombre.includes('Care') && <FeatureItem text="Descuentos exclusivos en marketplace" />}
+                                        {plan.nombre.includes('Premium') && <FeatureItem text="Usuarios familiares + alertas compartidas" />}
+                                        {plan.nombre.includes('Premium') && <FeatureItem text="GPS + collar inteligente integración" />}
+                                        {plan.nombre.includes('Premium') && <FeatureItem text="Seguro pet básico incluido" />}
+                                        {plan.nombre.includes('Premium') && <FeatureItem text="Consultas prioritarias + segunda opinión" />}
+                                        {plan.nombre.includes('Premium') && <FeatureItem text="Comunidad exclusiva + IA personalizada" />}
                                     </div>
                                     <Button onClick={() => handleUpgrade(plan)} className="w-full py-4 rounded-xl font-bold text-sm">
                                         Subir a {plan.nombre}

@@ -57,11 +57,19 @@ export const subscriptionService = {
 
     /**
      * Sincroniza un pago de suscripción aprobado manualmente.
+     * Endpoint: GET /payments/sync?payment_id=X&external_reference=Y
      */
-    async syncPayment(paymentId: string): Promise<Suscripcion> {
-        const { data } = await api.post<ApiResponse<Suscripcion>>(`${BASE_URL}/sync-payment`, null, {
-            params: { paymentId }
+    async syncPayment(paymentId: string, externalReference?: string): Promise<void> {
+        await api.get(`/payments/sync`, {
+            params: { payment_id: paymentId, external_reference: externalReference || '' }
         });
-        return data.data;
+    },
+
+    /**
+     * Cancela la suscripción actual del usuario.
+     * Endpoint: PATCH /subscriptions/cancel
+     */
+    async cancelSubscription(): Promise<void> {
+        await api.patch(`${BASE_URL}/cancel`);
     }
 };

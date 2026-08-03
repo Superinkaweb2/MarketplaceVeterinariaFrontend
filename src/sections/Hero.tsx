@@ -50,7 +50,7 @@ export const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-xl">
+            <div className="aspect-4/3 rounded-2xl overflow-hidden shadow-xl">
               <img
                 alt="Veterinario atendiendo una mascota"
                 className="w-full h-full object-cover"

@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
 import { Clock, Calendar, Check, X, Eye, Info } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "../../../../components/ui/Button";
 import { api } from "../../../../shared/http/api";
 import type { ApiResponse } from "../../../../shared/types/api";
-import { vetService } from "../services/vetService";
+import { useVetProfile } from "../hooks/useVetProfile";
 import Swal from "sweetalert2";
 
 export interface Cita {
@@ -20,45 +20,44 @@ export interface Cita {
 }
 
 export const VetCitasPage = () => {
- const [citas, setCitas] = useState<Cita[]>([]);
- const [isLoading, setIsLoading] = useState(true);
+ const { data: profile, isLoading: isLoadingProfile } = useVetProfile();
+ const queryClient = useQueryClient();
 
- const fetchCitas = async () => {
- try {
- const profile = await vetService.getMyProfile();
- const { data } = await api.get<ApiResponse<Cita[]>>(`/appointments/veterinario/${profile.idVeterinario}`);
- setCitas(data.data);
- } catch (error) {
- console.error("Error fetching citas:", error);
- } finally {
- setIsLoading(false);
- }
- };
+ const { data: citas = [], isLoading } = useQuery({
+   queryKey: ["vet-citas", profile?.idVeterinario],
+   queryFn: async () => {
+     const { data } = await api.get<ApiResponse<Cita[]>>(`/appointments/veterinario/${profile!.idVeterinario}`);
+     return data.data;
+   },
+   enabled: !!profile?.idVeterinario,
+   staleTime: 1 * 60 * 1000,
+ });
 
- useEffect(() => {
- fetchCitas();
- }, []);
+ const updateMutation = useMutation({
+   mutationFn: ({ citaId, nuevoEstado }: { citaId: number; nuevoEstado: string }) =>
+     api.patch(`/appointments/${citaId}/status`, null, { params: { estado: nuevoEstado } }),
+   onSuccess: () => {
+     queryClient.invalidateQueries({ queryKey: ["vet-citas"] });
+   },
+ });
 
  const handleUpdateStatus = async (citaId: number, nuevoEstado: string) => {
- const result = await Swal.fire({
- title: `¿Cambiar estado a ${nuevoEstado}?`,
- icon: "question",
- showCancelButton: true,
- confirmButtonText: "Sí, cambiar",
- cancelButtonText: "Cancelar"
- });
+   const result = await Swal.fire({
+     title: `¿Cambiar estado a ${nuevoEstado}?`,
+     icon: "question",
+     showCancelButton: true,
+     confirmButtonText: "Sí, cambiar",
+     cancelButtonText: "Cancelar"
+   });
 
- if (result.isConfirmed) {
- try {
- await api.patch(`/appointments/${citaId}/status`, null, {
- params: { estado: nuevoEstado }
- });
- Swal.fire("Éxito", "Estado actualizado", "success");
- fetchCitas();
- } catch (error) {
- Swal.fire("Error", "No se pudo actualizar el estado", "error");
- }
- }
+   if (result.isConfirmed) {
+     try {
+       await updateMutation.mutateAsync({ citaId, nuevoEstado });
+       Swal.fire("Éxito", "Estado actualizado", "success");
+     } catch (error) {
+       Swal.fire("Error", "No se pudo actualizar el estado", "error");
+     }
+   }
  };
 
  const getStatusColor = (estado: string) => {

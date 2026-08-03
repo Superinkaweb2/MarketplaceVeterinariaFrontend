@@ -21,7 +21,7 @@ const veterinarioSchema = z.object({
 type VeterinarioFormData = z.infer<typeof veterinarioSchema>;
 
 export const VeterinarioProfilePage = () => {
-  const { perfilCompleto, setPerfilCompleto } = useAuth();
+  const { perfilCompleto, setPerfilCompleto, setVeterinarioId } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
@@ -41,7 +41,11 @@ export const VeterinarioProfilePage = () => {
   useEffect(() => {
     const checkProfile = async () => {
       try {
-        await profileService.getVeterinarioProfile();
+        const res = await profileService.getVeterinarioProfile();
+        const vetId = res?.data?.idVeterinario;
+        if (vetId) {
+          setVeterinarioId(Number(vetId));
+        }
         setPerfilCompleto(true);
         navigate("/portal/veterinario", { replace: true });
       } catch {
@@ -53,7 +57,7 @@ export const VeterinarioProfilePage = () => {
     } else {
       setIsChecking(false);
     }
-  }, [perfilCompleto, setPerfilCompleto, navigate]);
+  }, [perfilCompleto, setPerfilCompleto, navigate, setVeterinarioId]);
 
   if (isChecking) {
     return (
@@ -73,7 +77,11 @@ export const VeterinarioProfilePage = () => {
   const onSubmit = async (data: VeterinarioFormData) => {
     setIsSubmitting(true);
     try {
-      await profileService.createVeterinarioProfile(data);
+      const response = await profileService.createVeterinarioProfile(data);
+      const vetId = response?.data?.idVeterinario;
+      if (vetId) {
+        setVeterinarioId(Number(vetId));
+      }
       setPerfilCompleto(true);
       Swal.fire({
         toast: true,

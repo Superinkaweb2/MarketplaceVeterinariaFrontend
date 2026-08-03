@@ -23,6 +23,23 @@ export interface CitaResponse {
     estado: 'SOLICITADA' | 'CONFIRMADA' | 'RECHAZADA' | 'COMPLETADA' | 'CANCELADA' | 'NOSHOW';
     notasCliente?: string;
     notasInternas?: string;
+    guestNombre?: string;
+    guestEmail?: string;
+    guestTelefono?: string;
+}
+
+export interface CrearCitaEmpresaRequest {
+    clienteId?: number;
+    guestNombre?: string;
+    guestEmail?: string;
+    guestTelefono?: string;
+    mascotaId?: number;
+    servicioId: number;
+    veterinarioId?: number;
+    fechaProgramada: string;
+    horaInicio: string;
+    notasCliente?: string;
+    notasInternas?: string;
 }
 
 export const appointmentService = {
@@ -45,6 +62,11 @@ export const appointmentService = {
         const params: any = { estado };
         if (notas) params.notas = notas;
         const { data } = await api.patch<ApiResponse<CitaResponse>>(`/appointments/${citaId}/status`, null, { params });
+        return data.data;
+    },
+
+    createForEmpresa: async (request: CrearCitaEmpresaRequest): Promise<CitaResponse> => {
+        const { data } = await api.post<ApiResponse<CitaResponse>>("/appointments/empresa", request);
         return data.data;
     },
 };

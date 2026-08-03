@@ -26,6 +26,7 @@ export const ALWAYS_PROTECTED_PATTERNS = [
   "/repartidores/me",
   "/applications",
   "/adoptions/me",
+  "/services/me",
 ];
 
 /**

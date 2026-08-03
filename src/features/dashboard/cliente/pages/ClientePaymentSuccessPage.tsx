@@ -42,11 +42,11 @@ export const ClientePaymentSuccessPage = () => {
             <div className="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl border border-slate-200 p-8 md:p-12 text-center space-y-8 animate-in zoom-in duration-500">
                 <div className="flex justify-center">
                     {syncing ? (
-                        <div className="w-24 h-24 bg-blue-500/10 rounded-[2rem] flex items-center justify-center text-blue-500 border border-blue-500/20 shadow-xl shadow-blue-500/10">
+                        <div className="w-24 h-24 bg-blue-500/10 rounded-4xl flex items-center justify-center text-blue-500 border border-blue-500/20 shadow-xl shadow-blue-500/10">
                             <Loader2 size={48} strokeWidth={2.5} className="animate-spin" />
                         </div>
                     ) : (
-                        <div className="w-24 h-24 bg-emerald-500/10 rounded-[2rem] flex items-center justify-center text-emerald-500 border border-emerald-500/20 shadow-xl shadow-emerald-500/10">
+                        <div className="w-24 h-24 bg-emerald-500/10 rounded-4xl flex items-center justify-center text-emerald-500 border border-emerald-500/20 shadow-xl shadow-emerald-500/10">
                             <CheckCircle2 size={48} strokeWidth={2.5} />
                         </div>
                     )}

@@ -6,7 +6,7 @@ export interface Lead {
   clienteTelefono: string | null;
   servicioSolicitado: string | null;
   mensaje: string | null;
-  estado: "NUEVO" | "EN_PROCESO" | "CONTACTADO" | "CONVERTIDO" | "CERRADO";
+  estado: "NUEVO" | "EN_CONTACTO" | "CONVERTIDO" | "PERDIDO";
   createdAt: string;
 }
 

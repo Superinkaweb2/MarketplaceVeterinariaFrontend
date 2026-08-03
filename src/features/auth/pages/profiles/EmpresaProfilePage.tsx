@@ -31,7 +31,7 @@ const empresaSchema = z.object({
 type EmpresaFormData = z.infer<typeof empresaSchema>;
 
 export const EmpresaProfilePage = () => {
-  const { perfilCompleto, setPerfilCompleto } = useAuth();
+  const { perfilCompleto, setPerfilCompleto, setEmpresaId } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
@@ -49,7 +49,11 @@ export const EmpresaProfilePage = () => {
   useEffect(() => {
     const checkProfile = async () => {
       try {
-        await profileService.getEmpresaProfile();
+        const res = await profileService.getEmpresaProfile();
+        const empresaId = res?.data?.id;
+        if (empresaId) {
+          setEmpresaId(Number(empresaId));
+        }
         setPerfilCompleto(true);
         navigate("/portal/empresa", { replace: true });
       } catch {
@@ -61,7 +65,7 @@ export const EmpresaProfilePage = () => {
     } else {
       setIsChecking(false);
     }
-  }, [perfilCompleto, setPerfilCompleto, navigate]);
+  }, [perfilCompleto, setPerfilCompleto, navigate, setEmpresaId]);
 
   if (isChecking) {
     return (
@@ -161,7 +165,11 @@ export const EmpresaProfilePage = () => {
       }
 
       console.log("Submitting profile with data:", finalData);
-      await profileService.createEmpresaProfile(finalData, logoFile, bannerFile);
+      const response = await profileService.createEmpresaProfile(finalData, logoFile, bannerFile);
+      const empresaId = response?.data?.id;
+      if (empresaId) {
+        setEmpresaId(Number(empresaId));
+      }
       setPerfilCompleto(true);
       Swal.fire({
         toast: true,

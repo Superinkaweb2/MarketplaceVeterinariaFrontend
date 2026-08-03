@@ -10,7 +10,17 @@ import App from './App.tsx'
 
 initSentry()
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 2 * 60 * 1000,      // 2 min — data stays fresh
+      gcTime: 10 * 60 * 1000,        // 10 min — cache after unmount
+      refetchOnWindowFocus: false,     // no refetch on tab switch
+      retry: 1,                        // 1 retry on failure
+      refetchOnReconnect: false,       // no refetch on network reconnect
+    },
+  },
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
