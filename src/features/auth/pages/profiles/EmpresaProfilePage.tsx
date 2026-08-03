@@ -1,227 +1,177 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, Building2, Phone, Mail, MapPin, Search, UploadCloud, X } from "lucide-react";
-import { Button } from "../../../../components/ui/Button";
+import {
+  Building2,
+  Phone,
+  Mail,
+  MapPin,
+  Search,
+  UploadCloud,
+  X,
+  Check,
+  FileText,
+  Globe,
+  ImageIcon,
+} from "lucide-react";
+import { WizardLayout } from "../../../../components/ui/WizardLayout";
 import { profileService } from "../../services/profileService";
-import { useAuth } from "../../context/useAuth";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useAuth } from "../../../auth/context/useAuth";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-const MAX_FILE_SIZE = 1024 * 1024; // 1MB - límite del backend
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = 1 * 1024 * 1024;
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const empresaSchema = z.object({
-  nombreComercial: z.string().min(2, "Requerido"),
-  razonSocial: z.string().min(2, "Requerido"),
-  ruc: z.string().min(11, "Mínimo 11 dígitos"),
-  tipoServicio: z.string().min(2, "Requerido"),
+  nombreComercial: z.string().min(2, "El nombre comercial es requerido"),
+  razonSocial: z.string().min(2, "La razón social es requerida"),
+  ruc: z.string().min(11, "El RUC debe tener 11 dígitos"),
+  tipoServicio: z.string().min(2, "Selecciona un tipo de servicio"),
   tipoServicioOtro: z.string().optional(),
-  telefono: z.string().min(6, "Requerido").regex(/^\d+$/, "Solo números permitidos"),
+  telefono: z
+    .string()
+    .min(6, "El teléfono debe tener al menos 6 dígitos")
+    .regex(/^\d+$/, "Solo debe contener números"),
   emailContacto: z.string().email("Correo inválido"),
-  direccion: z.string().min(5, "Requerido"),
-  ciudad: z.string().min(2, "Requerido"),
+  direccion: z.string().min(5, "La dirección es requerida"),
+  ciudad: z.string().min(2, "La ciudad es requerida"),
   descripcion: z.string().optional(),
-}).refine((data) => data.tipoServicio !== "OTRO" || (data.tipoServicioOtro && data.tipoServicioOtro.trim().length > 0), {
-  message: "Debe especificar el tipo de servicio",
-  path: ["tipoServicioOtro"],
 });
 
 type EmpresaFormData = z.infer<typeof empresaSchema>;
 
-export const EmpresaProfilePage = () => {
-  const { perfilCompleto, setPerfilCompleto, setEmpresaId } = useAuth();
-  const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
+const TIPOS_SERVICIO = ["VETERINARIA", "PETSHOP", "GROOMING", "HIBRIDO", "OTRO"];
 
+const STEPS = [
+  { label: "Datos legales", icon: FileText },
+  { label: "Perfil público", icon: Building2 },
+  { label: "Imágenes", icon: ImageIcon },
+  { label: "Listo", icon: Check },
+];
+
+export const EmpresaProfilePage = () => {
+  const { setPerfilCompleto } = useAuth();
+  const navigate = useNavigate();
+  const [step, setStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const logoRef = useRef<HTMLInputElement>(null);
+  const bannerRef = useRef<HTMLInputElement>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
-  const logoInputRef = useRef<HTMLInputElement>(null);
-  const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<EmpresaFormData>({
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    watch,
+    formState: { errors },
+  } = useForm<EmpresaFormData>({
     resolver: zodResolver(empresaSchema),
-    defaultValues: { tipoServicio: "VETERINARIA" }
   });
-
-  useEffect(() => {
-    const checkProfile = async () => {
-      try {
-        const res = await profileService.getEmpresaProfile();
-        const empresaId = res?.data?.id;
-        if (empresaId) {
-          setEmpresaId(Number(empresaId));
-        }
-        setPerfilCompleto(true);
-        navigate("/portal/empresa", { replace: true });
-      } catch {
-        setIsChecking(false);
-      }
-    };
-    if (!perfilCompleto) {
-      checkProfile();
-    } else {
-      setIsChecking(false);
-    }
-  }, [perfilCompleto, setPerfilCompleto, navigate, setEmpresaId]);
-
-  if (isChecking) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-500 animate-pulse font-medium">Verificando perfil...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (perfilCompleto) {
-    return <Navigate to="/portal/empresa" replace />;
-  }
 
   const tipoServicio = watch("tipoServicio");
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
+  useEffect(() => {
+    profileService
+      .getEmpresaProfile()
+      .then(() => {
+        setPerfilCompleto(true);
+        navigate("/portal/empresa", { replace: true });
+      })
+      .catch(() => setIsLoading(false));
+  }, [navigate, setPerfilCompleto]);
+
+  const handleImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "logo" | "banner"
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validar tipo de archivo
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      Swal.fire({
-        icon: "warning",
-        title: "Formato no válido",
-        text: "Solo se permiten archivos JPG, PNG o WEBP.",
-      });
-      e.target.value = '';
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      Swal.fire("Formato no soportado", "Usa JPG, PNG o WEBP", "warning");
       return;
     }
-
-    // Validar tamaño del archivo (máx 1MB)
     if (file.size > MAX_FILE_SIZE) {
-      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-      Swal.fire({
-        icon: "warning",
-        title: "Imagen demasiado grande",
-        text: `El archivo pesa ${sizeMB}MB. El límite es 1MB. Por favor, comprime la imagen e intenta de nuevo.`,
-      });
-      e.target.value = '';
+      Swal.fire("Archivo muy grande", "El archivo no debe superar 1MB", "warning");
       return;
     }
-
-    // Crear preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (type === 'logo') setLogoPreview(e.target?.result as string);
-      else setBannerPreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const removeImage = (type: 'logo' | 'banner') => {
-    if (type === 'logo') {
-      setLogoPreview(null);
-      if (logoInputRef.current) logoInputRef.current.value = '';
+    const preview = URL.createObjectURL(file);
+    if (type === "logo") {
+      setLogoFile(file);
+      setLogoPreview(preview);
     } else {
-      setBannerPreview(null);
-      if (bannerInputRef.current) bannerInputRef.current.value = '';
+      setBannerFile(file);
+      setBannerPreview(preview);
     }
   };
+
+  const removeImage = (type: "logo" | "banner") => {
+    if (type === "logo") {
+      setLogoFile(null);
+      setLogoPreview(null);
+      if (logoRef.current) logoRef.current.value = "";
+    } else {
+      setBannerFile(null);
+      setBannerPreview(null);
+      if (bannerRef.current) bannerRef.current.value = "";
+    }
+  };
+
+  const handleNext = async () => {
+    let valid = false;
+    if (step === 0) {
+      valid = await trigger(["razonSocial", "ruc"]);
+    } else if (step === 1) {
+      valid = await trigger([
+        "nombreComercial",
+        "tipoServicio",
+        "telefono",
+        "emailContacto",
+        "direccion",
+        "ciudad",
+      ]);
+    } else if (step === 2) {
+      valid = true;
+    }
+    if (valid) setStep((s) => s + 1);
+  };
+
+  const handleBack = () => setStep((s) => s - 1);
 
   const onSubmit = async (data: EmpresaFormData) => {
     setIsSubmitting(true);
     try {
       const finalData = {
         ...data,
-        tipoServicio: data.tipoServicio === "OTRO" ? data.tipoServicioOtro || "OTRO" : data.tipoServicio
+        tipoServicioOtro:
+          data.tipoServicio === "OTRO" ? data.tipoServicioOtro : undefined,
       };
-
-      const logoFile = logoInputRef.current?.files?.[0];
-      const bannerFile = bannerInputRef.current?.files?.[0];
-
-      // Validar tamaño de archivos ANTES de enviar al backend
-      if (logoFile && logoFile.size > MAX_FILE_SIZE) {
-        const sizeMB = (logoFile.size / (1024 * 1024)).toFixed(2);
-        Swal.fire({
-          icon: "warning",
-          title: "Logo demasiado grande",
-          text: `El logo pesa ${sizeMB}MB. El límite es 1MB. Por favor, comprime la imagen.`,
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (bannerFile && bannerFile.size > MAX_FILE_SIZE) {
-        const sizeMB = (bannerFile.size / (1024 * 1024)).toFixed(2);
-        Swal.fire({
-          icon: "warning",
-          title: "Banner demasiado grande",
-          text: `El banner pesa ${sizeMB}MB. El límite es 1MB. Por favor, comprime la imagen.`,
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      console.log("Submitting profile with data:", finalData);
-      const response = await profileService.createEmpresaProfile(finalData, logoFile, bannerFile);
-      const empresaId = response?.data?.id;
-      if (empresaId) {
-        setEmpresaId(Number(empresaId));
-      }
+      await profileService.createEmpresaProfile(finalData, logoFile || undefined, bannerFile || undefined);
       setPerfilCompleto(true);
       Swal.fire({
-        toast: true,
-        position: "top-end",
         icon: "success",
-        title: "¡Empresa registrada!",
-        timer: 3000,
+        title: "¡Empresa activada!",
+        text: "Tu negocio ya está en Huella360.",
+        timer: 2000,
         showConfirmButton: false,
+        position: "top-end",
+        toast: true,
       });
-      navigate("/portal/empresa", { replace: true });
-    } catch (error: any) {
-      console.error("Error creating profile:", error);
-
-      let message = "Ocurrió un error inesperado al crear el perfil.";
-      let footer = undefined;
-
-      // Detectar error de tamaño de archivo del backend
-      const errorText = error?.response?.data?.message || error?.message || "";
-      const isSizeError =
-        error?.response?.status === 413 ||
-        errorText.includes("Maximum upload size exceeded") ||
-        errorText.includes("exceeds its maximum permitted size") ||
-        errorText.includes("FileSizeLimitExceededException") ||
-        error?.response?.status === 500 && errorText.includes("upload");
-
-      if (isSizeError) {
-        Swal.fire({
-          icon: "warning",
-          title: "Imagen demasiado grande",
-          text: "Una de las imágenes supera el límite de 1MB. Por favor, comprime las imágenes e intenta de nuevo.",
-          confirmButtonColor: "#3b82f6",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (error.response?.data) {
-        const data = error.response.data;
-        message = data.message || message;
-
-        if (data.validationErrors) {
-          const errors = Object.values(data.validationErrors).map(err => `<li>${err}</li>`).join("");
-          footer = `<div class="text-left"><p class="font-bold mb-2">Errores de validación:</p><ul class="list-disc pl-4 space-y-1">${errors}</ul></div>`;
-        }
-      }
-
+      setTimeout(() => navigate("/portal/empresa", { replace: true }), 1500);
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message || "Error al guardar el perfil. Inténtalo de nuevo.";
       Swal.fire({
         icon: "error",
-        title: "Error al crear perfil",
-        text: message,
-        html: footer || undefined,
-        footer: footer ? undefined : undefined
+        title: "Error",
+        html: `<p class="text-sm text-slate-600">${msg}</p>`,
+        confirmButtonColor: "#1ea59c",
       });
     } finally {
       setIsSubmitting(false);
@@ -229,176 +179,248 @@ export const EmpresaProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
-      <div className="max-w-4xl w-full">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-slate-900">Perfil de Empresa</h2>
-          <p className="mt-2 text-slate-600">Registra tu clínica o veterinaria para comenzar a operar en la plataforma.</p>
+    <WizardLayout
+      steps={STEPS}
+      currentStep={step}
+      title="Activa tu empresa"
+      subtitle="Configura el perfil de tu negocio en la plataforma"
+      onBack={step > 0 && step < 3 ? handleBack : undefined}
+      onNext={step < 3 ? handleNext : undefined}
+      onSubmit={step === 3 ? handleSubmit(onSubmit) : undefined}
+      isSubmitting={isSubmitting}
+      isLastStep={step === 3}
+      nextLabel="Activar Empresa"
+      isLoading={isLoading}
+    >
+      {/* Step 0: Datos Legales */}
+      {step === 0 && (
+        <div className="space-y-5">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 mb-1">Información legal</h2>
+            <p className="text-sm text-slate-500">Datos fiscal y razón social de tu empresa.</p>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Razón Social</label>
+              <input
+                {...register("razonSocial")}
+                placeholder="Ej: Mi Empresa S.A.C."
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+              />
+              {errors.razonSocial && <p className="text-xs text-red-500 mt-1">{errors.razonSocial.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">RUC / NIT</label>
+              <input
+                {...register("ruc")}
+                placeholder="Ej: 20606677074"
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+              />
+              {errors.ruc && <p className="text-xs text-red-500 mt-1">{errors.ruc.message}</p>}
+            </div>
+          </div>
         </div>
+      )}
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <form onSubmit={handleSubmit(onSubmit)} className="p-8 sm:p-10 space-y-8">
-
-            {/* ── Subida de Imágenes ── */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Imágenes de Marca</h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Logo */}
-                <div className="col-span-1">
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Logo</label>
-                  <div className="relative group border-2 border-dashed border-slate-300 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" ref={logoInputRef} onChange={(e) => handleImageChange(e, 'logo')} />
-
-                    {logoPreview ? (
-                      <>
-                        <img src={logoPreview} alt="Logo preview" className="h-full w-full object-contain p-2" />
-                        <button type="button" onClick={() => removeImage('logo')} className="absolute top-2 right-2 bg-slate-900/50 hover:bg-red-500 text-white p-1.5 rounded-full transition-colors backdrop-blur-sm">
-                          <X size={16} />
-                        </button>
-                      </>
-                    ) : (
-                      <button type="button" onClick={() => logoInputRef.current?.click()} className="flex flex-col items-center text-slate-500 hover:text-primary transition-colors">
-                        <UploadCloud size={28} className="mb-2" />
-                        <span className="text-sm font-medium">Subir logo</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Banner */}
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Banner (Portada)</label>
-                  <div className="relative group border-2 border-dashed border-slate-300 rounded-2xl h-40 flex items-center justify-center overflow-hidden bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" ref={bannerInputRef} onChange={(e) => handleImageChange(e, 'banner')} />
-
-                    {bannerPreview ? (
-                      <>
-                        <img src={bannerPreview} alt="Banner preview" className="h-full w-full object-cover" />
-                        <button type="button" onClick={() => removeImage('banner')} className="absolute top-2 right-2 bg-slate-900/50 hover:bg-red-500 text-white p-1.5 rounded-full transition-colors backdrop-blur-sm">
-                          <X size={16} />
-                        </button>
-                      </>
-                    ) : (
-                      <button type="button" onClick={() => bannerInputRef.current?.click()} className="flex flex-col items-center text-slate-500 hover:text-primary transition-colors">
-                        <UploadCloud size={28} className="mb-2" />
-                        <span className="text-sm font-medium">Subir imagen panorámica</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
+      {/* Step 1: Perfil Público */}
+      {step === 1 && (
+        <div className="space-y-5">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 mb-1">Perfil público</h2>
+            <p className="text-sm text-slate-500">Información que verán los clientes.</p>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nombre Comercial</label>
+              <div className="relative">
+                <Building2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  {...register("nombreComercial")}
+                  placeholder="Nombre que ven los clientes"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+                />
               </div>
-              <p className="text-xs text-slate-400 mt-2">
-                Formatos aceptados: JPG, PNG, WEBP. Tamaño máximo: 1MB por imagen.
-              </p>
+              {errors.nombreComercial && <p className="text-xs text-red-500 mt-1">{errors.nombreComercial.message}</p>}
             </div>
 
-            {/* ── Datos Legales ── */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Información Legal</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Razón Social *</label>
-                  <input type="text" {...register("razonSocial")} className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary" />
-                  {errors.razonSocial && <p className="mt-1 text-xs text-red-500">{errors.razonSocial.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">RUC / NIT *</label>
-                  <input type="text" {...register("ruc")} className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary" />
-                  {errors.ruc && <p className="mt-1 text-xs text-red-500">{errors.ruc.message}</p>}
-                </div>
-              </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tipo de Servicio</label>
+              <select
+                {...register("tipoServicio")}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all appearance-none"
+              >
+                <option value="">Seleccionar...</option>
+                {TIPOS_SERVICIO.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+              {errors.tipoServicio && <p className="text-xs text-red-500 mt-1">{errors.tipoServicio.message}</p>}
             </div>
 
-            {/* ── Datos Comerciales ── */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Perfil Público</h3>
+            {tipoServicio === "OTRO" && (
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Especifique</label>
+                <input
+                  {...register("tipoServicioOtro")}
+                  placeholder="Describa su tipo de servicio"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+                />
+              </div>
+            )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Nombre Comercial *</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Building2 size={18} /></div>
-                    <input type="text" {...register("nombreComercial")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
-                  </div>
-                  {errors.nombreComercial && <p className="mt-1 text-xs text-red-500">{errors.nombreComercial.message}</p>}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Teléfono</label>
+                <div className="relative">
+                  <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    {...register("telefono")}
+                    type="tel"
+                    placeholder="Ej: 999888777"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+                  />
                 </div>
+                {errors.telefono && <p className="text-xs text-red-500 mt-1">{errors.telefono.message}</p>}
+              </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Tipo de Servicio *</label>
-                  <select {...register("tipoServicio")} className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary">
-                    <option value="VETERINARIA">Veterinaria / Clínica</option>
-                    <option value="PETSHOP">Pet Shop / Tienda</option>
-                    <option value="GROOMING">Peluquería / Grooming</option>
-                    <option value="HIBRIDO">Servicio Híbrido (Todo junto)</option>
-                    <option value="OTRO">Otros (Especificar)</option>
-                  </select>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email de Contacto</label>
+                <div className="relative">
+                  <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    {...register("emailContacto")}
+                    type="email"
+                    placeholder="contacto@empresa.com"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+                  />
                 </div>
-
-                {tipoServicio === "OTRO" && (
-                  <div className="animate-in fade-in slide-in-from-top-2">
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Especifique el Tipo de Servicio *</label>
-                    <input
-                      type="text"
-                      {...register("tipoServicioOtro", { required: tipoServicio === "OTRO" })}
-                      placeholder="Ej: Guardería, Adiestramiento, etc."
-                      className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 px-4 focus:ring-2 focus:ring-primary"
-                    />
-                    {errors.tipoServicioOtro && <p className="mt-1 text-xs text-red-500">Campo requerido cuando selecciona Otros</p>}
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Teléfono de Contacto *</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Phone size={18} /></div>
-                    <input type="tel" {...register("telefono")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
-                  </div>
-                  {errors.telefono && <p className="mt-1 text-xs text-red-500">{errors.telefono.message}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Email de Contacto *</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Mail size={18} /></div>
-                    <input type="email" {...register("emailContacto")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
-                  </div>
-                  {errors.emailContacto && <p className="mt-1 text-xs text-red-500">{errors.emailContacto.message}</p>}
-                </div>
+                {errors.emailContacto && <p className="text-xs text-red-500 mt-1">{errors.emailContacto.message}</p>}
               </div>
             </div>
 
-            {/* ── Ubicación ── */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold border-b border-slate-100 pb-2">Ubicación</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Ciudad *</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Search size={18} /></div>
-                    <input type="text" {...register("ciudad")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
-                  </div>
-                  {errors.ciudad && <p className="mt-1 text-xs text-red-500">{errors.ciudad.message}</p>}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Ciudad</label>
+                <div className="relative">
+                  <Globe size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    {...register("ciudad")}
+                    placeholder="Ej: Lima"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+                  />
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Dirección exacta *</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><MapPin size={18} /></div>
-                    <input type="text" {...register("direccion")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary" />
-                  </div>
-                  {errors.direccion && <p className="mt-1 text-xs text-red-500">{errors.direccion.message}</p>}
+                {errors.ciudad && <p className="text-xs text-red-500 mt-1">{errors.ciudad.message}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Dirección</label>
+                <div className="relative">
+                  <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    {...register("direccion")}
+                    placeholder="Calle, número"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+                  />
                 </div>
+                {errors.direccion && <p className="text-xs text-red-500 mt-1">{errors.direccion.message}</p>}
               </div>
             </div>
-
-            <div className="pt-6">
-              <Button type="submit" disabled={isSubmitting} variant="primary" className="w-full py-4 text-lg font-bold rounded-xl shadow-lg">
-                {isSubmitting ? "Creando perfil de empresa..." : "Activar Empresa en VetSaaS"} <ArrowRight size={20} className="ml-2" />
-              </Button>
-            </div>
-          </form>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+
+      {/* Step 2: Imágenes */}
+      {step === 2 && (
+        <div className="space-y-5">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 mb-1">Imágenes de marca</h2>
+            <p className="text-sm text-slate-500">Sube el logo y portada de tu negocio.</p>
+          </div>
+
+          {/* Logo */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Logo</label>
+            <input
+              ref={logoRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => handleImageChange(e, "logo")}
+            />
+            {logoPreview ? (
+              <div className="relative inline-block">
+                <img src={logoPreview} alt="Logo" className="w-24 h-24 object-cover rounded-xl border border-slate-200" />
+                <button
+                  type="button"
+                  onClick={() => removeImage("logo")}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => logoRef.current?.click()}
+                className="w-full border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-[#1ea59c] hover:bg-[#1ea59c]/5 transition-all"
+              >
+                <UploadCloud size={24} className="mx-auto text-slate-400 mb-2" />
+                <p className="text-sm text-slate-500">Click para subir logo</p>
+                <p className="text-xs text-slate-400">JPG, PNG o WEBP, máximo 1MB</p>
+              </button>
+            )}
+          </div>
+
+          {/* Banner */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Banner / Portada</label>
+            <input
+              ref={bannerRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => handleImageChange(e, "banner")}
+            />
+            {bannerPreview ? (
+              <div className="relative inline-block">
+                <img src={bannerPreview} alt="Banner" className="w-full h-32 object-cover rounded-xl border border-slate-200" />
+                <button
+                  type="button"
+                  onClick={() => removeImage("banner")}
+                  className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => bannerRef.current?.click()}
+                className="w-full border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-[#1ea59c] hover:bg-[#1ea59c]/5 transition-all"
+              >
+                <UploadCloud size={24} className="mx-auto text-slate-400 mb-2" />
+                <p className="text-sm text-slate-500">Click para subir portada</p>
+                <p className="text-xs text-slate-400">JPG, PNG o WEBP, máximo 1MB</p>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Listo */}
+      {step === 3 && (
+        <div className="text-center py-6">
+          <div className="w-16 h-16 bg-[#1ea59c]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Check size={32} className="text-[#1ea59c]" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">¡Empresa lista!</h2>
+          <p className="text-sm text-slate-500 max-w-xs mx-auto">
+            Todo está configurado. Haz clic en "Activar Empresa" para que tu negocio aparezca en Huella360.
+          </p>
+        </div>
+      )}
+    </WizardLayout>
   );
 };

@@ -1,112 +1,117 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, User, Phone, Truck, Camera, X } from "lucide-react";
-import { Button } from "../../../../components/ui/Button";
+import { User, Phone, Truck, Camera, X, Check } from "lucide-react";
+import { WizardLayout } from "../../../../components/ui/WizardLayout";
 import { profileService } from "../../services/profileService";
-import { useAuth } from "../../context/useAuth";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useAuth } from "../../../auth/context/useAuth";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const repartidorSchema = z.object({
-  nombres: z.string().min(2, "Los nombres son requeridos"),
-  apellidos: z.string().min(2, "Los apellidos son requeridos"),
-  telefono: z.string().min(6, "El teléfono es requerido").regex(/^\d+$/, "Solo números permitidos"),
-  tipoVehiculo: z.string().min(2, "El tipo de vehículo es requerido"),
-  placaVehiculo: z.string().min(3, "La placa del vehículo es requerida"),
+  nombres: z.string().min(2, "Los nombres deben tener al menos 2 caracteres"),
+  apellidos: z.string().min(2, "Los apellidos deben tener al menos 2 caracteres"),
+  telefono: z
+    .string()
+    .min(6, "El teléfono debe tener al menos 6 dígitos")
+    .regex(/^\d+$/, "Solo debe contener números"),
+  tipoVehiculo: z.string().min(2, "Selecciona un tipo de vehículo"),
+  placaVehiculo: z.string().min(3, "La placa es requerida"),
 });
 
 type RepartidorFormData = z.infer<typeof repartidorSchema>;
 
+const VEHICULOS = ["Motocicleta", "Bicicleta", "Automóvil", "A pie"];
+
+const STEPS = [
+  { label: "Datos personales", icon: User },
+  { label: "Vehículo", icon: Truck },
+  { label: "Listo", icon: Check },
+];
+
 export const RepartidorProfilePage = () => {
-  const { perfilCompleto, setPerfilCompleto } = useAuth();
+  const { setPerfilCompleto } = useAuth();
   const navigate = useNavigate();
+  const [step, setStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
-  const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
+
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<RepartidorFormData>({
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    formState: { errors },
+  } = useForm<RepartidorFormData>({
     resolver: zodResolver(repartidorSchema),
   });
 
   useEffect(() => {
-    const checkProfile = async () => {
-      try {
-        await profileService.getRepartidorProfile();
+    profileService
+      .getRepartidorProfile()
+      .then(() => {
         setPerfilCompleto(true);
         navigate("/portal/repartidor", { replace: true });
-      } catch {
-        setIsChecking(false);
-      }
-    };
-    if (!perfilCompleto) {
-      checkProfile();
-    } else {
-      setIsChecking(false);
-    }
-  }, [perfilCompleto, setPerfilCompleto, navigate]);
+      })
+      .catch(() => setIsLoading(false));
+  }, [navigate, setPerfilCompleto]);
 
-  if (isChecking) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-500 animate-pulse font-medium">Verificando perfil...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (perfilCompleto) {
-    return <Navigate to="/portal/repartidor" replace />;
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        Swal.fire("Error", "La imagen debe ser menor a 2MB", "error");
-        return;
-      }
-      setFotoPerfil(file);
-      setPreviewUrl(URL.createObjectURL(file));
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      Swal.fire("Archivo muy grande", "La foto no debe superar 2MB", "warning");
+      return;
     }
+    setFotoFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
-  const removePhoto = () => {
-    setFotoPerfil(null);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  const removeImage = () => {
+    setFotoFile(null);
     setPreviewUrl(null);
+    if (fileRef.current) fileRef.current.value = "";
   };
+
+  const handleNext = async () => {
+    let valid = false;
+    if (step === 0) {
+      valid = await trigger(["nombres", "apellidos", "telefono"]);
+    } else if (step === 1) {
+      valid = await trigger(["tipoVehiculo", "placaVehiculo"]);
+    }
+    if (valid) setStep((s) => s + 1);
+  };
+
+  const handleBack = () => setStep((s) => s - 1);
 
   const onSubmit = async (data: RepartidorFormData) => {
     setIsSubmitting(true);
     try {
-      await profileService.createRepartidorProfile(data, fotoPerfil || undefined);
+      await profileService.createRepartidorProfile(data, fotoFile || undefined);
       setPerfilCompleto(true);
       Swal.fire({
-        toast: true,
-        position: "top-end",
         icon: "success",
-        title: "¡Perfil completado!",
-        timer: 3000,
+        title: "¡Registro completado!",
+        text: "Tu cuenta será verificada por el equipo administrativo.",
+        timer: 2500,
         showConfirmButton: false,
+        position: "top-end",
+        toast: true,
       });
-      navigate("/portal/repartidor", { replace: true });
-    } catch (error: any) {
-      console.error("Error creating profile:", error);
-      let message = "No se pudo guardar el perfil";
-      
-      if (error.response?.data) {
-        message = error.response.data.message || message;
-      }
-
+      setTimeout(() => navigate("/portal/repartidor", { replace: true }), 2000);
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message || "Error al guardar el perfil. Inténtalo de nuevo.";
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: message,
+        html: `<p class="text-sm text-slate-600">${msg}</p>`,
+        confirmButtonColor: "#1ea59c",
       });
     } finally {
       setIsSubmitting(false);
@@ -114,130 +119,173 @@ export const RepartidorProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
-      <div className="max-w-2xl w-full">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-slate-900">Registro de Repartidor</h2>
-          <p className="mt-2 text-slate-600">Completa tu información para empezar a realizar entregas.</p>
-        </div>
+    <WizardLayout
+      steps={STEPS}
+      currentStep={step}
+      title="Únete como repartidor"
+      subtitle="Configura tu cuenta para comenzar a recibir entregas"
+      onBack={step > 0 && step < 2 ? handleBack : undefined}
+      onNext={step < 2 ? handleNext : undefined}
+      onSubmit={step === 2 ? handleSubmit(onSubmit) : undefined}
+      isSubmitting={isSubmitting}
+      isLastStep={step === 2}
+      nextLabel="Crear mi cuenta"
+      isLoading={isLoading}
+    >
+      {/* Step 0: Datos Personales */}
+      {step === 0 && (
+        <div className="space-y-5">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 mb-1">Datos personales</h2>
+            <p className="text-sm text-slate-500">Tu nombre y teléfono de contacto.</p>
+          </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 sm:p-10">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            
-            {/* Foto de Perfil */}
-            <div className="flex flex-col items-center mb-8">
-              <label className="block text-sm font-semibold text-slate-700 mb-4 text-center w-full">
-                Foto de Perfil / Identificación *
-              </label>
-              <div className="relative group">
-                <div className="w-32 h-32 rounded-full border-2 border-dashed border-slate-300 overflow-hidden bg-slate-50 flex items-center justify-center">
-                  {previewUrl ? (
-                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <Camera className="text-slate-400 w-10 h-10" />
-                  )}
-                </div>
-                {previewUrl ? (
-                  <button
-                    type="button"
-                    onClick={removePhoto}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-lg hover:bg-red-600 transition-colors"
-                  >
-                    <X size={16} />
-                  </button>
-                ) : (
-                  <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors rounded-full">
-                    <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
-                  </label>
-                )}
-              </div>
-              <p className="mt-2 text-xs text-slate-500">Haz clic para subir una foto clara de tu rostro.</p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Nombres */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Nombres *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nombres</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <User size={18} />
-                  </div>
-                  <input type="text" {...register("nombres")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary outline-none" />
-                </div>
-                {errors.nombres && <p className="mt-1 text-xs text-red-500">{errors.nombres.message}</p>}
-              </div>
-
-              {/* Apellidos */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Apellidos *</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <User size={18} />
-                  </div>
-                  <input type="text" {...register("apellidos")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary outline-none" />
-                </div>
-                {errors.apellidos && <p className="mt-1 text-xs text-red-500">{errors.apellidos.message}</p>}
-              </div>
-            </div>
-
-            {/* Teléfono */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Teléfono *</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                  <Phone size={18} />
-                </div>
-                <input type="tel" {...register("telefono")} className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary outline-none" />
-              </div>
-              {errors.telefono && <p className="mt-1 text-xs text-red-500">{errors.telefono.message}</p>}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Tipo de Vehículo */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Tipo de Vehículo *</label>
-                <select
-                  {...register("tipoVehiculo")}
-                  className="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary outline-none px-4 appearance-none"
-                >
-                  <option value="">Selecciona uno...</option>
-                  <option value="MOTO">Motocicleta</option>
-                  <option value="BICICLETA">Bicicleta</option>
-                  <option value="AUTO">Automóvil</option>
-                  <option value="A_PIE">A pie / Caminando</option>
-                </select>
-                {errors.tipoVehiculo && <p className="mt-1 text-xs text-red-500">{errors.tipoVehiculo.message}</p>}
-              </div>
-
-              {/* Placa */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Placa del Vehículo *</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <Truck size={18} />
-                  </div>
+                  <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
-                    type="text"
-                    {...register("placaVehiculo")}
-                    placeholder="Ej: ABC-123 o N/A"
-                    className="block w-full pl-10 rounded-xl border-slate-200 bg-slate-50 py-2.5 focus:ring-2 focus:ring-primary outline-none"
+                    {...register("nombres")}
+                    placeholder="Tus nombres"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
                   />
                 </div>
-                {errors.placaVehiculo && <p className="mt-1 text-xs text-red-500">{errors.placaVehiculo.message}</p>}
+                {errors.nombres && <p className="text-xs text-red-500 mt-1">{errors.nombres.message}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Apellidos</label>
+                <div className="relative">
+                  <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    {...register("apellidos")}
+                    placeholder="Tus apellidos"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+                  />
+                </div>
+                {errors.apellidos && <p className="text-xs text-red-500 mt-1">{errors.apellidos.message}</p>}
               </div>
             </div>
 
-            <div className="pt-4">
-              <Button type="submit" disabled={isSubmitting} variant="primary" className="w-full py-4 text-lg font-bold rounded-xl shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 active:translate-y-0">
-                {isSubmitting ? "Guardando..." : "Terminar Registro"} <ArrowRight size={22} className="ml-2" />
-              </Button>
-              <p className="text-center text-xs text-slate-500 mt-4 italic">
-                Nota: Tu cuenta será verificada por el equipo administrativo antes de recibir solicitudes.
-              </p>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Teléfono</label>
+              <div className="relative">
+                <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  {...register("telefono")}
+                  type="tel"
+                  placeholder="Ej: 999888777"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+                />
+              </div>
+              {errors.telefono && <p className="text-xs text-red-500 mt-1">{errors.telefono.message}</p>}
             </div>
-          </form>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+
+      {/* Step 1: Vehículo */}
+      {step === 1 && (
+        <div className="space-y-5">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 mb-1">Datos del vehículo</h2>
+            <p className="text-sm text-slate-500">Selecciona tu medio de transporte.</p>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tipo de Vehículo</label>
+              <div className="grid grid-cols-2 gap-2">
+                {VEHICULOS.map((v) => (
+                  <label
+                    key={v}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:border-[#1ea59c] transition-all has-[:checked]:border-[#1ea59c] has-[:checked]:bg-[#1ea59c]/5 has-[:checked]:text-[#1ea59c]"
+                  >
+                    <input
+                      type="radio"
+                      value={v}
+                      {...register("tipoVehiculo")}
+                      className="w-4 h-4 text-[#1ea59c] focus:ring-[#1ea59c]"
+                    />
+                    <span className="text-sm font-medium">{v}</span>
+                  </label>
+                ))}
+              </div>
+              {errors.tipoVehiculo && <p className="text-xs text-red-500 mt-1">{errors.tipoVehiculo.message}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Placa del Vehículo</label>
+              <div className="relative">
+                <Truck size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  {...register("placaVehiculo")}
+                  placeholder="Ej: ABC-123 o N/A"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+                />
+              </div>
+              {errors.placaVehiculo && <p className="text-xs text-red-500 mt-1">{errors.placaVehiculo.message}</p>}
+            </div>
+
+            {/* Foto de perfil */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                Foto de perfil <span className="text-slate-400 font-normal">(opcional)</span>
+              </label>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+              {previewUrl ? (
+                <div className="relative inline-block">
+                  <img
+                    src={previewUrl}
+                    alt="Foto"
+                    className="w-24 h-24 object-cover rounded-full border-2 border-slate-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute top-0 right-0 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="w-24 h-24 rounded-full border-2 border-dashed border-slate-200 flex flex-col items-center justify-center hover:border-[#1ea59c] hover:bg-[#1ea59c]/5 transition-all"
+                >
+                  <Camera size={20} className="text-slate-400" />
+                  <span className="text-[10px] text-slate-400 mt-1">Subir foto</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Step 2: Listo */}
+      {step === 2 && (
+        <div className="text-center py-6">
+          <div className="w-16 h-16 bg-[#1ea59c]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Check size={32} className="text-[#1ea59c]" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">¡Casi listo!</h2>
+          <p className="text-sm text-slate-500 max-w-xs mx-auto mb-4">
+            Haz clic en "Crear mi cuenta" para completar tu registro.
+          </p>
+          <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
+            Tu cuenta será verificada por el equipo administrativo antes de recibir solicitudes.
+          </p>
+        </div>
+      )}
+    </WizardLayout>
   );
 };
