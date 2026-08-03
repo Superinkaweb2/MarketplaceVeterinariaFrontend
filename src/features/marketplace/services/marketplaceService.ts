@@ -23,7 +23,7 @@ export const marketplaceService = {
     },
 
     getCategories: async (): Promise<Category[]> => {
-        const { data } = await api.get<ApiResponse<Category[]>>("/categories");
+        const { data } = await api.get<ApiResponse<Category[]>>("/categories/parents");
         return data.data;
     },
 

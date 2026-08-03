@@ -132,7 +132,17 @@ const LoadingFallback = () => (
   </div>
 );
 
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Auth0Provider } from "@auth0/auth0-react";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 function App() {
 
@@ -152,6 +162,7 @@ function App() {
     >
       <AuthProvider>
         <Router>
+          <ScrollToTop />
           <AuthRedirector />
           <ErrorBoundary>
           <Suspense fallback={<LoadingFallback />}>
