@@ -1,35 +1,65 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus, Search, Filter, Package, AlertTriangle, Eye, Edit2, Trash2, ArrowRight } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "../../../../components/ui/Button";
 import { productService } from "../services/productService";
+import { subscriptionService } from "../../shared/subscriptions/services/subscriptionService";
 import type { Product } from "../../../catalog/types/product";
 import Swal from "sweetalert2";
 import { ProductFormModal } from "../components/ProductFormModal";
 
 export const ProductosPage = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [page, setPage] = useState(0);
+  const queryClient = useQueryClient();
 
-  const fetchProducts = async () => {
-    setIsLoading(true);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["empresa-productos", page],
+    queryFn: async () => {
+      const data = await productService.getMyProducts(page, 10);
+      return data;
+    },
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const products = data?.content || [];
+  const totalPages = data?.totalPages || 1;
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => productService.deleteProduct(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["empresa-productos"] });
+    },
+  });
+
+  const handleOpenCreate = async () => {
     try {
-      const data = await productService.getMyProducts(0, 50);
-      setProducts(data.content);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    } finally {
-      setIsLoading(false);
+      const freshUsage = await subscriptionService.getUsageMetrics();
+      if (freshUsage.maxProducts > 0 && freshUsage.currentProducts >= freshUsage.maxProducts) {
+        Swal.fire({
+          title: "Límite de productos alcanzado",
+          html: `
+            <div class="text-left space-y-3">
+              <p class="text-slate-600">Tu plan actual permite <strong>${freshUsage.maxProducts} producto${freshUsage.maxProducts !== 1 ? 's' : ''}</strong> y ya tienes <strong>${freshUsage.currentProducts}</strong> creados.</p>
+              <p class="text-slate-500 text-sm">Actualiza tu plan para agregar más productos a tu catálogo.</p>
+            </div>
+          `,
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonText: "Ver planes",
+          cancelButtonText: "Cerrar",
+          confirmButtonColor: "#fe5c3c",
+          iconColor: "#3b82f6",
+        }).then((result) => {
+          if (result.isConfirmed) window.location.href = "/empresa/suscripcion";
+        });
+        return;
+      }
+    } catch (e) {
+      console.error("Error checking subscription limits:", e);
     }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const handleOpenCreate = () => {
     setEditingProduct(null);
     setIsModalOpen(true);
   };
@@ -53,8 +83,7 @@ export const ProductosPage = () => {
 
     if (result.isConfirmed) {
       try {
-        await productService.deleteProduct(id);
-        setProducts(products.filter(p => p.id !== id));
+        await deleteMutation.mutateAsync(id);
         Swal.fire('Eliminado', 'El producto ha sido eliminado.', 'success');
       } catch (error) {
         Swal.fire('Error', 'No se pudo eliminar el producto.', 'error');
@@ -134,6 +163,21 @@ export const ProductosPage = () => {
                       <td colSpan={6} className="px-6 py-4 h-20 bg-slate-50/30"></td>
                     </tr>
                   ))
+                ) : error ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-16 text-center">
+                      <div className="flex flex-col items-center justify-center max-w-sm mx-auto">
+                        <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                          <span className="text-2xl">!</span>
+                        </div>
+                        <h3 className="text-lg font-semibold text-red-700 mb-1">Error al cargar</h3>
+                        <p className="text-sm text-red-500 text-center mb-4">{error?.message || "Error desconocido"}</p>
+                        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["empresa-productos"] })} variant="outline" className="gap-2 rounded-lg">
+                          Reintentar
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
                 ) : filteredProducts.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-16 text-center">
@@ -239,6 +283,17 @@ export const ProductosPage = () => {
                   </div>
                 </div>
               ))
+            ) : error ? (
+               <div className="py-12 px-6 rounded-2xl text-center bg-white border border-red-200">
+                <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">!</span>
+                </div>
+                <p className="text-red-700 font-semibold mb-2">Error al cargar</p>
+                <p className="text-sm text-red-500 mb-4">{error?.message || "Error desconocido"}</p>
+                <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["empresa-productos"] })} variant="outline" className="gap-2 rounded-lg">
+                  Reintentar
+                </Button>
+              </div>
             ) : filteredProducts.length === 0 ? (
                <div className="py-12 px-6 rounded-2xl text-center">
                 <Package size={40} className="mx-auto mb-3 text-slate-300" />
@@ -306,11 +361,11 @@ export const ProductosPage = () => {
         {/* Pagination: Se queda fija al fondo de este contenedor */}
         <div className="shrink-0 px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 z-10">
           <span className="text-sm font-medium text-slate-500">
-            Mostrando <span className="text-slate-900">{filteredProducts.length}</span> productos
+            Mostrando <span className="text-slate-900">{products.length}</span> productos | Página {page + 1} de {totalPages}
           </span>
           <div className="flex gap-2 w-full sm:w-auto">
-            <Button variant="outline" className="flex-1 sm:flex-none text-sm px-4 py-2 h-auto" disabled>Anterior</Button>
-            <Button variant="outline" className="flex-1 sm:flex-none text-sm px-4 py-2 h-auto" disabled>Siguiente</Button>
+            <Button variant="outline" className="flex-1 sm:flex-none text-sm px-4 py-2 h-auto" disabled={page === 0 || isLoading} onClick={() => setPage(p => Math.max(0, p - 1))}>Anterior</Button>
+            <Button variant="outline" className="flex-1 sm:flex-none text-sm px-4 py-2 h-auto" disabled={page >= totalPages - 1 || isLoading} onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}>Siguiente</Button>
           </div>
         </div>
       </div>
@@ -318,7 +373,7 @@ export const ProductosPage = () => {
       <ProductFormModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        onSuccess={fetchProducts}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["empresa-productos"] })}
         product={editingProduct}
       />
     </div>

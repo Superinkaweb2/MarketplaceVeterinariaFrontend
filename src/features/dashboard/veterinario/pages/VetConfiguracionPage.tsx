@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { User, Settings, Save, ShieldCheck, Briefcase, Award, FileText, Camera, Lock, CreditCard } from "lucide-react";
 import { z } from "zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "../../../../components/ui/Button";
 import { vetService } from "../services/vetService";
 import { authService } from "../../../auth/services/authService";
 import { useAuth } from "../../../auth/context/useAuth";
-import type { VetProfile } from "../types/vet.types";
+import { useVetProfile } from "../hooks/useVetProfile";
 import Swal from "sweetalert2";
 
 const vetProfileSchema = z.object({
@@ -25,49 +26,39 @@ const vetProfileSchema = z.object({
 
 export const VetConfiguracionPage = () => {
  const { logout } = useAuth();
- const [profile, setProfile] = useState<VetProfile | null>(null);
+ const queryClient = useQueryClient();
+ const { data: profile, isLoading } = useVetProfile();
  const [activeTab, setActiveTab] = useState<"perfil" | "seguridad" | "pagos">("perfil");
- const [isLoading, setIsLoading] = useState(true);
  const [isSaving, setIsSaving] = useState(false);
 
  // Form state
  const [formData, setFormData] = useState({
- nombres: "",
- apellidos: "",
- especialidad: "",
- biografia: "",
- aniosExperiencia: 0,
- numeroColegiatura: "",
- fotoPerfilUrl: "",
- mpAccessToken: "",
- mpPublicKey: ""
+   nombres: "",
+   apellidos: "",
+   especialidad: "",
+   biografia: "",
+   aniosExperiencia: 0,
+   numeroColegiatura: "",
+   fotoPerfilUrl: "",
+   mpAccessToken: "",
+   mpPublicKey: ""
  });
 
  useEffect(() => {
- const fetchProfile = async () => {
- try {
- const data = await vetService.getMyProfile();
- setProfile(data);
- setFormData({
- nombres: data.nombres,
- apellidos: data.apellidos,
- especialidad: data.especialidad || "",
- biografia: data.biografia || "",
- aniosExperiencia: data.aniosExperiencia || 0,
- numeroColegiatura: data.numeroColegiatura || "",
- fotoPerfilUrl: data.fotoPerfilUrl || "",
- mpAccessToken: data.mpAccessToken || "",
- mpPublicKey: data.mpPublicKey || ""
- });
- } catch (error) {
- console.error("Error fetching profile:", error);
- Swal.fire("Error", "No se pudo cargar tu perfil", "error");
- } finally {
- setIsLoading(false);
- }
- };
- fetchProfile();
- }, []);
+   if (profile) {
+     setFormData({
+       nombres: profile.nombres,
+       apellidos: profile.apellidos,
+       especialidad: profile.especialidad || "",
+       biografia: profile.biografia || "",
+       aniosExperiencia: profile.aniosExperiencia || 0,
+       numeroColegiatura: profile.numeroColegiatura || "",
+       fotoPerfilUrl: profile.fotoPerfilUrl || "",
+       mpAccessToken: profile.mpAccessToken || "",
+       mpPublicKey: profile.mpPublicKey || ""
+     });
+   }
+ }, [profile]);
 
  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
  const { name, value } = e.target;
@@ -78,31 +69,31 @@ export const VetConfiguracionPage = () => {
  };
 
  const handleSave = async (e: React.FormEvent) => {
- e.preventDefault();
+   e.preventDefault();
 
- const result = vetProfileSchema.safeParse(formData);
- if (!result.success) {
- const firstError = Object.values(result.error.flatten().fieldErrors)[0]?.[0];
- Swal.fire("Error de validación", firstError || "Corrige los errores del formulario", "error");
- return;
- }
+   const result = vetProfileSchema.safeParse(formData);
+   if (!result.success) {
+     const firstError = Object.values(result.error.flatten().fieldErrors)[0]?.[0];
+     Swal.fire("Error de validación", firstError || "Corrige los errores del formulario", "error");
+     return;
+   }
 
- setIsSaving(true);
- try {
- const updatedProfile = await vetService.updateProfile(formData);
- setProfile(updatedProfile);
- Swal.fire({
- icon: "success",
- title: "Perfil Actualizado",
- text: "Tus cambios se han guardado correctamente.",
- timer: 2000,
- showConfirmButton: false,
- });
- } catch (error: any) {
- Swal.fire("Error", error.response?.data?.message || "No se pudo actualizar el perfil", "error");
- } finally {
- setIsSaving(false);
- }
+   setIsSaving(true);
+   try {
+     await vetService.updateProfile(formData);
+     queryClient.invalidateQueries({ queryKey: ["vet-profile"] });
+     Swal.fire({
+       icon: "success",
+       title: "Perfil Actualizado",
+       text: "Tus cambios se han guardado correctamente.",
+       timer: 2000,
+       showConfirmButton: false,
+     });
+   } catch (error: any) {
+     Swal.fire("Error", error.response?.data?.message || "No se pudo actualizar el perfil", "error");
+   } finally {
+     setIsSaving(false);
+   }
  };
 
  const handleLogoutAll = async () => {

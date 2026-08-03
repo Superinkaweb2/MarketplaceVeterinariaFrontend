@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../features/auth/context/useAuth";
 import { UserDropdown } from "../UserDropdown";
 import { useClientPointsDashboard } from "../../features/dashboard/gamification/hooks/useGamification";
@@ -7,6 +7,7 @@ import { Gift, Menu, X } from "lucide-react";
 
 export const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isAuthenticated, role } = useAuth();
   const isCliente = role === "CLIENTE";
   const { data: pointsData } = useClientPointsDashboard(isAuthenticated && isCliente);
@@ -26,6 +27,7 @@ export const Header = () => {
 
   const navItems = [
     { name: "Inicio", path: "/" },
+    { name: "Marketplace", path: "/marketplace" },
     { name: "Para Dueños", path: "/#duenos" },
     { name: "Veterinarios", path: "/#veterinarios" },
     { name: "Negocios", path: "/#negocios" },
@@ -34,11 +36,14 @@ export const Header = () => {
 
   const handleNavClick = (path: string) => {
     if (path.startsWith("/#")) {
+      const sectionId = path.replace("/#","");
       if (location.pathname !== "/") {
-        window.location.href = path;
+        navigate("/");
+        setTimeout(() => {
+          document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
       } else {
-        const el = document.getElementById(path.replace("/#", ""));
-        el?.scrollIntoView({ behavior: "smooth" });
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
       }
     }
   };

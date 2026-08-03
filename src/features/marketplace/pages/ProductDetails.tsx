@@ -5,6 +5,7 @@ import { useAuth } from "../../auth/context/AuthContext";
 import { PostularAdopcionModal } from "../../dashboard/shared/adopciones/components/PostularAdopcionModal";
 import { AgendarCitaModal } from "../../dashboard/shared/appointments/AgendarCitaModal";
 import { useProductDetails } from "../hooks/useProductDetails";
+import { ArrowLeft, ShoppingCart, Calendar, PawPrint, Store, ChevronRight, Package, Truck } from "lucide-react";
 import type { Product } from "../types/marketplace";
 
 export const ProductDetails = () => {
@@ -26,8 +27,8 @@ export const ProductDetails = () => {
 
     return (
         <main className="container mx-auto px-4 py-8 lg:py-12 bg-slate-50 min-h-screen">
-            <Link to="/marketplace" className="inline-flex items-center text-slate-500 hover:text-blue-600 mb-6 transition-colors font-medium">
-                <span className="material-symbols-outlined mr-2">arrow_back</span>
+            <Link to="/marketplace" className="inline-flex items-center gap-2 text-slate-500 hover:text-primary mb-6 transition-colors font-medium text-sm">
+                <ArrowLeft size={16} />
                 Volver al Marketplace
             </Link>
 
@@ -39,7 +40,12 @@ export const ProductDetails = () => {
                     {!isAdoption && <ProductPrice product={product} />}
                     <ProductStock stock={product.stock} isAdoption={isAdoption} isService={isService} />
                     <ProductDescription descripcion={product.descripcion} />
-                    <SellerCard empresaNombre={product.empresaNombre} empresaTipoServicio={product.empresaTipoServicio} isAdoption={isAdoption} />
+                    <SellerCard
+                        empresaNombre={product.empresaNombre}
+                        empresaTipoServicio={product.empresaTipoServicio}
+                        empresaId={product.empresaId}
+                        isAdoption={isAdoption}
+                    />
 
                     <div className="mt-auto space-y-4">
                         {!isAdoption && !isService && (
@@ -58,7 +64,14 @@ export const ProductDetails = () => {
                 </section>
             </div>
 
-            {!isAdoption && <ProductTabs />}
+            {/* Resumen de compra */}
+            {!isAdoption && !isService && (
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <InfoCard icon={<Package size={20} />} title="Producto" text={`Stock disponible: ${product.stock} unidades`} />
+                    <InfoCard icon={<Truck size={20} />} title="Envío" text="Consultar con el vendedor" />
+                    <InfoCard icon={<Store size={20} />} title="Garantía" text="Con el vendedor" />
+                </div>
+            )}
 
             <PostularAdopcionModal
                 isOpen={isApplyModalOpen}
@@ -80,21 +93,36 @@ export const ProductDetails = () => {
 };
 
 const ProductGallery = ({ imagenes, nombre }: { imagenes?: string[], nombre: string }) => {
-    const [mainImage, setMainImage] = useState(imagenes?.[0] || "https://via.placeholder.com/600");
+    const [mainImage, setMainImage] = useState(imagenes?.[0] || "");
 
     return (
         <section className="lg:w-1/2 space-y-4">
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 aspect-square flex items-center justify-center p-8 relative group">
-                <img alt={nombre} className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105" src={mainImage} />
+            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 aspect-square flex items-center justify-center relative group">
+                {mainImage ? (
+                    <img
+                        alt={nombre}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        src={mainImage}
+                    />
+                ) : (
+                    <div className="flex flex-col items-center text-slate-300">
+                        <Package size={48} strokeWidth={1.5} />
+                        <span className="text-xs font-medium mt-2">Sin imagen</span>
+                    </div>
+                )}
             </div>
 
             {imagenes && imagenes.length > 1 && (
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-3 overflow-x-auto pb-2">
                     {imagenes.map((img, idx) => (
                         <button
                             key={idx}
                             onClick={() => setMainImage(img)}
-                            className={`w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 transition-all border-2 ${mainImage === img ? 'border-blue-600 ring-2 ring-blue-100' : 'border-slate-200 hover:border-blue-400'}`}
+                            className={`w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 transition-all border-2 ${
+                                mainImage === img
+                                    ? 'border-primary ring-2 ring-primary/20'
+                                    : 'border-slate-200 hover:border-slate-300'
+                            }`}
                         >
                             <img alt={`${nombre} ${idx + 1}`} className="w-full h-full object-cover" src={img} />
                         </button>
@@ -107,13 +135,12 @@ const ProductGallery = ({ imagenes, nombre }: { imagenes?: string[], nombre: str
 
 const ProductHeader = ({ product }: { product: Product }) => (
     <>
-        <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+        <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full uppercase tracking-wider">
                 {product.categoriaNombre}
             </span>
-            <span className="text-xs text-slate-400">SKU: {product.id}</span>
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4 leading-tight">
             {product.nombre}
         </h1>
     </>
@@ -124,17 +151,17 @@ const ProductPrice = ({ product }: { product: Product }) => {
     const discountPercent = hasDiscount ? Math.round(((product.precio - product.precioActual) / product.precio) * 100) : 0;
 
     return (
-        <div className="flex items-end gap-3 mb-6">
-            <span className="text-3xl font-bold text-blue-600">
-                S/. {product.precioActual.toFixed(2)}
+        <div className="flex items-end gap-3 mb-5">
+            <span className="text-3xl font-bold text-slate-900">
+                S/ {product.precioActual.toFixed(2)}
             </span>
             {hasDiscount && (
                 <>
-                    <span className="text-lg text-slate-400 line-through mb-1 font-medium">
-                        S/. {product.precio.toFixed(2)}
+                    <span className="text-base text-slate-400 line-through mb-1">
+                        S/ {product.precio.toFixed(2)}
                     </span>
-                    <span className="ml-2 bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">
-                        -{discountPercent}% OFF
+                    <span className="bg-red-50 text-red-600 text-xs font-bold px-2.5 py-1 rounded-full">
+                        -{discountPercent}%
                     </span>
                 </>
             )}
@@ -149,65 +176,80 @@ const ProductStock = ({ stock, isAdoption, isService }: { stock: number, isAdopt
     const isOutOfStock = stock === 0;
 
     return (
-        <div className="flex items-center gap-2 mb-6">
-            <div className={`h-2 w-2 rounded-full ${isOutOfStock ? 'bg-red-500' : isLowStock ? 'bg-orange-500' : 'bg-green-500'}`}></div>
-            <span className={`text-sm font-medium ${isOutOfStock ? 'text-red-600' : isLowStock ? 'text-orange-600' : 'text-slate-600'}`}>
-                {isOutOfStock ? 'Agotado' : isLowStock ? `¡Solo quedan ${stock} unidades!` : `En Stock (${stock} disponibles)`}
+        <div className="flex items-center gap-2 mb-5">
+            <div className={`h-2 w-2 rounded-full ${isOutOfStock ? 'bg-red-500' : isLowStock ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+            <span className={`text-sm font-medium ${isOutOfStock ? 'text-red-600' : isLowStock ? 'text-amber-600' : 'text-slate-600'}`}>
+                {isOutOfStock
+                    ? 'Agotado'
+                    : isLowStock
+                        ? `Solo quedan ${stock} unidades`
+                        : `En stock (${stock} disponibles)`
+                }
             </span>
         </div>
     );
 };
 
 const ProductDescription = ({ descripcion }: { descripcion?: string }) => (
-    <div className="mb-8 border-t border-slate-100 pt-6">
-        <h3 className="text-sm font-bold text-slate-900 mb-2">Descripción</h3>
-        <p className="text-slate-600 leading-relaxed text-sm whitespace-pre-wrap">
-            {descripcion || "No hay descripción disponible para este producto."}
+    <div className="mb-6">
+        <h3 className="text-sm font-bold text-slate-900 mb-2">Descripcion</h3>
+        <p className="text-slate-500 leading-relaxed text-sm">
+            {descripcion || "Sin descripcion disponible."}
         </p>
     </div>
 );
 
-const SellerCard = ({ empresaNombre, empresaTipoServicio, isAdoption }: { empresaNombre: string, empresaTipoServicio?: string, isAdoption: boolean }) => {
+const SellerCard = ({ empresaNombre, empresaTipoServicio, empresaId, isAdoption }: {
+    empresaNombre: string, empresaTipoServicio?: string, empresaId: number, isAdoption: boolean
+}) => {
     const initials = empresaNombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
     return (
-        <div className="bg-slate-50 rounded-2xl p-4 mb-8 flex items-center gap-4 border border-slate-100">
-            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-slate-500 font-bold border border-slate-200 shadow-sm">
-                {initials}
+        <Link
+            to={`/marketplace/company/${empresaId}`}
+            className="block bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-100 hover:border-slate-200 hover:bg-white transition-all group"
+        >
+            <div className="flex items-center gap-4">
+                <div className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-slate-500 font-bold border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow">
+                    {initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                        {isAdoption ? "Publicado por" : "Vendido por"}
+                    </p>
+                    <p className="text-sm font-bold text-slate-700 truncate">{empresaNombre}</p>
+                    {empresaTipoServicio && (
+                        <p className="text-[10px] text-slate-400 uppercase">{empresaTipoServicio}</p>
+                    )}
+                </div>
+                <ChevronRight size={16} className="text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition-all" />
             </div>
-            <div>
-                <p className="text-xs text-slate-400 uppercase font-bold tracking-tighter">
-                    {isAdoption ? "Publicado por" : "Vendido por"}
-                </p>
-                <p className="text-sm font-bold text-slate-700">{empresaNombre}</p>
-                {empresaTipoServicio && (
-                    <p className="text-[10px] text-slate-500 uppercase">{empresaTipoServicio}</p>
-                )}
-            </div>
-        </div>
+        </Link>
     );
 };
 
-const ProductQuantitySelector = ({ quantity, setQuantity, stock }: { quantity: number, setQuantity: (q: number | ((prev: number) => number)) => void, stock: number }) => (
+const ProductQuantitySelector = ({ quantity, setQuantity, stock }: {
+    quantity: number, setQuantity: (q: number | ((prev: number) => number)) => void, stock: number
+}) => (
     <div className="flex items-center gap-4">
         <label className="text-sm font-medium text-slate-700" htmlFor="quantity">Cantidad</label>
-        <div className="flex items-center border border-slate-200 rounded-2xl bg-white">
+        <div className="flex items-center border border-slate-200 rounded-xl bg-white">
             <button
                 onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                className="p-3 px-5 hover:bg-slate-50 text-slate-600 rounded-l-2xl font-bold transition-colors"
+                className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 text-slate-600 rounded-l-xl transition-colors font-bold"
             >
-                −
+                -
             </button>
             <input
                 id="quantity"
                 type="number"
                 value={quantity}
                 readOnly
-                className="w-12 border-none text-center text-sm focus:ring-0 bg-transparent text-slate-900 font-bold"
+                className="w-12 border-none text-center text-sm bg-transparent text-slate-900 font-bold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
             <button
                 onClick={() => setQuantity(prev => Math.min(stock, prev + 1))}
-                className="p-3 px-5 hover:bg-slate-50 text-slate-600 rounded-r-2xl font-bold transition-colors"
+                className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 text-slate-600 rounded-r-xl transition-colors font-bold"
             >
                 +
             </button>
@@ -228,8 +270,12 @@ const ActionButtons = ({ product, quantity, onOpenAdoptionModal, onOpenCitaModal
 
     if (isAdoption) {
         return (
-            <button onClick={onOpenAdoptionModal} className="w-full bg-orange-500 hover:opacity-90 text-white font-bold py-4 rounded-2xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
-                <span className="material-symbols-outlined">pets</span> Solicitar Adopción
+            <button
+                onClick={onOpenAdoptionModal}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-orange-500/20 active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+                <PawPrint size={20} />
+                Solicitar Adopcion
             </button>
         );
     }
@@ -240,55 +286,58 @@ const ActionButtons = ({ product, quantity, onOpenAdoptionModal, onOpenCitaModal
             onOpenCitaModal();
         };
         return (
-            <button onClick={handleReservar} className="w-full bg-purple-600 text-white hover:opacity-90 font-bold py-4 rounded-2xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
-                <span className="material-symbols-outlined">event_available</span>
+            <button
+                onClick={handleReservar}
+                className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-2xl transition-all shadow-md shadow-primary/20 active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+                <Calendar size={20} />
                 Reservar Cita
             </button>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button onClick={() => addToCart(product, quantity)} className="bg-blue-600 hover:opacity-90 text-white font-bold py-4 rounded-2xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
-                <span className="material-symbols-outlined">add_shopping_cart</span> Al carrito
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <button
+                onClick={() => addToCart(product, quantity)}
+                className="bg-white border-2 border-slate-200 hover:border-primary hover:text-primary text-slate-700 font-bold py-4 rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+                <ShoppingCart size={20} />
+                Agregar al carrito
             </button>
-            <button onClick={() => { addToCart(product, quantity); navigate('/marketplace/checkout'); }} className="bg-slate-900 hover:opacity-90 text-white font-bold py-4 rounded-2xl transition-all shadow-md active:scale-95">
-                Comprar Ahora
+            <button
+                onClick={() => { addToCart(product, quantity); navigate('/marketplace/checkout'); }}
+                className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl transition-all shadow-md active:scale-[0.98]"
+            >
+                Comprar ahora
             </button>
         </div>
     );
 };
 
-const ProductTabs = () => (
-    <section className="mt-16 pt-8 border-t border-slate-100">
-        <div className="flex space-x-8 border-b border-slate-100 mb-8 overflow-x-auto scrollbar-hide">
-            <button className="pb-4 border-b-2 border-blue-600 text-sm font-bold text-slate-900 whitespace-nowrap">Especificaciones</button>
-            <button className="pb-4 border-b-2 border-transparent text-sm font-medium text-slate-400 hover:text-slate-600 whitespace-nowrap">Envíos y Devoluciones</button>
+const InfoCard = ({ icon, title, text }: { icon: React.ReactNode, title: string, text: string }) => (
+    <div className="bg-white rounded-2xl p-5 border border-slate-100 flex items-start gap-4">
+        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
+            {icon}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-sm max-w-4xl">
-            <div className="flex justify-between py-2 border-b border-slate-50">
-                <span className="text-slate-500">Disponibilidad</span>
-                <span className="font-medium text-slate-900">Envío a domicilio</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-slate-50">
-                <span className="text-slate-500">Garantía</span>
-                <span className="font-medium text-slate-900">Con el vendedor</span>
-            </div>
+        <div>
+            <p className="text-sm font-bold text-slate-900">{title}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{text}</p>
         </div>
-    </section>
+    </div>
 );
 
 const ProductNotFound = () => (
     <div className="w-full max-w-7xl mx-auto px-4 py-20 text-center">
         <h2 className="text-2xl font-bold text-slate-900 mb-4">Producto no encontrado</h2>
-        <Link to="/marketplace" className="text-blue-600 font-medium hover:underline">Volver al Marketplace</Link>
+        <Link to="/marketplace" className="text-primary font-medium hover:underline">Volver al Marketplace</Link>
     </div>
 );
 
 const LoadingSpinner = () => (
     <div className="w-full max-w-7xl mx-auto px-4 py-20 flex justify-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
-            <div className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+            <div className="w-12 h-12 rounded-full border-4 border-slate-200 border-t-primary animate-spin" />
             <p className="text-slate-500">Cargando detalles...</p>
         </div>
     </div>

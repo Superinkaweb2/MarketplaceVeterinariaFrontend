@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect, useCallback, useRef } from "react";
+import { createContext, useState, useContext, useEffect, useCallback } from "react";
 import type { ReactNode } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { api } from "../../../shared/http/api";
@@ -10,6 +10,8 @@ const STORAGE_KEYS = {
     TOKEN: "token",
     USER_ROLE: "userRole",
     EMPRESA_ID: "empresaId",
+    VETERINARIO_ID: "veterinarioId",
+    CLIENTE_ID: "clienteId",
     USER_NOMBRE: "userNombre",
     USER_ID: "userId",
 } as const;
@@ -18,6 +20,8 @@ const AUTH_STORAGE_KEYS = [
     STORAGE_KEYS.TOKEN,
     STORAGE_KEYS.USER_ROLE,
     STORAGE_KEYS.EMPRESA_ID,
+    STORAGE_KEYS.VETERINARIO_ID,
+    STORAGE_KEYS.CLIENTE_ID,
     STORAGE_KEYS.USER_NOMBRE,
     STORAGE_KEYS.PERFIL_COMPLETO,
     STORAGE_KEYS.USER_ID,
@@ -43,12 +47,17 @@ export interface AuthContextType {
     role: string | null;
     userId: number | null;
     empresaId: number | null;
+    veterinarioId: number | null;
+    clienteId: number | null;
     nombre: string | null;
     perfilCompleto: boolean;
     login: () => void;
     logout: () => void;
     setPerfilCompleto: (value: boolean) => void;
     setRole: (role: string) => void;
+    setEmpresaId: (id: number) => void;
+    setVeterinarioId: (id: number) => void;
+    setClienteId: (id: number) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -80,6 +89,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const stored = localStorage.getItem(STORAGE_KEYS.EMPRESA_ID);
         return stored ? Number(stored) : null;
     });
+    const [veterinarioId, setVeterinarioId] = useState<number | null>(() => {
+        const stored = localStorage.getItem(STORAGE_KEYS.VETERINARIO_ID);
+        return stored ? Number(stored) : null;
+    });
+    const [clienteId, setClienteId] = useState<number | null>(() => {
+        const stored = localStorage.getItem(STORAGE_KEYS.CLIENTE_ID);
+        return stored ? Number(stored) : null;
+    });
     const [nombre, setNombre] = useState<string | null>(
         localStorage.getItem(STORAGE_KEYS.USER_NOMBRE)
     );
@@ -91,9 +108,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return stored ? Number(stored) : null;
     });
 
-    const syncRef = useRef(false);
+    // syncComplete: si no hay rol en localStorage, el usuario no está logueado
+    // y no hay nada que sincronizar → iniciar en true para no mostrar spinner.
+    const [syncComplete, setSyncComplete] = useState(() => {
+        return !localStorage.getItem(STORAGE_KEYS.USER_ROLE);
+    });
 
-    // ── 1. Leer claims de Auth0 INMEDIATAMENTE (no bloquea UI) ──────────
+    // ── 1. Leer claims de Auth0 INMEDIATAMENTE ─────────────────────────────
     useEffect(() => {
         if (!isAuthenticated || !user) return;
 
@@ -111,23 +132,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [isAuthenticated, user]);
 
-    // ── 2. Sync con backend en background (NO bloquea la UI) ────────────
-    // localStorage "userRole" es la fuente de verdad:
-    //   - Si es null → usuario nuevo, necesita elegir rol → NO sync
-    //   - Si tiene valor → usuario existente → sync con backend
+    // ── 2. Sync con backend ────────────────────────────────────────────────
     useEffect(() => {
-        if (!isAuthenticated || !user || syncRef.current) return;
+        if (!isAuthenticated || !user) return;
 
         const storedRole = localStorage.getItem(STORAGE_KEYS.USER_ROLE);
 
         if (!storedRole) {
             localStorage.setItem(STORAGE_KEYS.PERFIL_COMPLETO, "false");
             setPerfilCompletoState(false);
-            syncRef.current = true;
+            setSyncComplete(true);
             return;
         }
-
-        syncRef.current = true;
 
         const syncWithBackend = async () => {
             try {
@@ -154,12 +170,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     setPerfilCompletoState(false);
                 }
 
-                if (localStorage.getItem(STORAGE_KEYS.PERFIL_COMPLETO) !== "true") {
+                const hasEntityId =
+                    (backendRole === "CLIENTE" && localStorage.getItem(STORAGE_KEYS.CLIENTE_ID)) ||
+                    (backendRole === "EMPRESA" && localStorage.getItem(STORAGE_KEYS.EMPRESA_ID)) ||
+                    (backendRole === "VETERINARIO" && localStorage.getItem(STORAGE_KEYS.VETERINARIO_ID));
+                const perfilIncompleto = localStorage.getItem(STORAGE_KEYS.PERFIL_COMPLETO) !== "true";
+
+                if (!hasEntityId || perfilIncompleto) {
                     try {
-                        if (backendRole === "CLIENTE") await api.get("/clients/me", config);
-                        else if (backendRole === "EMPRESA") await api.get("/companies/me", config);
-                        else if (backendRole === "VETERINARIO") await api.get("/veterinarians/me", config);
-                        else if (backendRole === "REPARTIDOR") await api.get("/repartidores/me", config);
+                        if (backendRole === "CLIENTE") {
+                            const res = await api.get("/clients/me", config);
+                            const id = res.data.data?.id;
+                            if (id) {
+                                localStorage.setItem(STORAGE_KEYS.CLIENTE_ID, String(id));
+                                setClienteId(id);
+                            }
+                        } else if (backendRole === "EMPRESA") {
+                            const res = await api.get("/companies/me", config);
+                            const id = res.data.data?.id;
+                            if (id) {
+                                localStorage.setItem(STORAGE_KEYS.EMPRESA_ID, String(id));
+                                setEmpresaId(id);
+                            }
+                        } else if (backendRole === "VETERINARIO") {
+                            const res = await api.get("/veterinarians/me", config);
+                            const id = res.data.data?.idVeterinario;
+                            if (id) {
+                                localStorage.setItem(STORAGE_KEYS.VETERINARIO_ID, String(id));
+                                setVeterinarioId(id);
+                            }
+                        } else if (backendRole === "REPARTIDOR") {
+                            await api.get("/repartidores/me", config);
+                        }
 
                         localStorage.setItem(STORAGE_KEYS.PERFIL_COMPLETO, "true");
                         setPerfilCompletoState(true);
@@ -172,6 +214,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 }
             } catch (error) {
                 console.error("Error sincronizando con el backend:", error);
+            } finally {
+                setSyncComplete(true);
             }
         };
 
@@ -210,7 +254,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, [loginWithRedirect]);
 
     const logout = useCallback(() => {
-        syncRef.current = false;
+        setSyncComplete(false);
         clearAuthStorage();
         auth0Logout({ logoutParams: { returnTo: window.location.origin } });
     }, [auth0Logout]);
@@ -225,12 +269,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setRoleState(newRole);
     }, []);
 
-    // ── Loading state (solo Auth0 init, NO el sync) ─────────────────────
+    const setEmpresaIdSafe = useCallback((id: number) => {
+        localStorage.setItem(STORAGE_KEYS.EMPRESA_ID, String(id));
+        setEmpresaId(id);
+    }, []);
+
+    const setVeterinarioIdSafe = useCallback((id: number) => {
+        localStorage.setItem(STORAGE_KEYS.VETERINARIO_ID, String(id));
+        setVeterinarioId(id);
+    }, []);
+
+    const setClienteIdSafe = useCallback((id: number) => {
+        localStorage.setItem(STORAGE_KEYS.CLIENTE_ID, String(id));
+        setClienteId(id);
+    }, []);
+
+    // ── Loading states ──────────────────────────────────────────────────
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen gap-4">
                 <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
                 <p className="text-slate-500 animate-pulse font-medium">Validando sesión...</p>
+            </div>
+        );
+    }
+
+    if (!syncComplete) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-slate-500 animate-pulse font-medium">Sincronizando...</p>
             </div>
         );
     }
@@ -243,12 +311,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 role,
                 userId,
                 empresaId,
+                veterinarioId,
+                clienteId,
                 nombre,
                 perfilCompleto,
                 login,
                 logout,
                 setPerfilCompleto,
                 setRole,
+                setEmpresaId: setEmpresaIdSafe,
+                setVeterinarioId: setVeterinarioIdSafe,
+                setClienteId: setClienteIdSafe,
             }}
         >
             {children}

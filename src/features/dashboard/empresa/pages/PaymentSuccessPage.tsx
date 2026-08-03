@@ -27,7 +27,9 @@ export const PaymentSuccessPage = () => {
             setSyncing(false);
             return;
         }
-        api.post(`/subscriptions/sync-payment?paymentId=${paymentId}`)
+        api.get(`/payments/sync`, {
+            params: { payment_id: paymentId, external_reference: searchParams.get('external_reference') || '' }
+        })
             .then(() => setSyncing(false))
             .catch((err) => {
                 setSyncing(false);
@@ -88,7 +90,7 @@ export const PaymentSuccessPage = () => {
 
                 <div className="flex flex-col gap-3">
                     <Button
-                        onClick={() => navigate('/portal/empresa/dashboard')}
+                        onClick={() => navigate('/portal/empresa')}
                         className="w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
                     >
                         <LayoutDashboard size={18} />

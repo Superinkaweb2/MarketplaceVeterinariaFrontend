@@ -109,11 +109,16 @@ export const Footer = () => {
           <div>
             <h4 className="font-bold text-text-primary text-sm mb-4">Plataforma</h4>
             <ul className="space-y-2.5">
-              {["Para Dueños", "Software Veterinario", "Marketplace B2B", "Precios"].map((item) => (
-                <li key={item}>
-                  <a className="text-text-secondary text-sm hover:text-primary transition-colors" href="#">
-                    {item}
-                  </a>
+              {[
+                { name: "Para Dueños", to: "/portal/cliente/mascotas" },
+                { name: "Software Veterinario", to: "/portal/veterinario/citas" },
+                { name: "Marketplace B2B", to: "/marketplace" },
+                { name: "Precios", to: "/portal/empresa/suscripcion" },
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link className="text-text-secondary text-sm hover:text-primary transition-colors" to={item.to}>
+                    {item.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -122,11 +127,16 @@ export const Footer = () => {
           <div>
             <h4 className="font-bold text-text-primary text-sm mb-4">Empresa</h4>
             <ul className="space-y-2.5">
-              {["Sobre Nosotros", "Blog", "Carreras", "Contacto"].map((item) => (
-                <li key={item}>
-                  <a className="text-text-secondary text-sm hover:text-primary transition-colors" href="#">
-                    {item}
-                  </a>
+              {[
+                { name: "Sobre Nosotros", to: "/sobre-nosotros" },
+                { name: "Blog", to: "/blog" },
+                { name: "Carreras", to: "/empleos" },
+                { name: "Contacto", to: "/contacto" },
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link className="text-text-secondary text-sm hover:text-primary transition-colors" to={item.to}>
+                    {item.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -135,18 +145,30 @@ export const Footer = () => {
           <div>
             <h4 className="font-bold text-text-primary text-sm mb-4">Legal</h4>
             <ul className="space-y-2.5">
-              {[
-                { name: "Privacidad", to: "/privacidad" },
-                { name: "Términos de Servicio", to: "/terminos" },
-                { name: "Política de Cookies", to: "/cookies" },
-                { name: "Libro de Reclamaciones", to: "/libro-reclamaciones" },
-              ].map((item) => (
-                <li key={item.name}>
-                  <Link className="text-text-secondary text-sm hover:text-primary transition-colors" to={item.to}>
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link className="text-text-secondary text-sm hover:text-primary transition-colors" to="/privacidad">
+                  Politicas de privacidad
+                </Link>
+              </li>
+              <li>
+                <Link className="text-text-secondary text-sm hover:text-primary transition-colors" to="/terminos">
+                  Termino y condiciones
+                </Link>
+              </li>
+              <li>
+                <Link className="text-text-secondary text-sm hover:text-primary transition-colors" to="/devoluciones">
+                  Devoluciones y Reembolsos
+                </Link>
+              </li>
+              <li className="pt-1">
+                <Link to="/libro-reclamaciones" className="inline-block">
+                  <img
+                    src="/libro-reclamacion.webp"
+                    alt="Libro de Reclamaciones"
+                    className="h-20 w-auto rounded hover:opacity-80 transition-opacity"
+                  />
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

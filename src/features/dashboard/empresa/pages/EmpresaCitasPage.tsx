@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { Calendar, Clock, Check, X, Loader2, Info } from "lucide-react";
+import { useState } from "react";
+import { Calendar, Clock, Check, X, Loader2, Info, Plus } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { appointmentService } from "../../shared/appointments/appointmentService";
-import type { CitaResponse } from "../../shared/appointments/appointmentService";
-import { api } from "../../../../shared/http/api";
-import type { ApiResponse } from "../../../../shared/types/api";
+import { useAuth } from "../../../auth/context/AuthContext";
+import { CrearCitaEmpresaModal } from "../components/CrearCitaEmpresaModal";
 import Swal from "sweetalert2";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -16,28 +16,24 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export const EmpresaCitasPage = () => {
-    const [citas, setCitas] = useState<CitaResponse[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const { empresaId } = useAuth();
+    const queryClient = useQueryClient();
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useEffect(() => {
-        const load = async () => {
-            try {
-                const { data: companyData } = await api.get<ApiResponse<{ id: number }>>("/companies/me");
-                const id = companyData?.data?.id;
-                if (!id || isNaN(id)) {
-                    console.warn("Company ID not found in response:", companyData);
-                    return;
-                }
-                const data = await appointmentService.getCitasByEmpresa(id);
-                setCitas(data);
-            } catch (err) {
-                console.error("Error fetching company appointments:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        load();
-    }, []);
+    const { data: citas = [], isLoading, error } = useQuery({
+        queryKey: ["empresa-citas", empresaId],
+        queryFn: () => appointmentService.getCitasByEmpresa(empresaId!),
+        enabled: !!empresaId,
+        staleTime: 1 * 60 * 1000,
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: ({ citaId, nuevoEstado }: { citaId: number; nuevoEstado: string }) =>
+            appointmentService.updateStatus(citaId, nuevoEstado),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["empresa-citas"] });
+        },
+    });
 
     const handleUpdateStatus = async (citaId: number, nuevoEstado: string) => {
         const labels: Record<string, string> = {
@@ -54,28 +50,48 @@ export const EmpresaCitasPage = () => {
         });
         if (!result.isConfirmed) return;
         try {
-            await appointmentService.updateStatus(citaId, nuevoEstado);
-            setCitas(prev => prev.map(c => c.id === citaId ? { ...c, estado: nuevoEstado as any } : c));
+            await updateMutation.mutateAsync({ citaId, nuevoEstado });
             Swal.fire({ icon: "success", title: "Estado actualizado", timer: 1500, showConfirmButton: false });
         } catch {
             Swal.fire({ icon: "error", title: "Error", text: "No se pudo actualizar el estado." });
         }
     };
 
+    const errorMsg = !empresaId
+        ? "No se pudo identificar tu empresa. Completa tu perfil de empresa primero."
+        : error?.message || "Error al cargar las citas. Intenta de nuevo.";
+
     return (
         <div className="p-6 max-w-5xl mx-auto">
-            <div className="mb-8">
-                <h1 className="text-3xl font-black text-slate-900 mb-2 flex items-center gap-3">
-                    <Calendar className="text-teal-500" size={32} />
-                    Gestión de Citas
-                </h1>
-                <p className="text-slate-500">Revisa y gestiona todas las citas solicitadas a tu empresa.</p>
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-black text-slate-900 mb-2 flex items-center gap-3">
+                        <Calendar className="text-teal-500" size={32} />
+                        Gestión de Citas
+                    </h1>
+                    <p className="text-slate-500">Revisa y gestiona todas las citas solicitadas a tu empresa.</p>
+                </div>
+                {empresaId && (
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="h-10 px-5 rounded-xl bg-teal-500 hover:bg-teal-600 text-white text-sm font-semibold transition-colors flex items-center gap-2 shrink-0"
+                    >
+                        <Plus size={18} />
+                        Nueva Cita
+                    </button>
+                )}
             </div>
 
             {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20">
                     <Loader2 className="w-12 h-12 text-teal-500 animate-spin mb-4" />
                     <p className="text-slate-400">Cargando citas...</p>
+                </div>
+            ) : error || !empresaId ? (
+                <div className="text-center py-20 bg-white rounded-3xl border border-red-200">
+                    <Info size={48} className="text-red-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-red-700">Error</h3>
+                    <p className="text-sm text-red-500 mt-2 max-w-xs mx-auto">{errorMsg}</p>
                 </div>
             ) : citas.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
@@ -159,6 +175,11 @@ export const EmpresaCitasPage = () => {
                     ))}
                 </div>
             )}
+            <CrearCitaEmpresaModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={() => setIsModalOpen(false)}
+            />
         </div>
     );
 };

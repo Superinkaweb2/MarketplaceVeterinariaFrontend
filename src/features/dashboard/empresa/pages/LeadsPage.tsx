@@ -7,10 +7,9 @@ import Swal from "sweetalert2";
 
 const ESTADO_COLORS: Record<string, string> = {
  NUEVO: "bg-blue-100 text-blue-700",
- EN_PROCESO: "bg-yellow-100 text-yellow-700",
- CONTACTADO: "bg-purple-100 text-purple-700",
+ EN_CONTACTO: "bg-yellow-100 text-yellow-700",
  CONVERTIDO: "bg-green-100 text-green-700",
- CERRADO: "bg-slate-100 text-slate-500",
+ PERDIDO: "bg-slate-100 text-slate-500",
 };
 
 export const LeadsPage = () => {
@@ -34,22 +33,21 @@ export const LeadsPage = () => {
   }
  };
 
+ const nextStatus: Record<string, string> = {
+  NUEVO: "EN_CONTACTO",
+  EN_CONTACTO: "CONVERTIDO",
+ };
+
  const handleUpdateStatus = async (leadId: number, newStatus: string) => {
   try {
    await leadService.updateLeadStatus(leadId, newStatus);
    setLeads((prev) =>
     prev.map((l) => (l.id === leadId ? { ...l, estado: newStatus as Lead["estado"] } : l))
    );
-   Swal.fire("Actualizado", `Lead marcado como ${newStatus}`, "success");
+   Swal.fire("Actualizado", `Lead marcado como ${newStatus.replace(/_/g, " ").toLowerCase()}`, "success");
   } catch (error) {
    Swal.fire("Error", "No se pudo actualizar el lead", "error");
   }
- };
-
- const nextStatus: Record<string, string> = {
-  NUEVO: "EN_PROCESO",
-  EN_PROCESO: "CONTACTADO",
-  CONTACTADO: "CONVERTIDO",
  };
 
  return (
@@ -116,12 +114,12 @@ export const LeadsPage = () => {
          <div className="flex gap-2 pt-2">
           {nextStatus[lead.estado] && (
            <Button onClick={() => handleUpdateStatus(lead.id, nextStatus[lead.estado])} className="text-sm px-3 py-1.5">
-            Marcar como {nextStatus[lead.estado].replace("_", " ").toLowerCase()}
+            Marcar como {nextStatus[lead.estado].replace(/_/g, " ").toLowerCase()}
            </Button>
           )}
-          {lead.estado !== "CERRADO" && (
-           <Button variant="outline" onClick={() => handleUpdateStatus(lead.id, "CERRADO")} className="text-sm px-3 py-1.5 text-red-600 border-red-200">
-            Cerrar
+          {lead.estado !== "PERDIDO" && (
+           <Button variant="outline" onClick={() => handleUpdateStatus(lead.id, "PERDIDO")} className="text-sm px-3 py-1.5 text-red-600 border-red-200">
+            Marcar como perdido
            </Button>
           )}
          </div>

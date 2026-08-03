@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
     Plus,
     Search,
@@ -12,8 +12,10 @@ import {
     Home,
     RefreshCw,
 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "../../../../components/ui/Button";
 import { serviceService } from "../services/serviceService";
+import { subscriptionService } from "../../shared/subscriptions/services/subscriptionService";
 import type { Service, ModalidadServicio } from "../../../catalog/types/service.types";
 import { ServiceFormModal } from "../components/ServiceFormModal";
 import Swal from "sweetalert2";
@@ -41,33 +43,55 @@ const ModalidadBadge = ({ modalidad }: { modalidad: ModalidadServicio }) => {
 /* ── Page Component ──────────────────────────────────────── */
 
 export const ServiciosPage = () => {
-    const [services, setServices] = useState<Service[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingService, setEditingService] = useState<Service | null>(null);
+    const queryClient = useQueryClient();
 
-    /* ── Data Fetching ─────────────────────────────────────── */
-
-    const fetchServices = async () => {
-        setIsLoading(true);
-        try {
+    const { data: services = [], isLoading, error } = useQuery({
+        queryKey: ["empresa-servicios"],
+        queryFn: async () => {
             const data = await serviceService.getMyServices(0, 50);
-            setServices(data.content);
-        } catch (error) {
-            console.error("Error fetching services:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            return data.content;
+        },
+        staleTime: 2 * 60 * 1000,
+    });
 
-    useEffect(() => {
-        fetchServices();
-    }, []);
+    const deleteMutation = useMutation({
+        mutationFn: (id: number) => serviceService.deleteService(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["empresa-servicios"] });
+        },
+    });
 
     /* ── Actions ───────────────────────────────────────────── */
 
-    const handleOpenCreate = () => {
+    const handleOpenCreate = async () => {
+        try {
+            const freshUsage = await subscriptionService.getUsageMetrics();
+            if (freshUsage.maxServices > 0 && freshUsage.currentServices >= freshUsage.maxServices) {
+                Swal.fire({
+                    title: "Límite de servicios alcanzado",
+                    html: `
+                        <div class="text-left space-y-3">
+                            <p class="text-slate-600">Tu plan actual permite <strong>${freshUsage.maxServices} servicio${freshUsage.maxServices !== 1 ? 's' : ''}</strong> y ya tienes <strong>${freshUsage.currentServices}</strong> creados.</p>
+                            <p class="text-slate-500 text-sm">Actualiza tu plan para agregar más servicios.</p>
+                        </div>
+                    `,
+                    icon: "info",
+                    showCancelButton: true,
+                    confirmButtonText: "Ver planes",
+                    cancelButtonText: "Cerrar",
+                    confirmButtonColor: "#fe5c3c",
+                    iconColor: "#3b82f6",
+                }).then((result) => {
+                    if (result.isConfirmed) window.location.href = "/empresa/suscripcion";
+                });
+                return;
+            }
+        } catch (e) {
+            console.error("Error checking subscription limits:", e);
+        }
         setEditingService(null);
         setIsModalOpen(true);
     };
@@ -91,8 +115,7 @@ export const ServiciosPage = () => {
 
         if (result.isConfirmed) {
             try {
-                await serviceService.deleteService(id);
-                setServices((prev) => prev.filter((s) => s.id !== id));
+                await deleteMutation.mutateAsync(id);
                 Swal.fire("Desactivado", "El servicio ha sido desactivado.", "success");
             } catch {
                 Swal.fire("Error", "No se pudo desactivar el servicio.", "error");
@@ -170,8 +193,25 @@ export const ServiciosPage = () => {
                                             <td colSpan={6} className="px-6 py-4 h-16 bg-slate-50/30" />
                                         </tr>
                                     ))
-                                    : filteredServices.length === 0
+                                    : error
                                         ? (
+                                            <tr>
+                                                <td colSpan={6} className="px-6 py-16 text-center">
+                                                    <div className="flex flex-col items-center justify-center max-w-sm mx-auto">
+                                                        <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                                                            <span className="text-2xl">!</span>
+                                                        </div>
+                                                        <h3 className="text-lg font-semibold text-red-700 mb-1">Error al cargar</h3>
+                                                        <p className="text-sm text-red-500 text-center mb-4">{error?.message || "Error desconocido"}</p>
+                                                        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["empresa-servicios"] })} variant="outline" className="gap-2 rounded-lg">
+                                                            Reintentar
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )
+                                        : filteredServices.length === 0
+                                            ? (
                                             <tr>
                                                 <td colSpan={6} className="px-6 py-16 text-center">
                                                     <div className="flex flex-col items-center justify-center max-w-sm mx-auto">
@@ -270,8 +310,21 @@ export const ServiciosPage = () => {
                                     </div>
                                 </div>
                             ))
-                            : filteredServices.length === 0
+                            : error
                                 ? (
+                                    <div className="py-12 px-6 rounded-2xl text-center bg-white border border-red-200">
+                                        <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <span className="text-2xl">!</span>
+                                        </div>
+                                        <p className="text-red-700 font-semibold mb-2">Error al cargar</p>
+                                        <p className="text-sm text-red-500 mb-4">{error?.message || "Error desconocido"}</p>
+                                        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["empresa-servicios"] })} variant="outline" className="gap-2 rounded-lg">
+                                            Reintentar
+                                        </Button>
+                                    </div>
+                                )
+                                : filteredServices.length === 0
+                                    ? (
                                     <div className="py-12 px-6 rounded-2xl text-center">
                                         <Stethoscope size={40} className="mx-auto mb-3 text-slate-300" />
                                         <p className="text-slate-500 font-medium">No se encontraron servicios.</p>
@@ -345,7 +398,7 @@ export const ServiciosPage = () => {
             <ServiceFormModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSuccess={fetchServices}
+                onSuccess={() => queryClient.invalidateQueries({ queryKey: ["empresa-servicios"] })}
                 service={editingService}
             />
         </div>

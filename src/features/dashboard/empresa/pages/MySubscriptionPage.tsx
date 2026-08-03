@@ -30,7 +30,7 @@ export const MySubscriptionPage = () => {
 
     const isPaidPlan = mySub && mySub.plan.precioMensual > 0;
     const currentPrice = mySub?.plan.precioMensual ?? 0;
-    const maxPrice = Math.max(...plans.map(p => p.precioMensual));
+    const maxPrice = plans.length > 0 ? Math.max(...plans.map(p => p.precioMensual)) : 0;
     const isMaxPlan = currentPrice >= maxPrice;
     const upgradePlans = plans.filter(p => p.precioMensual > currentPrice);
 
@@ -85,7 +85,7 @@ export const MySubscriptionPage = () => {
 
         if (result.isConfirmed) {
             try {
-                await subscriptionService.updatePlan(freePlan.id);
+                await subscriptionService.cancelSubscription();
                 Swal.fire({ icon: 'success', title: 'Suscripción cancelada', timer: 2000, showConfirmButton: false });
                 fetchSubscriptionData();
             } catch (err: any) {
@@ -234,11 +234,19 @@ export const MySubscriptionPage = () => {
                                     )}
                                 </div>
                                 <div className="space-y-3 mb-8 flex-1 text-sm">
-                                    <FeatureItem text={mySub.plan.limiteMascotas === 0 ? 'Mascotas Ilimitadas' : `Hasta ${mySub.plan.limiteMascotas} mascotas`} />
-                                    <FeatureItem text={mySub.plan.limiteProductos === 0 ? 'Productos Ilimitados' : `Hasta ${mySub.plan.limiteProductos} productos`} />
-                                    <FeatureItem text="Gestión de Citas" />
-                                    {(mySub.plan.nombre.toLowerCase().includes('pro') || mySub.plan.nombre.toLowerCase().includes('premium')) && <FeatureItem text="Reportes Avanzados" />}
-                                    {mySub.plan.nombre.toLowerCase().includes('premium') && <FeatureItem text="Soporte VIP 24/7" />}
+                                    <FeatureItem text={mySub.plan.limiteMascotas <= 0 ? 'Mascotas Ilimitadas' : `Hasta ${mySub.plan.limiteMascotas} mascotas`} />
+                                    <FeatureItem text={mySub.plan.limiteProductos <= 0 ? 'Productos Ilimitados' : `Hasta ${mySub.plan.limiteProductos} productos`} />
+                                    <FeatureItem text={mySub.plan.limiteServicios <= 0 ? 'Servicios Ilimitados' : `Hasta ${mySub.plan.limiteServicios} servicios`} />
+                                    <FeatureItem text="Gestión de citas" />
+                                    <FeatureItem text="Catálogo de servicios" />
+                                    <FeatureItem text={mySub.plan.limiteRecordatorios === -1 ? 'Recordatorios ilimitados' : mySub.plan.limiteRecordatorios > 0 ? `${mySub.plan.limiteRecordatorios} recordatorios/mes` : 'Sin recordatorios'} />
+                                    <FeatureItem text={mySub.plan.limiteIaUso === 0 ? 'Sin asistente IA' : `${mySub.plan.limiteIaUso} consultas IA/mes`} />
+                                    {mySub.plan.nombre.toLowerCase().includes('starter') && <FeatureItem text="Multi-veterinarios" />}
+                                    {mySub.plan.nombre.toLowerCase().includes('starter') && <FeatureItem text="Analytics completo" />}
+                                    {mySub.plan.nombre.toLowerCase().includes('starter') && <FeatureItem text="Delivery propio integrado" />}
+                                    {mySub.plan.nombre.toLowerCase().includes('pro') && <FeatureItem text="Lead visibility ilimitada" />}
+                                    {mySub.plan.nombre.toLowerCase().includes('pro') && <FeatureItem text="IA avanzada" />}
+                                    {mySub.plan.nombre.toLowerCase().includes('pro') && <FeatureItem text="Finanzas y multi-sucursal" />}
                                 </div>
                                 <Button disabled className="w-full py-4 rounded-xl font-bold text-sm bg-slate-50 border-slate-200 text-slate-400">
                                     Plan Actual
@@ -256,11 +264,18 @@ export const MySubscriptionPage = () => {
                                     <span className="text-xs text-slate-400 font-bold uppercase">/mes</span>
                                 </div>
                                 <div className="space-y-3 mb-8 flex-1 text-sm">
-                                    <FeatureItem text={plan.limiteMascotas === 0 ? 'Mascotas Ilimitadas' : `Hasta ${plan.limiteMascotas} mascotas`} />
-                                    <FeatureItem text={plan.limiteProductos === 0 ? 'Productos Ilimitados' : `Hasta ${plan.limiteProductos} productos`} />
-                                    <FeatureItem text="Gestión de Citas" />
-                                    {(plan.nombre.toLowerCase().includes('pro') || plan.nombre.toLowerCase().includes('premium')) && <FeatureItem text="Reportes Avanzados" />}
-                                    {plan.nombre.toLowerCase().includes('premium') && <FeatureItem text="Soporte VIP 24/7" />}
+                                    <FeatureItem text={plan.limiteMascotas <= 0 ? 'Mascotas Ilimitadas' : `Hasta ${plan.limiteMascotas} mascotas`} />
+                                    <FeatureItem text={plan.limiteProductos <= 0 ? 'Productos Ilimitados' : `Hasta ${plan.limiteProductos} productos`} />
+                                    <FeatureItem text={plan.limiteServicios <= 0 ? 'Servicios Ilimitados' : `Hasta ${plan.limiteServicios} servicios`} />
+                                    <FeatureItem text="Gestión de citas" />
+                                    <FeatureItem text={plan.limiteRecordatorios === -1 ? 'Recordatorios ilimitados' : plan.limiteRecordatorios > 0 ? `${plan.limiteRecordatorios} recordatorios/mes` : 'Sin recordatorios'} />
+                                    <FeatureItem text={plan.limiteIaUso === 0 ? 'Sin asistente IA' : `${plan.limiteIaUso} consultas IA/mes`} />
+                                    {plan.nombre.toLowerCase().includes('starter') && <FeatureItem text="Multi-veterinarios" />}
+                                    {plan.nombre.toLowerCase().includes('starter') && <FeatureItem text="Analytics completo" />}
+                                    {plan.nombre.toLowerCase().includes('starter') && <FeatureItem text="Delivery propio integrado" />}
+                                    {plan.nombre.toLowerCase().includes('pro') && <FeatureItem text="Lead visibility ilimitada" />}
+                                    {plan.nombre.toLowerCase().includes('pro') && <FeatureItem text="IA avanzada" />}
+                                    {plan.nombre.toLowerCase().includes('pro') && <FeatureItem text="Finanzas y multi-sucursal" />}
                                 </div>
                                 <Button onClick={() => handleUpgrade(plan)} className="w-full py-4 rounded-xl font-bold text-sm">
                                     Subir a {plan.nombre}

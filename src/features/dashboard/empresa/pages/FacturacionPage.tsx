@@ -16,12 +16,14 @@ import {
 import { Button } from "../../../../components/ui/Button";
 import { billingService } from "../services/billingService";
 import { deliveryEmpresaService } from "../services/deliveryEmpresaService";
-import type { OrderSummary, EstadoOrden } from "../types/billing.types";
+import type { OrderSummary } from "../types/billing.types";
 import Swal from "sweetalert2";
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
-const ESTADO_CONFIG: Record<EstadoOrden, { label: string; color: string }> = {
+const DEFAULT_ESTADO = { label: "Desconocido", color: "bg-slate-100 text-slate-500" };
+
+const ESTADO_CONFIG: Record<string, { label: string; color: string }> = {
     PENDIENTE: { label: "Pendiente", color: "bg-amber-100 text-amber-700" },
     PAGADO: { label: "Pagado", color: "bg-emerald-100 text-emerald-700" },
     ENVIADO: { label: "Enviado", color: "bg-blue-100 text-blue-700" },
@@ -36,20 +38,23 @@ const ESTADO_CONFIG: Record<EstadoOrden, { label: string; color: string }> = {
 export const FacturacionPage = () => {
     const [orders, setOrders] = useState<OrderSummary[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
     const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [searchStatus, setSearchStatus] = useState<string>("");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
 
     const fetchOrders = async () => {
         setIsLoading(true);
+        setError(null);
         try {
             const data = await billingService.getMyOrders(page, 15, {
                 estado: searchStatus || undefined,
-                codigoOrden: searchTerm || undefined,
+                codigoOrden: debouncedSearch || undefined,
                 startDate: startDate || undefined,
                 endDate: endDate || undefined
             });
@@ -58,31 +63,28 @@ export const FacturacionPage = () => {
             setTotalElements(data.totalElements);
         } catch (error: any) {
             console.error("Error fetching orders:", error);
-            // Mock data temporal solo si da 404 (endpoint no encontrado)
-            if (error.response?.status === 404 || error.response?.status === 403) {
-                setOrders([
-                    { id: 1, codigoOrden: "ORD-2026-0001", clienteNombre: "Juan Pérez", subtotal: 100, costoEnvio: 10, comisionPlataforma: 5, descuento: 0, total: 110, estado: "PAGADO", metodoPago: "visa", createdAt: new Date().toISOString() },
-                    { id: 2, codigoOrden: "ORD-2026-0002", clienteNombre: "María López", subtotal: 250, costoEnvio: 0, comisionPlataforma: 12.5, descuento: 0, total: 250, estado: "PENDIENTE", createdAt: new Date(Date.now() - 86400000).toISOString() },
-                ]);
-            }
+            setError(error.response?.data?.message || "Error al cargar las órdenes. Intenta de nuevo.");
         } finally {
             setIsLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchOrders();
-    }, [page, searchStatus, startDate, endDate]);
-
-    // Búsqueda con debounce o manual (por ahora manual al presionar Enter o perder foco, o simplemente al cambiar si no es muy pesado)
-    // Para el searchTerm (código de orden), mejor usar un botón de buscar o useEffect con delay
+    // Debounce search term
     useEffect(() => {
         const timer = setTimeout(() => {
-            setPage(0);
-            fetchOrders();
+            setDebouncedSearch(searchTerm);
         }, 500);
         return () => clearTimeout(timer);
     }, [searchTerm]);
+
+    // Single fetch effect — resets page when filters change
+    useEffect(() => {
+        setPage(0);
+    }, [debouncedSearch, searchStatus, startDate, endDate]);
+
+    useEffect(() => {
+        fetchOrders();
+    }, [page, searchStatus, startDate, endDate, debouncedSearch]);
 
     const handleResetDelivery = async (orderId: number) => {
         const result = await Swal.fire({
@@ -128,8 +130,8 @@ export const FacturacionPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 shrink-0">
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-semibold text-slate-500">Ventas Totales (Mes)</p>
-                        <h3 className="text-2xl font-bold text-slate-900 mt-1">S/ {orders.filter(o => o.estado === 'PAGADO').reduce((acc, curr) => acc + curr.total, 0).toFixed(2)}</h3>
+                        <p className="text-sm font-semibold text-slate-500">Total Órdenes</p>
+                        <h3 className="text-2xl font-bold text-slate-900 mt-1">{totalElements}</h3>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
                         <DollarSign size={24} className="text-emerald-500" />
@@ -236,6 +238,14 @@ export const FacturacionPage = () => {
                                             <td colSpan={6} className="px-6 py-4 h-16 bg-slate-50/50" />
                                         </tr>
                                     ))
+                                ) : error ? (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-16 text-center">
+                                            <Receipt size={32} className="mx-auto text-red-300 mb-3" />
+                                            <p className="text-red-500 font-medium">{error}</p>
+                                            <button onClick={fetchOrders} className="mt-3 text-sm text-primary hover:underline">Reintentar</button>
+                                        </td>
+                                    </tr>
                                 ) : filteredOrders.length === 0 ? (
                                     <tr>
                                         <td colSpan={6} className="px-6 py-16 text-center">
@@ -263,8 +273,8 @@ export const FacturacionPage = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-opacity-20 ${ESTADO_CONFIG[order.estado].color}`}>
-                                                    {ESTADO_CONFIG[order.estado].label}
+                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-opacity-20 ${(ESTADO_CONFIG[order.estado] || DEFAULT_ESTADO).color}`}>
+                                                    {(ESTADO_CONFIG[order.estado] || DEFAULT_ESTADO).label}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-right">
@@ -308,6 +318,11 @@ export const FacturacionPage = () => {
                             Array.from({ length: 3 }).map((_, i) => (
                                 <div key={i} className="h-24 bg-slate-50 rounded-2xl animate-pulse border border-slate-100" />
                             ))
+                        ) : error ? (
+                            <div className="py-12 text-center">
+                                <p className="text-red-500 font-medium">{error}</p>
+                                <button onClick={fetchOrders} className="mt-3 text-sm text-primary hover:underline">Reintentar</button>
+                            </div>
                         ) : filteredOrders.length === 0 ? (
                             <div className="py-12 text-center text-slate-500">No se encontraron órdenes.</div>
                         ) : (
@@ -318,8 +333,8 @@ export const FacturacionPage = () => {
                                             <p className="font-mono text-sm font-bold text-slate-900">{order.codigoOrden}</p>
                                             <p className="text-xs text-slate-500">{new Date(order.createdAt).toLocaleDateString()}</p>
                                         </div>
-                                        <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase ${ESTADO_CONFIG[order.estado].color}`}>
-                                            {ESTADO_CONFIG[order.estado].label}
+                                        <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase ${(ESTADO_CONFIG[order.estado] || DEFAULT_ESTADO).color}`}>
+                                            {(ESTADO_CONFIG[order.estado] || DEFAULT_ESTADO).label}
                                         </span>
                                     </div>
                                     <div>

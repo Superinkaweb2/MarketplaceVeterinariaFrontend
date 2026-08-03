@@ -183,22 +183,27 @@ export const EmpresaConfigPage = () => {
 
     const handleLogoutAll = async () => {
         const result = await Swal.fire({
-            title: "¿Cerrar sesión?",
-            text: "Se cerrará tu sesión actual.",
+            title: "¿Cerrar todas las sesiones?",
+            text: "Se cerrará tu sesión actual y todas las sesiones en otros dispositivos.",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, cerrar",
+            confirmButtonText: "Sí, cerrar todas",
             cancelButtonText: "Cancelar"
         });
 
         if (result.isConfirmed) {
+            try {
+                await authService.logoutAll();
+            } catch {
+                // Continue with local logout even if backend fails
+            }
             logout();
             Swal.fire({
                 icon: "success",
-                title: "Sesión cerrada",
-                text: "Has cerrado sesión exitosamente.",
+                title: "Sesiones cerradas",
+                text: "Has cerrado todas las sesiones exitosamente.",
                 timer: 2000,
                 showConfirmButton: false
             });

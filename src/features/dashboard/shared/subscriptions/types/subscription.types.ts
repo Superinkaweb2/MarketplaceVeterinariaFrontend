@@ -33,6 +33,9 @@ export interface SubscriptionUsage {
     currentProducts: number;
     maxProducts: number;
     productPercentage: number;
+    currentServices: number;
+    maxServices: number;
+    servicePercentage: number;
 }
 
 export interface PaymentPreference {
