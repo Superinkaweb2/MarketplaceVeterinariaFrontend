@@ -51,7 +51,7 @@ const STEPS = [
 ];
 
 export const EmpresaProfilePage = () => {
-  const { setPerfilCompleto } = useAuth();
+  const { setPerfilCompleto, setEmpresaId } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -151,7 +151,11 @@ export const EmpresaProfilePage = () => {
         tipoServicioOtro:
           data.tipoServicio === "OTRO" ? data.tipoServicioOtro : undefined,
       };
-      await profileService.createEmpresaProfile(finalData, logoFile || undefined, bannerFile || undefined);
+      const response = await profileService.createEmpresaProfile(finalData, logoFile || undefined, bannerFile || undefined);
+      const empresaId = response.data?.id;
+      if (empresaId) {
+        setEmpresaId(empresaId);
+      }
       setPerfilCompleto(true);
       Swal.fire({
         icon: "success",
@@ -183,7 +187,7 @@ export const EmpresaProfilePage = () => {
       currentStep={step}
       title="Activa tu empresa"
       subtitle="Configura el perfil de tu negocio en la plataforma"
-      onBack={step > 0 && step < 3 ? handleBack : undefined}
+      onBack={step > 0 ? handleBack : undefined}
       onNext={step < 3 ? handleNext : undefined}
       onSubmit={step === 3 ? handleSubmit(onSubmit) : undefined}
       isSubmitting={isSubmitting}

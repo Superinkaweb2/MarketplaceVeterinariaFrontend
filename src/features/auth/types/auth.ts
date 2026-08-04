@@ -86,5 +86,5 @@ export interface RepartidorProfileRequest {
   apellidos: string;
   telefono: string;
   tipoVehiculo: string;
-  placaVehiculo: string;
+  placaVehiculo?: string;
 }

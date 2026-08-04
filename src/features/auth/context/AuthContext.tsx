@@ -200,8 +200,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                             await api.get("/repartidores/me", config);
                         }
 
-                        localStorage.setItem(STORAGE_KEYS.PERFIL_COMPLETO, "true");
-                        setPerfilCompletoState(true);
+                        if (backendRole) {
+                            localStorage.setItem(STORAGE_KEYS.PERFIL_COMPLETO, "true");
+                            setPerfilCompletoState(true);
+                        }
                     } catch (error: any) {
                         if (error.response?.status === 404 || error.response?.status === 400) {
                             localStorage.setItem(STORAGE_KEYS.PERFIL_COMPLETO, "false");
