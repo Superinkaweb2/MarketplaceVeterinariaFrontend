@@ -134,14 +134,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // ── 2. Sync con backend ────────────────────────────────────────────────
     useEffect(() => {
-        if (!isAuthenticated || !user) return;
-
-        const storedRole = localStorage.getItem(STORAGE_KEYS.USER_ROLE);
-
-        if (!storedRole) {
-            localStorage.setItem(STORAGE_KEYS.PERFIL_COMPLETO, "false");
-            setPerfilCompletoState(false);
-            setSyncComplete(true);
+        if (!isAuthenticated || !user) {
+            // Si Auth0 terminó de cargar y no está autenticado, no hay nada que sincronizar
+            if (!isLoading) {
+                setSyncComplete(true);
+            }
             return;
         }
 
@@ -203,8 +200,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                             await api.get("/repartidores/me", config);
                         }
 
-                        localStorage.setItem(STORAGE_KEYS.PERFIL_COMPLETO, "true");
-                        setPerfilCompletoState(true);
+                        if (backendRole) {
+                            localStorage.setItem(STORAGE_KEYS.PERFIL_COMPLETO, "true");
+                            setPerfilCompletoState(true);
+                        }
                     } catch (error: any) {
                         if (error.response?.status === 404 || error.response?.status === 400) {
                             localStorage.setItem(STORAGE_KEYS.PERFIL_COMPLETO, "false");

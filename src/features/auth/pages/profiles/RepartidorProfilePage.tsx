@@ -17,12 +17,19 @@ const repartidorSchema = z.object({
     .min(6, "El teléfono debe tener al menos 6 dígitos")
     .regex(/^\d+$/, "Solo debe contener números"),
   tipoVehiculo: z.string().min(2, "Selecciona un tipo de vehículo"),
-  placaVehiculo: z.string().min(3, "La placa es requerida"),
+  placaVehiculo: z.string().optional(),
 });
+
+const REQUIEREN_PLACA = ["MOTO", "AUTO"];
 
 type RepartidorFormData = z.infer<typeof repartidorSchema>;
 
-const VEHICULOS = ["Motocicleta", "Bicicleta", "Automóvil", "A pie"];
+const VEHICULOS = [
+  { value: "MOTO", label: "Motocicleta" },
+  { value: "BICICLETA", label: "Bicicleta" },
+  { value: "AUTO", label: "Automóvil" },
+  { value: "A_PIE", label: "A pie" },
+];
 
 const STEPS = [
   { label: "Datos personales", icon: User },
@@ -45,10 +52,14 @@ export const RepartidorProfilePage = () => {
     register,
     handleSubmit,
     trigger,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<RepartidorFormData>({
     resolver: zodResolver(repartidorSchema),
   });
+
+  const tipoVehiculo = watch("tipoVehiculo");
 
   useEffect(() => {
     profileService
@@ -82,7 +93,12 @@ export const RepartidorProfilePage = () => {
     if (step === 0) {
       valid = await trigger(["nombres", "apellidos", "telefono"]);
     } else if (step === 1) {
-      valid = await trigger(["tipoVehiculo", "placaVehiculo"]);
+      if (REQUIEREN_PLACA.includes(tipoVehiculo)) {
+        valid = await trigger(["tipoVehiculo", "placaVehiculo"]);
+      } else {
+        setValue("placaVehiculo", "N/A");
+        valid = await trigger(["tipoVehiculo"]);
+      }
     }
     if (valid) setStep((s) => s + 1);
   };
@@ -124,7 +140,7 @@ export const RepartidorProfilePage = () => {
       currentStep={step}
       title="Únete como repartidor"
       subtitle="Configura tu cuenta para comenzar a recibir entregas"
-      onBack={step > 0 && step < 2 ? handleBack : undefined}
+      onBack={step > 0 ? handleBack : undefined}
       onNext={step < 2 ? handleNext : undefined}
       onSubmit={step === 2 ? handleSubmit(onSubmit) : undefined}
       isSubmitting={isSubmitting}
@@ -200,16 +216,16 @@ export const RepartidorProfilePage = () => {
               <div className="grid grid-cols-2 gap-2">
                 {VEHICULOS.map((v) => (
                   <label
-                    key={v}
+                    key={v.value}
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:border-[#1ea59c] transition-all has-[:checked]:border-[#1ea59c] has-[:checked]:bg-[#1ea59c]/5 has-[:checked]:text-[#1ea59c]"
                   >
                     <input
                       type="radio"
-                      value={v}
+                      value={v.value}
                       {...register("tipoVehiculo")}
                       className="w-4 h-4 text-[#1ea59c] focus:ring-[#1ea59c]"
                     />
-                    <span className="text-sm font-medium">{v}</span>
+                    <span className="text-sm font-medium">{v.label}</span>
                   </label>
                 ))}
               </div>
@@ -217,15 +233,29 @@ export const RepartidorProfilePage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Placa del Vehículo</label>
-              <div className="relative">
-                <Truck size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                Placa del Vehículo
+                {!REQUIEREN_PLACA.includes(tipoVehiculo) && tipoVehiculo && (
+                  <span className="text-slate-400 font-normal">(no aplica)</span>
+                )}
+              </label>
+              {REQUIEREN_PLACA.includes(tipoVehiculo) ? (
+                <div className="relative">
+                  <Truck size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    {...register("placaVehiculo")}
+                    placeholder="Ej: ABC-123"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+                  />
+                </div>
+              ) : (
                 <input
-                  {...register("placaVehiculo")}
-                  placeholder="Ej: ABC-123 o N/A"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-[#1ea59c]/20 focus:border-[#1ea59c] outline-none transition-all"
+                  type="text"
+                  disabled
+                  value="N/A"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm text-slate-400 cursor-not-allowed"
                 />
-              </div>
+              )}
               {errors.placaVehiculo && <p className="text-xs text-red-500 mt-1">{errors.placaVehiculo.message}</p>}
             </div>
 
