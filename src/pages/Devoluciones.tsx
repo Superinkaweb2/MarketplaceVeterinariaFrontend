@@ -4,9 +4,9 @@ export const Devoluciones = () => {
             <h1 className="text-3xl md:text-5xl font-bold mb-8 text-[#0d131b] border-b pb-4">Políticas de Devoluciones y Reembolsos</h1>
             <div className="prose max-w-none text-slate-600 space-y-6">
                 
-                <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">1. PRINCIPIO GENERAL DE LA INTERMEDIACIÓN</h2>
+                <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">1. PRINCIPIO GENERAL DE LA INTERMEDIACIÓN Y GARANTÍA DE PLATAFORMA</h2>
                 <p>
-                    El usuario reconoce que HUELLA360.COM actúa exclusivamente como una plataforma de intermediación tecnológica (marketplace). Por lo tanto, las políticas específicas de cambios, garantías y devoluciones de productos o la reprogramación de servicios son establecidas de manera directa por cada VENDEDOR (veterinaria, pet shop o comercio aliado). El COMPRADOR se obliga a revisar las condiciones particulares de devolución publicadas por el Vendedor en la ficha de cada producto antes de finalizar su compra.
+                    El usuario reconoce que HUELLA360.COM actúa como una plataforma de intermediación tecnológica (marketplace). Las condiciones particulares de cambios y garantías son ofrecidas directamente por cada VENDEDOR en la ficha de producto. Sin embargo, en resguardo del derecho de idoneidad del consumidor (Ley N° 29571), HUELLA360.COM garantiza la retención del pago en custodia (escrow) y gestionará el reembolso automático a favor del COMPRADOR si el VENDEDOR no entrega el producto, entrega un artículo defectuoso o incumple las condiciones de la compra.
                 </p>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">2. EXCLUSIÓN DE DEVOLUCIONES POR EQUIVOCACIÓN DEL COMPRADOR</h2>
@@ -24,14 +24,14 @@ export const Devoluciones = () => {
                     <li>En caso de que el VENDEDOR acepte excepcionalmente la devolución, el COMPRADOR asumirá de forma íntegra el 100% de los costos de traslado, delivery o envío logístico de retorno del producto.</li>
                 </ul>
 
-                <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">4. FACULTAD DEL VENDEDOR PARA SEÑALAR LA VIGENCIA DE DEVOLUCIONES</h2>
+                <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">4. AUTONOMÍA DEL VENDEDOR Y GARANTÍA LEGAL OBLIGATORIA</h2>
                 <p>
-                    Cada VENDEDOR tiene la libertad y autonomía de señalar expresamente en la descripción de sus productos si estos cuentan con derecho a devolución o no, así como los plazos y condiciones particulares para ejecutarlo (por ejemplo, por fallas de fábrica o empaques dañados en el traslado). Si el VENDEDOR no especifica una política propia en la ficha del producto, se aplicarán de forma supletoria los plazos mínimos estándar de la plataforma, que son de cuarenta y ocho (48) horas calendario desde la entrega para reportar cualquier inconveniente.
+                    Cada VENDEDOR podrá señalar condiciones o plazos extendidos de devolución en las fichas de sus productos. En ningún caso dichas condiciones privadas podrán restringir o anular la Garantía Legal de idoneidad establecida por el Código de Protección y Defensa del Consumidor del Perú. En ausencia de especificación en la ficha del producto, se aplicará el plazo estándar de la plataforma de cuarenta y ocho (48) horas calendario tras la entrega para reportar cualquier disconformidad en el servicio o producto.
                 </p>
 
-                <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">5. RESTRICCIÓN ABSOLUTA PARA PRODUCTOS EN OFERTA, PROMOCIÓN O LIQUIDACIÓN</h2>
+                <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">5. PRODUCTOS EN OFERTA, PROMOCIÓN O LIQUIDACIÓN</h2>
                 <p>
-                    Todo producto o servicio que sea adquirido bajo la modalidad de oferta, promoción especial, descuento de temporada, uso de cupones o liquidación de stock tiene la condición de "Venta Final". En consecuencia, no se admitirá ningún tipo de cambio, devolución ni reembolso sobre estos artículos, salvo que presenten un defecto técnico de fábrica insubsanable o se encuentre vencido al momento de la entrega, lo cual deberá ser reportado inmediatamente.
+                    Los productos adquiridos con descuento, cupones o bajo la modalidad de liquidación de stock no estarán sujetos a cambios ni devoluciones motivados por decisión personal, error o cambio de opinión del COMPRADOR. No obstante, se mantiene plenamente vigente la Garantía Legal en caso el producto presente defectos de fabricación, fallas de funcionamiento, empaques dañados que comprometan el contenido o se entregue con fecha de vencimiento expirada.
                 </p>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">6. RESTRICCIONES SANITARIAS Y DE BIOSEGURIDAD (RECORDATORIO OBLIGATORIO)</h2>
@@ -61,11 +61,14 @@ export const Devoluciones = () => {
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">9. CANALES Y PLAZOS PARA EL PROCESAMIENTO DE REEMBOLSOS</h2>
                 <p>
-                    Una vez que el VENDEDOR confirme la recepción del producto devuelto en sus almacenes y valide que cumple con las condiciones, o cuando la Empresa resuelva una disputa a favor del cliente en la Etapa de Mediación, el reembolso se procesará de la siguiente manera:
+                    Podrá enviar su solicitud de devolución y/o reembolso a través del correo hola@huella360.com.
+                </p>
+                <p>
+                    Una vez aprobada la devolución por el VENDEDOR o resuelta la disputa por soporte de la Plataforma a favor del usuario:
                 </p>
                 <ul className="list-disc pl-6 space-y-2">
-                    <li>Si el dinero aún se encuentra retenido en la pasarela de la plataforma (dentro de las 48 horas de custodia), la Empresa extornará el dinero al mismo medio de pago utilizado por el cliente.</li>
-                    <li>El tiempo de reflejo del dinero en la cuenta del COMPRADOR dependerá exclusivamente de la pasarela de pagos y de los plazos internos de la entidad bancaria del cliente (pudiendo tomar entre 3 y 15 días hábiles para tarjetas de débito, y hasta 30 días hábiles para tarjetas de crédito extornadas).</li>
+                    <li><strong>a) Cancelación Directa:</strong> Si los fondos continúan en el periodo de custodia (escrow) de la plataforma, se procesará la orden de extorno inmediata a la pasarela de pagos.</li>
+                    <li><strong>b) Plazos Bancarios:</strong> El tiempo de procesamiento dependerá de la pasarela y la entidad emisora del cliente (estimado de 3 a 15 días hábiles para extornos en tarjetas de débito/transferencias, y hasta 30 días hábiles o según el cierre de facturación para tarjetas de crédito).</li>
                 </ul>
             </div>
         </div>
