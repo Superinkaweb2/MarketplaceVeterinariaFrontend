@@ -11,10 +11,10 @@ export const Privacidad = () => {
                 </p>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">BANCOS DE DATOS REGISTRADOS</h2>
-                <p>Los datos personales recabados a través de la plataforma serán almacenados de forma segura en los bancos de datos de titularidad de la Empresa, los cuales se encuentran debidamente inscritos (o en proceso de inscripción) ante el Registro Nacional de Protección de Datos Personales:</p>
+                <p>Los datos personales recabados a través de la plataforma serán almacenados de forma segura en los bancos de datos de titularidad de la Empresa, los cuales se encuentran debidamente inscritos ante el Registro Nacional de Protección de Datos Personales del Ministerio de Justicia y Derechos Humanos de la República del Perú:</p>
                 <ul className="list-disc pl-6 space-y-2">
-                    <li><strong>Banco de Datos "Usuarios y Compradores":</strong> Diseñado para almacenar la información de los clientes de la plataforma.</li>
-                    <li><strong>Banco de Datos "Vendedores y Comercios":</strong> Diseñado para almacenar la información de las veterinarias y pet shops afiliados.</li>
+                    <li><strong>Banco de Datos "Usuarios y Compradores":</strong> [Código de Registro N° XXXXX].</li>
+                    <li><strong>Banco de Datos "Vendedores y Comercios":</strong> [Código de Registro N° XXXXX].</li>
                 </ul>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">DATOS PERSONALES QUE RECOPILAMOS</h2>
@@ -46,7 +46,7 @@ export const Privacidad = () => {
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">PLAZO DE CONSERVACIÓN DE LOS DATOS</h2>
                 <p>
-                    Los datos se conservarán mientras la relación comercial y la cuenta permanezcan activas. Una vez cancelada la cuenta, se procederá a eliminar o anonimizar los datos, salvo aquellos que deban conservarse por plazos legales obligatorios (ej. tributarios).
+                    Los datos personales se conservarán mientras se mantenga vigente la cuenta del usuario o la relación comercial con la Empresa. Tras la cancelación o baja de la cuenta, los datos serán conservados debidamente bloqueados durante un plazo máximo de diez (10) años, con la única finalidad de atender posibles responsabilidades legales, tributarias o requerimientos de autoridades competentes, procediéndose posteriormente a su supresión o anonimización definitiva.
                 </p>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">TRANSFERENCIA DE DATOS PERSONALES (DESTINATARIOS)</h2>
@@ -62,9 +62,9 @@ export const Privacidad = () => {
                     El usuario toma conocimiento y otorga su consentimiento de que los servidores que alojan la plataforma pertenecen a proveedores en la nube (AWS, Google Cloud, etc.) cuyas infraestructuras pueden estar ubicadas fuera del territorio peruano.
                 </p>
 
-                <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">AUDITORÍA LEGAL DE MENSAJERÍA INTERNA</h2>
+                <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">AUDITORÍA DE MENSAJERÍA INTERNA Y CONFIDENCIALIDAD</h2>
                 <p>
-                    En concordancia con los Términos y Condiciones, el usuario acepta expresamente que la Empresa pueda monitorear y revisar las conversaciones del chat interno con la única finalidad de auditar tratos por fuera del sistema (evasión de comisiones) o detectar conductas que atenten contra la seguridad y bienestar animal.
+                    En concordancia con los Términos y Condiciones, el usuario toma conocimiento de que la Empresa podrá emplear herramientas tecnológicas y filtros automatizados para el monitoreo de la mensajería interna. Dicho procesamiento automatizado tiene la única finalidad de detectar intentos de evasión de comisiones (desvío de pagos fuera del sistema), prevenir fraudes y reportar conductas que atenten contra la seguridad o bienestar animal. La Empresa garantiza que este procedimiento respeta la confidencialidad de las consultas clínicas o médicas veterinarias realizadas entre el Cliente y el Vendedor.
                 </p>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">MEDIDAS DE SEGURIDAD IMPLEMENTADAS</h2>
@@ -73,14 +73,15 @@ export const Privacidad = () => {
                 </p>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">EJERCICIO DE DERECHOS ARCO</h2>
-                <p>De conformidad con la normativa peruana, los usuarios tienen derecho a ejercer gratuitamente sus derechos de:</p>
+                <p>De conformidad con la normativa peruana, los usuarios tienen derecho a ejercer gratuitamente sus derechos de Acceso, Rectificación, Cancelación u Oposición (ARCO).</p>
+                <p>
+                    Para ejercer estos derechos, el usuario deberá remitir una solicitud formal dirigida al correo electrónico oficial [correo@huella360.com], adjuntando copia legible de su DNI o documento de identidad, e indicando el derecho específico que desea ejercer.
+                </p>
+                <p>La Empresa atenderá la solicitud dentro de los plazos legales establecidos en el Reglamento de la Ley N° 29733:</p>
                 <ul className="list-disc pl-6 space-y-2">
-                    <li><strong>Acceso:</strong> Conocer qué datos posee la Empresa y cómo se tratan.</li>
-                    <li><strong>Rectificación:</strong> Solicitar corrección de datos inexactos o incompletos.</li>
-                    <li><strong>Cancelación:</strong> Solicitar eliminación de datos cuando ya no sean necesarios.</li>
-                    <li><strong>Oposición:</strong> Negarse al tratamiento para finalidades específicas.</li>
+                    <li><strong>Respuesta a Solicitudes de Acceso:</strong> Máximo de veinte (20) días hábiles contados desde el día siguiente de presentada la solicitud.</li>
+                    <li><strong>Respuesta a Solicitudes de Rectificación, Cancelación u Oposición:</strong> Máximo de diez (10) días hábiles contados desde el día siguiente de presentada la solicitud.</li>
                 </ul>
-                <p>Para ejercer estos derechos, debe enviar una solicitud formal por escrito al correo de soporte oficial, adjuntando copia legible de su DNI.</p>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">MODIFICACIONES A LA POLÍTICA DE PRIVACIDAD</h2>
                 <p>

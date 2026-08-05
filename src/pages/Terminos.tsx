@@ -10,7 +10,7 @@ export const Terminos = () => {
                     Estos Términos y Condiciones (en adelante, los "T&C") regulan el acceso, registro, navegación y uso del Sitio, indistintamente del lugar del mundo en el que se realice el acceso. Cualquier suministro o provisión de Productos (alimentos, accesorios, fármacos) y/o Servicios (consultas médicas, baños, hospedajes) por parte del VENDEDOR estará sujeto a estos T&C y constituirá el acuerdo completo y exclusivo entre el Vendedor, el Cliente y la EMPRESA.
                 </p>
                 <p>
-                    Cualquier persona que desee acceder, suscribirse o usar el Sitio podrá hacerlo sujetándose estrictamente a estos T&C. La aceptación de los presentes T&C es un requisito indispensable, vinculante y obligatorio para realizar cualquier transacción en el Sitio. Si el Usuario no está de acuerdo con estas disposiciones, deberá abstenerse inmediatamente de utilizar la plataforma. LA EMPRESA se reserva el derecho de actualizar y/o modificar los presentes T&C en cualquier momento y sin previo aviso, operando los cambios para las transacciones que se efectúen a partir de su publicación en el Sitio.
+                    LA EMPRESA se reserva el derecho de modificar o actualizar los presentes T&C en cualquier momento. Dichas modificaciones serán notificadas a los Usuarios a través de la Plataforma o mediante correo electrónico con una anticipación mínima de cinco (5) días calendario antes de su entrada en vigencia. El uso continuado del Sitio tras la publicación de los T&C modificados constituirá la aceptación plena de los mismos. Si el Usuario no estuviera de acuerdo con las modificaciones, podrá cancelar su cuenta sin penalidad alguna.
                 </p>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">1. ACEPTACIÓN Y OBLIGATORIEDAD</h2>
@@ -52,6 +52,7 @@ export const Terminos = () => {
                     <li><strong>Requisitos Exclusivos para Servicios de Medicina Veterinaria:</strong> El requisito de contar con título profesional, colegiatura vigente y la condición de "Habilitado" por el Colegio Médico Veterinario del Perú (CMVP) es exigible única y exclusivamente para aquellos Vendedores que ofrezcan servicios de salud clínica, consultas médicas, cirugías, emisión de recetas, diagnósticos de enfermedades o cualquier actividad que constituya un acto médico veterinario.</li>
                     <li><strong>Exención para Servicios No Médicos y Comercio:</strong> Quedan totalmente exentos de presentar colegiatura o habilitación del CMVP aquellos Vendedores que se dediquen exclusivamente a la venta de productos (accesorios, juguetes, ropa), servicios de paseos, hospedajes, adiestramiento, o estética animal (baños y cortes de pelo), así como estudiantes de la carrera o personal técnico de apoyo, siempre que no realicen diagnósticos ni prescriban tratamientos médicos.</li>
                     <li><strong>Requisitos para Venta de Alimentos y Fármacos:</strong> Aquellos Vendedores que se dediquen a la comercialización y distribución de alimentos balanceados, medicamentos o insumos zoosanitarios, garantizan contar con las autorizaciones y registros sanitarios vigentes expedidos por el Servicio Nacional de Sanidad Agraria (SENASA) cuando la normativa sectorial así lo exija.</li>
+                    <li><strong>Compromiso de Bienestar Animal (Ley N° 30407):</strong> Todos los Vendedores que brinden servicios de alojamiento, transporte, adiestramiento, estética o atención médica, garantizan brindar un trato humanitario y condiciones aptas de salubridad y seguridad a las mascotas. Queda estrictamente prohibido el uso de la Plataforma para la comercialización de especies silvestres protegidas o peleas de animales. LA EMPRESA aplicará la suspensión inmediata y denunciará ante la Policía Nacional del Perú (PNP) o el Ministerio Público cualquier indicio de crueldad, negligencia grave o maltrato animal imputable a un Vendedor.</li>
                 </ul>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">5. REGISTRO DE USUARIOS, CREACIÓN DE CUENTA Y VALIDACIÓN</h2>
@@ -105,8 +106,13 @@ export const Terminos = () => {
                 </ol>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">10. SUSPENSIÓN, CANCELACIÓN Y PENALIDADES</h2>
+                <h3 className="text-xl font-semibold mt-6 mb-2 text-[#0d131b]">10.1. Causales de Suspensión</h3>
                 <p>
-                    La Empresa podrá suspender o cancelar cuentas que contravengan estos T&C. Si un Vendedor intenta evadir comisiones, su cuenta será cancelada inmediatamente, perdiendo el derecho a saldos acumulados a título de penalidad compensatoria.
+                    La Empresa podrá suspender o cancelar la cuenta de cualquier Usuario que incumpla los presentes T&C, proporcione información falsa, comercialice productos sin Registro Sanitario exigible o incurra en conductas prohibidas.
+                </p>
+                <h3 className="text-xl font-semibold mt-6 mb-2 text-[#0d131b]">10.2. Sanción por Circunvención (Desvío de Pagos)</h3>
+                <p>
+                    La detección de desvío de transacciones fuera de la Plataforma facultará a la Empresa a la cancelación inmediata de la cuenta del Vendedor y a la aplicación de una penalidad equivalente al valor de la comisión eludida más los gastos administrativos ocasionados. En ningún caso se confiscarán saldos de transacciones legítimamente completadas y entregadas con anterioridad, procediéndose a la liquidación final previa deducción de las penalidades aplicables.
                 </p>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">11. OBLIGACIONES TRIBUTARIAS</h2>
@@ -129,9 +135,9 @@ export const Terminos = () => {
                     Para medicamentos controlados, es obligatorio cargar copia digital legible de la receta. Al momento de la entrega, el Cliente debe exhibir la receta física original, de lo contrario no se entregará el producto.
                 </p>
 
-                <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">15. LIBRO DE RECLAMACIONES</h2>
+                <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">15. LIBRO DE RECLAMACIONES VIRTUAL</h2>
                 <p>
-                    Conforme al Código de Protección y Defensa del Consumidor, el Sitio dispone de un Libro de Reclamaciones Virtual en la página principal, cuyos reclamos se atenderán en el plazo legal de quince (15) días hábiles.
+                    En cumplimiento de lo dispuesto por el Código de Protección y Defensa del Consumidor (Ley N° 29571) y el D.S. 011-2011-PCM, el Sitio dispone de un Libro de Reclamaciones Virtual de fácil acceso en su página de inicio. La Empresa dará respuesta formal a los reclamos o quejas ingresados en un plazo máximo de quince (15) días hábiles, el cual podrá ser extendido por un periodo igual cuando la naturaleza del reclamo lo justifique, notificando dicha extensión al consumidor antes del vencimiento del plazo inicial.
                 </p>
 
                 <h2 className="text-2xl font-bold mt-8 mb-4 text-[#0d131b]">16. LEGISLACIÓN APLICABLE Y JURISDICCIÓN</h2>
