@@ -15,7 +15,8 @@ import {
     AlertCircle,
     Camera,
     Image as ImageIcon,
-    Lock
+    Lock,
+    Search
 } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { api } from "../../../../shared/http/api";
@@ -23,6 +24,7 @@ import { useAuth } from "../../../auth/context/useAuth";
 import { authService } from "../../../auth/services/authService";
 import Swal from "sweetalert2";
 import { MapPicker } from "../components/MapPicker";
+import { geocodeAddress } from "../../../../shared/utils/geocoding";
 
 const generalDataSchema = z.object({
     nombreComercial: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
@@ -53,6 +55,7 @@ export const EmpresaConfigPage = () => {
     const [activeTab, setActiveTab] = useState<"general" | "pago" | "seguridad">("general");
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isGeocoding, setIsGeocoding] = useState(false);
 
     // Image states
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -178,6 +181,29 @@ export const EmpresaConfigPage = () => {
             });
         } catch (error) {
             Swal.fire("Error", "No se pudo actualizar la configuración de pago.", "error");
+        }
+    };
+
+    const handleGeocodeAddress = async () => {
+        const address = watchGeneral("direccion");
+        if (!address || address.trim().length < 5) {
+            Swal.fire("Atención", "Escribe una dirección válida antes de buscarla en el mapa.", "warning");
+            return;
+        }
+
+        setIsGeocoding(true);
+        try {
+            const result = await geocodeAddress(address);
+            if (result) {
+                setGeneralValue("latitud", result.lat);
+                setGeneralValue("longitud", result.lng);
+            } else {
+                Swal.fire("Sin resultados", "No se encontró esa dirección. Ajusta el punto manualmente en el mapa.", "info");
+            }
+        } catch {
+            Swal.fire("Error", "No se pudo buscar la dirección. Intenta de nuevo o ubícala manualmente.", "error");
+        } finally {
+            setIsGeocoding(false);
         }
     };
 
@@ -481,13 +507,25 @@ export const EmpresaConfigPage = () => {
 
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-slate-700">Dirección Física</label>
-                                        <div className="relative group">
-                                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
-                                            <input
-                                                {...registerGeneral("direccion")}
-                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                                            />
+                                        <div className="flex gap-2">
+                                            <div className="relative group flex-1">
+                                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
+                                                <input
+                                                    {...registerGeneral("direccion")}
+                                                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={handleGeocodeAddress}
+                                                disabled={isGeocoding}
+                                                title="Buscar dirección en el mapa"
+                                                className="shrink-0 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 hover:text-primary hover:border-primary/40 transition-all disabled:opacity-50"
+                                            >
+                                                {isGeocoding ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
+                                            </button>
                                         </div>
+                                        <p className="text-[11px] text-slate-400">Escribe la dirección y presiona buscar para ubicarla automáticamente en el mapa. Puedes ajustar el punto manualmente después.</p>
                                         {errorsGeneral.direccion && <p className="text-xs text-red-500">{errorsGeneral.direccion.message}</p>}
                                     </div>
 

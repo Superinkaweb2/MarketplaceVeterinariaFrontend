@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
     Store,
@@ -9,7 +9,8 @@ import {
     Mail,
     Info,
     Navigation,
-    Gift
+    Gift,
+    ArrowLeft
 } from "lucide-react";
 import { marketplaceService } from "../services/marketplaceService";
 import { mapAdoptionToProduct, mapServiceToProduct } from "../utils/productAdapter";
@@ -38,6 +39,7 @@ type TabType = 'products' | 'services' | 'adoptions' | 'rewards';
 
 export const CompanyProfile = () => {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [company, setCompany] = useState<Company | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [services, setServices] = useState<Product[]>([]);
@@ -182,6 +184,14 @@ export const CompanyProfile = () => {
                 )}
                 {/* Subtle gradient overlay to ensure header legibility if moved up */}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+
+                <button
+                    onClick={() => navigate(-1)}
+                    className="absolute top-24 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm hover:bg-white text-slate-800 text-sm font-medium rounded-full shadow-sm transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Volver
+                </button>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
