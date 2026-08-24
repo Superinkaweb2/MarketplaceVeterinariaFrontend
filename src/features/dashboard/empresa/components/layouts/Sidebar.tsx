@@ -41,6 +41,7 @@ const NAV_SECTIONS = [
     items: [
       { icon: <Stethoscope size={18} />, label: "Servicios", to: "/portal/empresa/servicios" },
       { icon: <Package size={18} />, label: "Productos", to: "/portal/empresa/productos" },
+      { icon: <Users size={18} />, label: "Clientes (CRM)", to: "/portal/empresa/clientes" },
       { icon: <Users size={18} />, label: "Equipo", to: "/portal/empresa/equipo" },
     ],
   },

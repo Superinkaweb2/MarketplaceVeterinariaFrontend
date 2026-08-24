@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
-import { ChevronDown, Search, SlidersHorizontal, ChevronRight } from "lucide-react";
+import { ChevronDown, Search, SlidersHorizontal, ChevronRight, MapPin, LayoutGrid } from "lucide-react";
 import { ProductCard } from "../components/ProductCard";
+import { ServicesMap } from "../components/ServicesMap";
 import { marketplaceService } from "../services/marketplaceService";
 import { mapAdoptionToProduct, mapServiceToProduct } from "../utils/productAdapter";
+import { useUserLocation } from "../hooks/useUserLocation";
 import { Seo } from "../../../components/Seo";
-import type { Product, AdoptionResponse, ServiceResponse, MarketplaceFilters, Category } from "../types/marketplace";
+import type { Product, AdoptionResponse, ServiceResponse, MarketplaceFilters, Category, CompanyResponse } from "../types/marketplace";
 
 type SortOption = "newest" | "price-asc" | "price-desc" | "name";
 
@@ -32,6 +34,12 @@ export const Marketplace = () => {
   const [subcategories, setSubcategories] = useState<Map<number, Category[]>>(new Map());
   const [expandedCats, setExpandedCats] = useState<Set<number>>(new Set());
   const [loadingSubs, setLoadingSubs] = useState<Set<number>>(new Set());
+
+  const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
+  const [mapCompanies, setMapCompanies] = useState<CompanyResponse[]>([]);
+  const [loadingMap, setLoadingMap] = useState(false);
+
+  const { location: userLocation, error: locationError } = useUserLocation(viewMode === "map");
 
   useEffect(() => {
     marketplaceService
@@ -108,7 +116,39 @@ export const Marketplace = () => {
 
   const handleCategorySelect = (categoryId?: number) => {
     setFilters((prev) => ({ ...prev, category: categoryId, page: 0 }));
+    if (categoryId === -1) {
+      setViewMode("grid");
+    }
   };
+
+  useEffect(() => {
+    if (viewMode !== "map") return;
+
+    const empresaIds = Array.from(
+      new Set(
+        products
+          .filter((p) => p.itemType !== "adoption" && p.empresaId > 0)
+          .map((p) => p.empresaId)
+      )
+    );
+
+    if (empresaIds.length === 0) {
+      setMapCompanies([]);
+      return;
+    }
+
+    setLoadingMap(true);
+    Promise.all(
+      empresaIds.map((id) => marketplaceService.getCompanyById(id).catch(() => null))
+    )
+      .then((results) => {
+        const valid = results.filter(
+          (c): c is CompanyResponse => !!c && c.latitud != null && c.longitud != null
+        );
+        setMapCompanies(valid);
+      })
+      .finally(() => setLoadingMap(false));
+  }, [viewMode, products]);
 
   const toggleExpandCategory = useCallback(
     async (catId: number) => {
@@ -326,6 +366,30 @@ export const Marketplace = () => {
                   <span className="text-xs text-slate-500">
                     {!loading && `${totalElements} resultados`}
                   </span>
+
+                  {filters.category !== -1 && (
+                  <div className="flex items-center gap-1 bg-slate-100 rounded-md p-1">
+                    <button
+                      onClick={() => setViewMode("grid")}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                        viewMode === "grid" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      }`}
+                    >
+                      <LayoutGrid size={14} />
+                      Lista
+                    </button>
+                    <button
+                      onClick={() => setViewMode("map")}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                        viewMode === "map" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      }`}
+                    >
+                      <MapPin size={14} />
+                      Mapa
+                    </button>
+                  </div>
+                  )}
+
                   <div className="relative">
                     <button
                       onClick={() => setShowSortDropdown(!showSortDropdown)}
@@ -359,8 +423,27 @@ export const Marketplace = () => {
               </div>
             </div>
 
-            {/* Product Grid */}
-            {loading ? (
+            {/* Services Map */}
+            {viewMode === "map" ? (
+              <div>
+                {locationError && (
+                  <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 mb-3">
+                    {locationError} Mostrando clínicas sin centrar en tu ubicación.
+                  </p>
+                )}
+                {loadingMap ? (
+                  <div className="h-[500px] w-full rounded-md border border-slate-200 bg-white flex items-center justify-center">
+                    <p className="text-slate-400 text-sm animate-pulse">Cargando ubicaciones...</p>
+                  </div>
+                ) : mapCompanies.length > 0 ? (
+                  <ServicesMap companies={mapCompanies} userLocation={userLocation} />
+                ) : (
+                  <div className="py-16 text-center bg-white rounded-md border border-slate-200">
+                    <p className="text-slate-500 text-base">No hay ubicaciones disponibles para estos servicios.</p>
+                  </div>
+                )}
+              </div>
+            ) : loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="aspect-square bg-white rounded-md animate-pulse border border-slate-100" />

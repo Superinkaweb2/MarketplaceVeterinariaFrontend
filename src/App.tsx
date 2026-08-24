@@ -75,6 +75,7 @@ const ProductosPage = lazyPage(() => import("./features/dashboard/empresa/pages/
 const EquipoPage = lazyPage(() => import("./features/dashboard/empresa/pages/EquipoPage"), "EquipoPage");
 const MySubscriptionPage = lazyPage(() => import("./features/dashboard/empresa/pages/MySubscriptionPage"), "MySubscriptionPage");
 const FacturacionPage = lazyPage(() => import("./features/dashboard/empresa/pages/FacturacionPage"), "FacturacionPage");
+const ClientesPage = lazyPage(() => import("./features/dashboard/empresa/pages/ClientesPage"), "ClientesPage");
 const TalentoPage = lazyPage(() => import("./features/dashboard/empresa/pages/TalentoPage"), "TalentoPage");
 const EmpresaPacientesPage = lazyPage(() => import("./features/dashboard/empresa/pages/PacientesPage"), "PacientesPage");
 const EmpresaCitasPage = lazyPage(() => import("./features/dashboard/empresa/pages/EmpresaCitasPage"), "EmpresaCitasPage");
@@ -220,6 +221,7 @@ function App() {
                     <Route path="leads" element={<LeadsPage />} />
                     <Route path="suscripcion" element={<MySubscriptionPage />} />
                     <Route path="facturacion" element={<FacturacionPage />} />
+                    <Route path="clientes" element={<ClientesPage />} />
                     <Route path="adopciones" element={<AdopcionesPage />} />
                     <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
                     <Route path="configuracion" element={<EmpresaConfigPage />} />
