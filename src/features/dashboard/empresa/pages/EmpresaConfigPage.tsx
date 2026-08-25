@@ -16,7 +16,8 @@ import {
     Camera,
     Image as ImageIcon,
     Lock,
-    Search
+    Search,
+    Clock
 } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { api } from "../../../../shared/http/api";
@@ -25,6 +26,9 @@ import { authService } from "../../../auth/services/authService";
 import Swal from "sweetalert2";
 import { MapPicker } from "../components/MapPicker";
 import { geocodeAddress } from "../../../../shared/utils/geocoding";
+import { horarioService } from "../services/horarioService";
+import { DIAS_SEMANA } from "../types/horario.types";
+import type { HorarioAtencion, DiaSemana } from "../types/horario.types";
 
 const generalDataSchema = z.object({
     nombreComercial: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
@@ -52,10 +56,15 @@ type MercadoPagoValues = z.infer<typeof mercadopagoSchema>;
 
 export const EmpresaConfigPage = () => {
     const { logout } = useAuth();
-    const [activeTab, setActiveTab] = useState<"general" | "pago" | "seguridad">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "pago" | "seguridad" | "horarios">("general");
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isGeocoding, setIsGeocoding] = useState(false);
+
+    const [horarios, setHorarios] = useState<HorarioAtencion[]>([]);
+    const [isLoadingHorarios, setIsLoadingHorarios] = useState(false);
+    const [isSavingHorarios, setIsSavingHorarios] = useState(false);
+    const [horariosLoaded, setHorariosLoaded] = useState(false);
 
     // Image states
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -89,6 +98,65 @@ export const EmpresaConfigPage = () => {
     useEffect(() => {
         fetchCompanyData();
     }, []);
+
+    useEffect(() => {
+        if (activeTab === "horarios" && !horariosLoaded) {
+            fetchHorarios();
+        }
+    }, [activeTab, horariosLoaded]);
+
+    const buildDefaultHorarios = (existentes: HorarioAtencion[]): HorarioAtencion[] => {
+        return DIAS_SEMANA.map(({ value }) => {
+            const existente = existentes.find((h) => h.diaSemana === value);
+            return (
+                existente || {
+                    diaSemana: value,
+                    horaInicio: "09:00",
+                    horaFin: "18:00",
+                    capacidad: 1,
+                    activo: false,
+                }
+            );
+        });
+    };
+
+    const fetchHorarios = async () => {
+        setIsLoadingHorarios(true);
+        try {
+            const data = await horarioService.getHorarios();
+            setHorarios(buildDefaultHorarios(data));
+            setHorariosLoaded(true);
+        } catch (error) {
+            console.error("Error al cargar horarios de atención:", error);
+            setHorarios(buildDefaultHorarios([]));
+        } finally {
+            setIsLoadingHorarios(false);
+        }
+    };
+
+    const updateHorario = (dia: DiaSemana, campo: keyof HorarioAtencion, valor: string | number | boolean) => {
+        setHorarios((prev) =>
+            prev.map((h) => (h.diaSemana === dia ? { ...h, [campo]: valor } : h))
+        );
+    };
+
+    const handleGuardarHorarios = async () => {
+        setIsSavingHorarios(true);
+        try {
+            const data = await horarioService.guardarHorarios(horarios);
+            setHorarios(buildDefaultHorarios(data));
+            Swal.fire({
+                icon: "success",
+                title: "Horarios guardados",
+                timer: 1500,
+                showConfirmButton: false,
+            });
+        } catch (error: any) {
+            Swal.fire("Error", error.response?.data?.message || "No se pudieron guardar los horarios.", "error");
+        } finally {
+            setIsSavingHorarios(false);
+        }
+    };
 
     const fetchCompanyData = async () => {
         try {
@@ -346,6 +414,16 @@ export const EmpresaConfigPage = () => {
                     >
                         <Lock size={18} />
                         <span>Seguridad</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("horarios")}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "horarios"
+                            ? "bg-primary text-white shadow-lg shadow-primary/20"
+                            : "bg-white text-slate-600 border border-slate-100 hover:bg-slate-50"
+                            }`}
+                    >
+                        <Clock size={18} />
+                        <span>Horario de Atención</span>
                     </button>
                 </div>
 
@@ -610,6 +688,90 @@ export const EmpresaConfigPage = () => {
                                     </Button>
                                 </div>
                             </div>
+                        </div>
+                    ) : activeTab === "horarios" ? (
+                        <div className="p-6 md:p-8">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+                                    <Clock size={24} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-900">Horario de Atención</h2>
+                                    <p className="text-sm text-slate-500">Define qué días atiendes y cuántas citas simultáneas soportas por horario.</p>
+                                </div>
+                            </div>
+
+                            {isLoadingHorarios ? (
+                                <div className="flex items-center justify-center py-16">
+                                    <Loader2 className="animate-spin text-primary" size={28} />
+                                </div>
+                            ) : (
+                                <div className="space-y-8">
+                                    <div className="space-y-3">
+                                        {horarios.map((h) => {
+                                            const label = DIAS_SEMANA.find((d) => d.value === h.diaSemana)?.label || h.diaSemana;
+                                            return (
+                                                <div
+                                                    key={h.diaSemana}
+                                                    className={`grid grid-cols-1 sm:grid-cols-[auto_1fr_1fr_auto] items-center gap-3 p-4 rounded-2xl border transition-all ${h.activo ? "border-primary/20 bg-primary/5" : "border-slate-100 bg-slate-50"
+                                                        }`}
+                                                >
+                                                    <label className="flex items-center gap-2 min-w-[120px]">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={h.activo}
+                                                            onChange={(e) => updateHorario(h.diaSemana, "activo", e.target.checked)}
+                                                            className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary/20"
+                                                        />
+                                                        <span className="text-sm font-semibold text-slate-700">{label}</span>
+                                                    </label>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="time"
+                                                            value={h.horaInicio}
+                                                            disabled={!h.activo}
+                                                            onChange={(e) => updateHorario(h.diaSemana, "horaInicio", e.target.value)}
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:ring-2 focus:ring-primary/20 outline-none disabled:opacity-50 disabled:bg-slate-100"
+                                                        />
+                                                        <span className="text-slate-400 text-sm">a</span>
+                                                        <input
+                                                            type="time"
+                                                            value={h.horaFin}
+                                                            disabled={!h.activo}
+                                                            onChange={(e) => updateHorario(h.diaSemana, "horaFin", e.target.value)}
+                                                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:ring-2 focus:ring-primary/20 outline-none disabled:opacity-50 disabled:bg-slate-100"
+                                                        />
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs text-slate-500 whitespace-nowrap">Cupo simultáneo</span>
+                                                        <input
+                                                            type="number"
+                                                            min={1}
+                                                            value={h.capacidad}
+                                                            disabled={!h.activo}
+                                                            onChange={(e) => updateHorario(h.diaSemana, "capacidad", Math.max(1, Number(e.target.value)))}
+                                                            className="w-20 px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:ring-2 focus:ring-primary/20 outline-none disabled:opacity-50 disabled:bg-slate-100"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <div className="flex justify-end pt-2">
+                                        <Button
+                                            onClick={handleGuardarHorarios}
+                                            disabled={isSavingHorarios}
+                                            className="gap-2 px-8 h-12 rounded-2xl shadow-xl shadow-primary/20 font-bold transition-all active:scale-95"
+                                        >
+                                            {isSavingHorarios ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                                            {isSavingHorarios ? "Guardando..." : "Guardar Horarios"}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="p-6 md:p-8">

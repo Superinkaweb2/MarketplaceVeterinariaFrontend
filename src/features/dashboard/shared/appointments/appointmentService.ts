@@ -69,4 +69,11 @@ export const appointmentService = {
         const { data } = await api.post<ApiResponse<CitaResponse>>("/appointments/empresa", request);
         return data.data;
     },
+
+    getAvailableSlots: async (empresaId: number, servicioId: number, fecha: string): Promise<string[]> => {
+        const { data } = await api.get<ApiResponse<string[]>>("/appointments/available-slots", {
+            params: { empresaId, servicioId, fecha },
+        });
+        return data.data;
+    },
 };

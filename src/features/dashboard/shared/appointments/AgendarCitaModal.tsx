@@ -6,6 +6,8 @@ import { appointmentService } from "./appointmentService";
 import type { Pet } from "../../cliente/types/pet.types";
 import type { CitaRequest } from "./appointmentService";
 
+const formatSlot = (slot: string) => slot.slice(0, 5);
+
 const agendarCitaSchema = z.object({
  mascotaId: z.string().optional().or(z.literal("")),
  fechaProgramada: z.string().min(1, "La fecha es requerida"),
@@ -26,6 +28,9 @@ export const AgendarCitaModal = ({ isOpen, onClose, servicioId, empresaId, servi
  const [isLoadingPets, setIsLoadingPets] = useState(true);
  const [isSubmitting, setIsSubmitting] = useState(false);
  const [success, setSuccess] = useState(false);
+ const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+ const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+ const [slotsError, setSlotsError] = useState<string | null>(null);
 
  const today = new Date().toISOString().split("T")[0];
 
@@ -37,14 +42,14 @@ export const AgendarCitaModal = ({ isOpen, onClose, servicioId, empresaId, servi
  }>({
  mascotaId: "",
  fechaProgramada: today,
- horaInicio: "09:00",
+ horaInicio: "",
  notasCliente: "",
  });
 
  useEffect(() => {
  if (!isOpen) return;
  setSuccess(false);
- setForm({ mascotaId: "", fechaProgramada: today, horaInicio: "09:00", notasCliente: "" });
+ setForm({ mascotaId: "", fechaProgramada: today, horaInicio: "", notasCliente: "" });
  const load = async () => {
  setIsLoadingPets(true);
  try {
@@ -59,6 +64,17 @@ export const AgendarCitaModal = ({ isOpen, onClose, servicioId, empresaId, servi
  };
  load();
  }, [isOpen]);
+
+ useEffect(() => {
+ if (!isOpen || !form.fechaProgramada) return;
+ setIsLoadingSlots(true);
+ setSlotsError(null);
+ appointmentService
+ .getAvailableSlots(empresaId, servicioId, form.fechaProgramada)
+ .then(slots => setAvailableSlots(slots))
+ .catch(() => setSlotsError("No se pudieron cargar los horarios disponibles."))
+ .finally(() => setIsLoadingSlots(false));
+ }, [isOpen, form.fechaProgramada, empresaId, servicioId]);
 
  const handleSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
@@ -82,8 +98,9 @@ export const AgendarCitaModal = ({ isOpen, onClose, servicioId, empresaId, servi
  if (form.mascotaId) request.mascotaId = Number(form.mascotaId);
  await appointmentService.create(request);
  setSuccess(true);
- } catch (err) {
+ } catch (err: any) {
  console.error("Error creating appointment:", err);
+ alert(err?.response?.data?.message || "No se pudo agendar la cita. Intenta con otro horario.");
  } finally {
  setIsSubmitting(false);
  }
@@ -96,8 +113,8 @@ export const AgendarCitaModal = ({ isOpen, onClose, servicioId, empresaId, servi
  if (!isOpen) return null;
 
  return (
- <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
- <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md border border-slate-100 overflow-hidden">
+ <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+ <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] border border-slate-100 overflow-y-auto">
  <div className="flex items-center justify-between p-6 border-b border-slate-100">
  <div>
  <h2 className="text-xl font-black text-slate-900">Agendar Cita</h2>
@@ -160,7 +177,7 @@ export const AgendarCitaModal = ({ isOpen, onClose, servicioId, empresaId, servi
  name="fechaProgramada"
  value={form.fechaProgramada}
  min={today}
- onChange={handleChange}
+ onChange={(e) => setForm(f => ({ ...f, fechaProgramada: e.target.value, horaInicio: "" }))}
  required
  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none"
  />
@@ -168,16 +185,39 @@ export const AgendarCitaModal = ({ isOpen, onClose, servicioId, empresaId, servi
 
  <div>
  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
- <Clock size={16} className="text-blue-500" /> Hora preferida
+ <Clock size={16} className="text-blue-500" /> Hora disponible
  </label>
- <input
- type="time"
- name="horaInicio"
- value={form.horaInicio}
- onChange={handleChange}
- required
- className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none"
- />
+ {isLoadingSlots ? (
+ <div className="flex items-center justify-center py-4">
+ <Loader2 size={18} className="animate-spin text-blue-500" />
+ </div>
+ ) : slotsError ? (
+ <p className="text-xs text-red-500 bg-red-50 rounded-xl px-3 py-2">{slotsError}</p>
+ ) : availableSlots.length === 0 ? (
+ <p className="text-xs text-slate-500 bg-slate-50 rounded-xl px-3 py-2">
+ No hay horarios disponibles para esta fecha, prueba con otro día.
+ </p>
+ ) : (
+ <div className="grid grid-cols-3 gap-2">
+ {availableSlots.map((slot) => {
+ const value = formatSlot(slot);
+ const selected = form.horaInicio === value;
+ return (
+ <button
+ key={slot}
+ type="button"
+ onClick={() => setForm(f => ({ ...f, horaInicio: value }))}
+ className={`py-2 rounded-xl text-sm font-semibold border transition-all ${selected
+ ? "bg-blue-600 border-blue-600 text-white"
+ : "bg-slate-50 border-slate-200 text-slate-700 hover:border-blue-300"
+ }`}
+ >
+ {value}
+ </button>
+ );
+ })}
+ </div>
+ )}
  </div>
 
  <div>
@@ -204,7 +244,7 @@ export const AgendarCitaModal = ({ isOpen, onClose, servicioId, empresaId, servi
  </button>
  <button
  type="submit"
- disabled={isSubmitting}
+ disabled={isSubmitting || !form.horaInicio}
  className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
  >
  {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Calendar size={18} />}
