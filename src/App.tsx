@@ -119,6 +119,8 @@ const MascotaDetailPage = lazyPage(() => import("./features/dashboard/cliente/pa
 const RecordatoriosPage = lazyPage(() => import("./features/dashboard/cliente/pages/RecordatoriosPage"), "RecordatoriosPage");
 const ReferralsPage = lazyPage(() => import("./features/dashboard/cliente/pages/ReferralsPage"), "ReferralsPage");
 const TeleconsultasClientePage = lazyPage(() => import("./features/dashboard/cliente/pages/TeleconsultasClientePage"), "TeleconsultasClientePage");
+const MisChatsPage = lazyPage(() => import("./features/dashboard/cliente/pages/MisChatsPage"), "MisChatsPage");
+const EmpresaChatsPage = lazyPage(() => import("./features/dashboard/empresa/pages/EmpresaChatsPage"), "EmpresaChatsPage");
 
 // NEW: Empresa Feature Pages
 const LeadsPage = lazyPage(() => import("./features/dashboard/empresa/pages/LeadsPage"), "LeadsPage");
@@ -222,6 +224,7 @@ function App() {
                     <Route path="suscripcion" element={<MySubscriptionPage />} />
                     <Route path="facturacion" element={<FacturacionPage />} />
                     <Route path="clientes" element={<ClientesPage />} />
+                    <Route path="chats" element={<EmpresaChatsPage />} />
                     <Route path="adopciones" element={<AdopcionesPage />} />
                     <Route path="mis-adopciones" element={<MisAdopcionesPage />} />
                     <Route path="configuracion" element={<EmpresaConfigPage />} />
@@ -265,6 +268,7 @@ function App() {
                     <Route path="servicios" element={<ClienteMisServiciosPage />} />
                     <Route path="citas" element={<MisCitasPage />} />
                     <Route path="teleconsultas" element={<TeleconsultasClientePage />} />
+                    <Route path="chats" element={<MisChatsPage />} />
                     <Route path="recordatorios" element={<RecordatoriosPage />} />
                     <Route path="referidos" element={<ReferralsPage />} />
                     <Route path="configuracion" element={<ClienteConfigPage />} />

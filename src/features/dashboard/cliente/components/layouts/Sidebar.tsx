@@ -14,6 +14,7 @@ import {
   Package,
   Award,
   MessageSquare,
+  MessageCircle,
   Bell,
   Users,
   ChevronDown,
@@ -37,6 +38,7 @@ const NAV_SECTIONS = [
     items: [
       { icon: Calendar, label: "Mis Servicios", href: "/portal/cliente/servicios" },
       { icon: MessageSquare, label: "Teleconsultas", href: "/portal/cliente/teleconsultas" },
+      { icon: MessageCircle, label: "Mis Chats", href: "/portal/cliente/chats" },
       { icon: Bell, label: "Recordatorios", href: "/portal/cliente/recordatorios" },
     ],
   },
