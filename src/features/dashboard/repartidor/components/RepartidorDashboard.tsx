@@ -9,7 +9,7 @@ import {
     MapPin, Store, Navigation, CheckCircle, Package, AlertCircle, 
     Power, User, Bike, Car, Truck, ShoppingBag, 
     MessageCircle, Star, Camera, History, Home, CreditCard,
-    ChevronRight, Calendar, DollarSign, ArrowUpRight
+    ChevronRight, Calendar, DollarSign, ArrowUpRight, X
 } from 'lucide-react';
 import type { DeliveryResponseDTO } from '../types/delivery';
 
@@ -17,44 +17,44 @@ export const RepartidorDashboard: React.FC = () => {
     const { logout } = useAuth();
     const { 
         perfil, 
-        deliveryActivo, 
+        deliveriesActivos,
         historial,
         loading, 
         toggleDisponibilidad, 
         avanzarEstado, 
         entregarConOTP, 
+        rechazarPedido,
         recargarDatos 
     } = useRepartidor();
     
     const [activeTab, setActiveTab] = useState<'home' | 'history' | 'profile'>('home');
-    const [otp, setOtp] = useState<string>("");
+    const [otpMap, setOtpMap] = useState<Record<number, string>>({});
     const [disponibles, setDisponibles] = useState<DeliveryResponseDTO[]>([]);
     const [aceptandoId, setAceptandoId] = useState<number | null>(null);
     const [cargandoFoto, setCargandoFoto] = useState(false);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-    // Estado para Incidencias
     const [showIncidenciaModal, setShowIncidenciaModal] = useState(false);
+    const [incidenciaDeliveryId, setIncidenciaDeliveryId] = useState<number | null>(null);
     const [motivoIncidencia, setMotivoIncidencia] = useState("");
     const [descIncidencia, setDescIncidencia] = useState("");
     const [fotoIncidencia, setFotoIncidencia] = useState<File | null>(null);
     const [enviandoIncidencia, setEnviandoIncidencia] = useState(false);
 
     const isDisponible = perfil?.estadoActual === 'DISPONIBLE';
-    const isOcupado = perfil?.estadoActual === 'OCUPADO' || deliveryActivo !== null;
+    const isOcupado = perfil?.estadoActual === 'OCUPADO' || deliveriesActivos.length > 0;
+    const maxPedidos = 3;
 
-    // Calcular ganancias totales del historial
     const gananciasTotales = historial.reduce((acc, curr) => acc + (curr.costoDelivery || 0), 0);
     const entregasCompletadas = historial.length;
 
-    // Cargar pedidos iniciales
     useEffect(() => {
-        if (isDisponible && !deliveryActivo) {
+        if (isDisponible && deliveriesActivos.length === 0) {
             repartidorService.getPedidosDisponibles()
                 .then(res => setDisponibles(res.data.data))
                 .catch(err => console.error("Error cargando disponibles:", err));
         }
-    }, [isDisponible, deliveryActivo]);
+    }, [isDisponible, deliveriesActivos.length]);
 
     const { isConnected, sendLocation, stompClient } = useStompClient({
         repartidorId: perfil?.idRepartidor,
@@ -64,7 +64,6 @@ export const RepartidorDashboard: React.FC = () => {
         }
     });
 
-    // Suscripción al Pool de Pedidos vía WebSocket
     useEffect(() => {
         if (stompClient && isConnected && isDisponible) {
             const sub = stompClient.subscribe('/topic/pedidos-disponibles', (msg) => {
@@ -119,13 +118,13 @@ export const RepartidorDashboard: React.FC = () => {
         }
     };
 
-    const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>, deliveryId: number) => {
         const file = e.target.files?.[0];
-        if (!file || !deliveryActivo) return;
+        if (!file) return;
 
         try {
             setCargandoFoto(true);
-            await repartidorService.confirmarFoto(deliveryActivo.idDelivery, file);
+            await repartidorService.confirmarFoto(deliveryId, file);
             Swal.fire({
                 title: '¡Entrega confirmada!',
                 text: 'La evidencia fotográfica se guardó correctamente.',
@@ -142,20 +141,20 @@ export const RepartidorDashboard: React.FC = () => {
     };
 
     const handleLocationUpdate = (lat: number, lng: number) => {
-        if (deliveryActivo && isConnected) {
-             sendLocation(lat, lng, deliveryActivo.idDelivery);
+        if (deliveriesActivos.length > 0 && isConnected) {
+            deliveriesActivos.forEach(d => sendLocation(lat, lng, d.idDelivery));
         } else {
-             repartidorService.actualizarUbicacion(lat, lng).catch(console.error);
+            repartidorService.actualizarUbicacion(lat, lng).catch(console.error);
         }
     };
 
     const handleReportarIncidencia = async () => {
-        if (!deliveryActivo || !motivoIncidencia || !descIncidencia) return;
+        if (!incidenciaDeliveryId || !motivoIncidencia || !descIncidencia) return;
 
         try {
             setEnviandoIncidencia(true);
             await repartidorService.reportarIncidencia(
-                deliveryActivo.idDelivery,
+                incidenciaDeliveryId,
                 motivoIncidencia,
                 descIncidencia,
                 fotoIncidencia || undefined
@@ -168,6 +167,7 @@ export const RepartidorDashboard: React.FC = () => {
             });
 
             setShowIncidenciaModal(false);
+            setIncidenciaDeliveryId(null);
             setMotivoIncidencia("");
             setDescIncidencia("");
             setFotoIncidencia(null);
@@ -216,6 +216,137 @@ export const RepartidorDashboard: React.FC = () => {
         return <Bike className="w-5 h-5" />;
     };
 
+    const renderDeliveryCard = (delivery: DeliveryResponseDTO) => {
+        const setOtp = (val: string) => setOtpMap(prev => ({ ...prev, [delivery.idDelivery]: val }));
+        const currentOtp = otpMap[delivery.idDelivery] || "";
+
+        return (
+            <div key={delivery.idDelivery} className="bg-white rounded-3xl p-6 shadow-xl border border-blue-100 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
+                
+                <div className="relative z-10">
+                    <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center gap-2">
+                            <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                                {delivery.estado.replace('_', ' ')}
+                            </span>
+                            {(delivery.estado === 'REPARTIDOR_ASIGNADO' || delivery.estado === 'EN_TIENDA') && (
+                                <button
+                                    onClick={() => rechazarPedido(delivery.idDelivery)}
+                                    className="flex items-center gap-1 bg-red-50 text-red-600 text-[10px] font-bold px-2 py-1 rounded-full hover:bg-red-100 transition-colors"
+                                >
+                                    <X className="w-3 h-3" /> RECHAZAR
+                                </button>
+                            )}
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Pago</p>
+                            <p className="text-lg font-black text-blue-600">S/ {delivery.costoDelivery.toFixed(2)}</p>
+                        </div>
+                    </div>
+
+                    {/* Info Cliente */}
+                    <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold uppercase">
+                                {delivery.clienteNombre?.charAt(0) || 'C'}
+                            </div>
+                            <div>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase">Cliente</p>
+                                <p className="text-sm font-bold text-gray-800 truncate max-w-[120px]">{delivery.clienteNombre}</p>
+                            </div>
+                        </div>
+                        {delivery.clienteTelefono && (
+                            <a 
+                                href={`https://wa.me/${delivery.clienteTelefono.replace(/\D/g, '')}`} 
+                                target="_blank" 
+                                className="bg-green-500 text-white p-2.5 rounded-xl shadow-lg shadow-green-100"
+                            >
+                                <MessageCircle className="w-5 h-5" />
+                            </a>
+                        )}
+                    </div>
+
+                    {/* Ruta */}
+                    <div className="space-y-6 mb-8 relative before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+                        <div className="relative pl-8">
+                            <div className="absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-blue-500 flex items-center justify-center">
+                                <Store className="w-2.5 h-2.5 text-blue-500" />
+                            </div>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Origen</p>
+                            <p className="text-xs font-bold text-gray-800 leading-snug">{delivery.origenDireccion}</p>
+                        </div>
+                        <div className="relative pl-8">
+                            <div className="absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-red-500 flex items-center justify-center">
+                                <Navigation className="w-2.5 h-2.5 text-red-500" />
+                            </div>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase">Destino</p>
+                            <p className="text-xs font-bold text-gray-800 leading-snug">{delivery.destinoDireccion}</p>
+                        </div>
+                    </div>
+
+                    {/* Acciones */}
+                    {delivery.estado === 'REPARTIDOR_ASIGNADO' && (
+                        <button onClick={() => avanzarEstado(delivery.idDelivery, 'EN_TIENDA')} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200">
+                            LLEGUÉ A LA TIENDA
+                        </button>
+                    )}
+                    {delivery.estado === 'EN_TIENDA' && (
+                        <button onClick={() => avanzarEstado(delivery.idDelivery, 'RECOGIDO')} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200">
+                            PRODUCTO RECOGIDO
+                        </button>
+                    )}
+                    {delivery.estado === 'RECOGIDO' && (
+                        <button onClick={() => avanzarEstado(delivery.idDelivery, 'EN_CAMINO')} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200">
+                            INICIAR ENTREGA
+                        </button>
+                    )}
+                    {(delivery.estado === 'EN_CAMINO' || delivery.estado === 'CERCA') && (
+                        <div className="space-y-4">
+                            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                <p className="text-center text-[10px] font-bold text-gray-400 uppercase mb-3">Confirmación de Entrega</p>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        value={currentOtp}
+                                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                                        placeholder="CÓDIGO PIN"
+                                        className="flex-1 bg-white border border-gray-200 rounded-xl px-4 text-center font-black tracking-[0.3em] outline-none focus:border-blue-500"
+                                    />
+                                    <button 
+                                        onClick={() => { entregarConOTP(delivery.idDelivery, currentOtp); setOtp(''); }}
+                                        disabled={currentOtp.length !== 4}
+                                        className="bg-green-500 text-white px-6 py-4 rounded-xl font-bold disabled:opacity-50"
+                                    >
+                                        ENTREGAR
+                                    </button>
+                                </div>
+                                <div className="mt-4">
+                                    <input type="file" accept="image/*" capture="environment" className="hidden" ref={fileInputRef} onChange={(e) => handleFotoChange(e, delivery.idDelivery)} />
+                                    <button 
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={cargandoFoto}
+                                        className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-[10px] font-bold text-gray-500 flex items-center justify-center gap-2"
+                                    >
+                                        <Camera className="w-4 h-4" /> {cargandoFoto ? 'SUBIENDO...' : 'O SUBIR FOTO DE EVIDENCIA'}
+                                    </button>
+                                </div>
+                                <div className="mt-4">
+                                    <button 
+                                        onClick={() => { setIncidenciaDeliveryId(delivery.idDelivery); setShowIncidenciaModal(true); }}
+                                        className="w-full py-3 text-[10px] font-bold text-red-500 flex items-center justify-center gap-2 hover:bg-red-50 rounded-xl transition-all"
+                                    >
+                                        <AlertCircle className="w-4 h-4" /> REPORTAR PROBLEMA / ACCIDENTE
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
     const renderHome = () => (
         <div className="space-y-6 pb-24">
             {/* Control de Disponibilidad */}
@@ -261,8 +392,21 @@ export const RepartidorDashboard: React.FC = () => {
                 </div>
             </div>
 
+            {/* Pedidos Activos */}
+            {deliveriesActivos.length > 0 && (
+                <div className="flex items-center justify-between px-1">
+                    <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                        <Truck className="w-4 h-4 text-blue-600" />
+                        Pedidos Activos
+                    </h3>
+                    <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-black">
+                        {deliveriesActivos.length}/{maxPedidos}
+                    </span>
+                </div>
+            )}
+
             {/* Área de Delivery Activo o Disponibles */}
-            {!deliveryActivo ? (
+            {deliveriesActivos.length === 0 ? (
                 <div className="space-y-4">
                     {isDisponible ? (
                         <>
@@ -312,10 +456,10 @@ export const RepartidorDashboard: React.FC = () => {
                                             </div>
                                             <button 
                                                 onClick={() => handleAceptarPedido(pedido.idDelivery)}
-                                                disabled={aceptandoId === pedido.idDelivery}
+                                                disabled={aceptandoId === pedido.idDelivery || deliveriesActivos.length >= maxPedidos}
                                                 className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-md transition-all active:scale-95 disabled:bg-gray-300"
                                             >
-                                                {aceptandoId === pedido.idDelivery ? 'ACEPTANDO...' : 'TOMAR PEDIDO'}
+                                                {aceptandoId === pedido.idDelivery ? 'ACEPTANDO...' : deliveriesActivos.length >= maxPedidos ? 'LÍMITE ALCANZADO' : 'TOMAR PEDIDO'}
                                             </button>
                                         </div>
                                     ))}
@@ -331,119 +475,8 @@ export const RepartidorDashboard: React.FC = () => {
                     )}
                 </div>
             ) : (
-                /* Viaje Activo */
-                <div className="bg-white rounded-3xl p-6 shadow-xl border border-blue-100 overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
-                    
-                    <div className="relative z-10">
-                        <div className="flex justify-between items-center mb-6">
-                            <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
-                                {deliveryActivo.estado.replace('_', ' ')}
-                            </span>
-                            <div className="text-right">
-                                <p className="text-[10px] text-gray-400 font-bold uppercase">Pago</p>
-                                <p className="text-lg font-black text-blue-600">S/ {deliveryActivo.costoDelivery.toFixed(2)}</p>
-                            </div>
-                        </div>
-
-                        {/* Info Cliente */}
-                        <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold uppercase">
-                                    {deliveryActivo.clienteNombre?.charAt(0) || 'C'}
-                                </div>
-                                <div>
-                                    <p className="text-[10px] text-gray-400 font-bold uppercase">Cliente</p>
-                                    <p className="text-sm font-bold text-gray-800 truncate max-w-[120px]">{deliveryActivo.clienteNombre}</p>
-                                </div>
-                            </div>
-                            {deliveryActivo.clienteTelefono && (
-                                <a 
-                                    href={`https://wa.me/${deliveryActivo.clienteTelefono.replace(/\D/g, '')}`} 
-                                    target="_blank" 
-                                    className="bg-green-500 text-white p-2.5 rounded-xl shadow-lg shadow-green-100"
-                                >
-                                    <MessageCircle className="w-5 h-5" />
-                                </a>
-                            )}
-                        </div>
-
-                        {/* Ruta */}
-                        <div className="space-y-6 mb-8 relative before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
-                            <div className="relative pl-8">
-                                <div className="absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-blue-500 flex items-center justify-center">
-                                    <Store className="w-2.5 h-2.5 text-blue-500" />
-                                </div>
-                                <p className="text-[10px] text-gray-400 font-bold uppercase">Origen</p>
-                                <p className="text-xs font-bold text-gray-800 leading-snug">{deliveryActivo.origenDireccion}</p>
-                            </div>
-                            <div className="relative pl-8">
-                                <div className="absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-red-500 flex items-center justify-center">
-                                    <Navigation className="w-2.5 h-2.5 text-red-500" />
-                                </div>
-                                <p className="text-[10px] text-gray-400 font-bold uppercase">Destino</p>
-                                <p className="text-xs font-bold text-gray-800 leading-snug">{deliveryActivo.destinoDireccion}</p>
-                            </div>
-                        </div>
-
-                        {/* Acciones */}
-                        {deliveryActivo.estado === 'REPARTIDOR_ASIGNADO' && (
-                            <button onClick={() => avanzarEstado(deliveryActivo.idDelivery, 'EN_TIENDA')} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200">
-                                LLEGUÉ A LA TIENDA
-                            </button>
-                        )}
-                        {deliveryActivo.estado === 'EN_TIENDA' && (
-                            <button onClick={() => avanzarEstado(deliveryActivo.idDelivery, 'RECOGIDO')} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200">
-                                PRODUCTO RECOGIDO
-                            </button>
-                        )}
-                        {deliveryActivo.estado === 'RECOGIDO' && (
-                            <button onClick={() => avanzarEstado(deliveryActivo.idDelivery, 'EN_CAMINO')} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200">
-                                INICIAR ENTREGA
-                            </button>
-                        )}
-                        {(deliveryActivo.estado === 'EN_CAMINO' || deliveryActivo.estado === 'CERCA') && (
-                            <div className="space-y-4">
-                                <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                                    <p className="text-center text-[10px] font-bold text-gray-400 uppercase mb-3">Confirmación de Entrega</p>
-                                    <div className="flex gap-2">
-                                        <input 
-                                            type="text" 
-                                            value={otp}
-                                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                                            placeholder="CÓDIGO PIN"
-                                            className="flex-1 bg-white border border-gray-200 rounded-xl px-4 text-center font-black tracking-[0.3em] outline-none focus:border-blue-500"
-                                        />
-                                        <button 
-                                            onClick={() => { entregarConOTP(deliveryActivo.idDelivery, otp); setOtp(''); }}
-                                            disabled={otp.length !== 4}
-                                            className="bg-green-500 text-white px-6 py-4 rounded-xl font-bold disabled:opacity-50"
-                                        >
-                                            ENTREGAR
-                                        </button>
-                                    </div>
-                                    <div className="mt-4">
-                                        <input type="file" accept="image/*" capture="environment" className="hidden" ref={fileInputRef} onChange={handleFotoChange} />
-                                        <button 
-                                            onClick={() => fileInputRef.current?.click()}
-                                            disabled={cargandoFoto}
-                                            className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-[10px] font-bold text-gray-500 flex items-center justify-center gap-2"
-                                        >
-                                            <Camera className="w-4 h-4" /> {cargandoFoto ? 'SUBIENDO...' : 'O SUBIR FOTO DE EVIDENCIA'}
-                                        </button>
-                                    </div>
-                                    <div className="mt-4">
-                                        <button 
-                                            onClick={() => setShowIncidenciaModal(true)}
-                                            className="w-full py-3 text-[10px] font-bold text-red-500 flex items-center justify-center gap-2 hover:bg-red-50 rounded-xl transition-all"
-                                        >
-                                            <AlertCircle className="w-4 h-4" /> REPORTAR PROBLEMA / ACCIDENTE
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                <div className="space-y-4">
+                    {deliveriesActivos.map(delivery => renderDeliveryCard(delivery))}
                 </div>
             )}
 
@@ -499,7 +532,7 @@ export const RepartidorDashboard: React.FC = () => {
                                         >
                                             <Camera className="w-5 h-5 text-gray-300" />
                                             <span className="text-[10px] font-bold text-gray-400 uppercase">
-                                                {fotoIncidencia ? 'Foto seleccionada ✅' : 'Tomar Foto de Evidencia'}
+                                                {fotoIncidencia ? 'Foto seleccionada' : 'Tomar Foto de Evidencia'}
                                             </span>
                                         </label>
                                     </div>
@@ -508,7 +541,7 @@ export const RepartidorDashboard: React.FC = () => {
 
                             <div className="mt-8 flex gap-3">
                                 <button 
-                                    onClick={() => setShowIncidenciaModal(false)}
+                                    onClick={() => { setShowIncidenciaModal(false); setIncidenciaDeliveryId(null); }}
                                     className="flex-1 py-4 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
                                 >
                                     CANCELAR

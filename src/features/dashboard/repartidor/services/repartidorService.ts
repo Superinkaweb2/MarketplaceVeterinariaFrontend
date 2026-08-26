@@ -16,8 +16,8 @@ export const repartidorService = {
     cambiarDisponibilidad: (disponible: boolean): Promise<AxiosResponse<ApiResponse<void>>> => 
         api.patch(`/repartidores/me/disponibilidad?disponible=${disponible}`),
     
-    getDeliveryActivo: (): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO>>> => 
-        api.get("/repartidores/me/delivery-activo"),
+    getDeliveriesActivos: (): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO[]>>> => 
+        api.get("/repartidores/me/deliveries-activos"),
     
     cambiarEstado: (deliveryId: number, nuevoEstado: DeliveryStatus, descripcion: string = ""): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO>>> => 
         api.patch(`/deliveries/${deliveryId}/estado`, { nuevoEstado, descripcion }),
@@ -36,6 +36,9 @@ export const repartidorService = {
 
     aceptarPedido: (deliveryId: number): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO>>> => 
         api.post(`/deliveries/${deliveryId}/aceptar`),
+
+    rechazarPedido: (deliveryId: number): Promise<AxiosResponse<ApiResponse<DeliveryResponseDTO>>> => 
+        api.post(`/deliveries/${deliveryId}/rechazar`),
 
     reportarIncidencia: (deliveryId: number, motivo: string, descripcion: string, foto?: File): Promise<AxiosResponse<ApiResponse<void>>> => {
         const formData = new FormData();
