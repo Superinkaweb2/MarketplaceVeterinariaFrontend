@@ -18,6 +18,7 @@ import {
   Calendar,
   Award,
   ChevronDown,
+  MessageCircle,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -33,6 +34,7 @@ const NAV_SECTIONS = [
       { icon: <LayoutDashboard size={18} />, label: "Dashboard", to: "/portal/empresa", end: true },
       { icon: <Calendar size={18} />, label: "Citas", to: "/portal/empresa/citas" },
       { icon: <PawPrint size={18} />, label: "Pacientes", to: "/portal/empresa/pacientes" },
+      { icon: <MessageCircle size={18} />, label: "Chats", to: "/portal/empresa/chats" },
     ],
   },
   {

@@ -10,7 +10,8 @@ import {
     Info,
     Navigation,
     Gift,
-    ArrowLeft
+    ArrowLeft,
+    MessageCircle
 } from "lucide-react";
 import { marketplaceService } from "../services/marketplaceService";
 import { mapAdoptionToProduct, mapServiceToProduct } from "../utils/productAdapter";
@@ -19,6 +20,9 @@ import { MapView } from "../components/MapView";
 import { Seo } from "../../../components/Seo";
 import type { Product } from "../types/marketplace";
 import { RewardsStore } from "../../dashboard/gamification/components/client/RewardsStore";
+import { useAuth } from "../../auth/context/useAuth";
+import { chatService } from "../../dashboard/shared/chat/chatService";
+import { ChatModal } from "../../dashboard/shared/chat/ChatModal";
 
 interface Company {
     id: number;
@@ -40,12 +44,33 @@ type TabType = 'products' | 'services' | 'adoptions' | 'rewards';
 export const CompanyProfile = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { isAuthenticated, role } = useAuth();
     const [company, setCompany] = useState<Company | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [services, setServices] = useState<Product[]>([]);
     const [adoptions, setAdoptions] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<TabType>('products');
+    const [chatRoomId, setChatRoomId] = useState<number | null>(null);
+    const [isOpeningChat, setIsOpeningChat] = useState(false);
+
+    const handleOpenChat = async () => {
+        if (!isAuthenticated) {
+            navigate(`/login?next=${encodeURIComponent(`/empresa/${id}`)}`);
+            return;
+        }
+        if (!company) return;
+        setIsOpeningChat(true);
+        try {
+            const room = await chatService.abrirChatConEmpresa(company.id);
+            setChatRoomId(room.id);
+        } catch (error) {
+            console.error("Error opening chat:", error);
+            toast.error("No se pudo abrir el chat. Intenta de nuevo.");
+        } finally {
+            setIsOpeningChat(false);
+        }
+    };
 
     const fetchCompanyData = useCallback(async () => {
         if (!id) return;
@@ -228,6 +253,17 @@ export const CompanyProfile = () => {
                                 </p>
                             </div>
 
+                            {(!isAuthenticated || role === 'CLIENTE') && (
+                                <button
+                                    onClick={handleOpenChat}
+                                    disabled={isOpeningChat}
+                                    className="w-full flex items-center justify-center gap-2 py-3 mb-6 bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl transition-all shadow-md shadow-primary/20 disabled:opacity-60"
+                                >
+                                    <MessageCircle size={18} />
+                                    {isOpeningChat ? "Abriendo chat..." : "Chatear"}
+                                </button>
+                            )}
+
                             {/* Contact Details */}
                             <div className="space-y-3 pt-6 border-t border-slate-100 text-sm">
                                 <div className="flex items-start gap-3 text-slate-600">
@@ -315,6 +351,15 @@ export const CompanyProfile = () => {
                     </div>
                 </div>
             </div>
+
+            {chatRoomId && (
+                <ChatModal
+                    roomId={chatRoomId}
+                    title={company.nombreComercial}
+                    logoUrl={company.logoUrl}
+                    onClose={() => setChatRoomId(null)}
+                />
+            )}
         </div>
     );
 };

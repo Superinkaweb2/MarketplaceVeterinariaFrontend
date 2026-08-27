@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { X, Calendar, User, Mail, Phone } from "lucide-react";
+import { X, Calendar, Clock, User, Mail, Phone, Loader2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { appointmentService } from "../../shared/appointments/appointmentService";
 import type { CrearCitaEmpresaRequest } from "../../shared/appointments/appointmentService";
 import { serviceService } from "../services/serviceService";
 import { useAuth } from "../../../auth/context/AuthContext";
 import Swal from "sweetalert2";
+
+const formatSlot = (slot: string) => slot.slice(0, 5);
 
 const citaSchema = z.object({
     servicioId: z.coerce.number().min(1, "Selecciona un servicio"),
@@ -33,6 +35,9 @@ export const CrearCitaEmpresaModal = ({ isOpen, onClose, onSuccess }: CrearCitaE
     const { empresaId } = useAuth();
     const queryClient = useQueryClient();
     const [esInvitado, setEsInvitado] = useState(true);
+    const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+    const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+    const [slotsError, setSlotsError] = useState<string | null>(null);
 
     const { data: servicios = [] } = useQuery({
         queryKey: ["empresa-servicios-select", empresaId],
@@ -47,10 +52,30 @@ export const CrearCitaEmpresaModal = ({ isOpen, onClose, onSuccess }: CrearCitaE
         register,
         handleSubmit,
         reset,
+        watch,
+        setValue,
         formState: { errors },
     } = useForm<CitaFormData>({
         resolver: zodResolver(citaSchema) as any,
     });
+
+    const servicioIdValue = watch("servicioId");
+    const fechaProgramadaValue = watch("fechaProgramada");
+    const horaInicioValue = watch("horaInicio");
+
+    useEffect(() => {
+        if (!isOpen || !empresaId || !servicioIdValue || !fechaProgramadaValue) {
+            setAvailableSlots([]);
+            return;
+        }
+        setIsLoadingSlots(true);
+        setSlotsError(null);
+        appointmentService
+            .getAvailableSlots(empresaId, Number(servicioIdValue), fechaProgramadaValue)
+            .then((slots) => setAvailableSlots(slots))
+            .catch(() => setSlotsError("No se pudieron cargar los horarios disponibles."))
+            .finally(() => setIsLoadingSlots(false));
+    }, [isOpen, empresaId, servicioIdValue, fechaProgramadaValue]);
 
     const createMutation = useMutation({
         mutationFn: (request: CrearCitaEmpresaRequest) =>
@@ -202,33 +227,65 @@ export const CrearCitaEmpresaModal = ({ isOpen, onClose, onSuccess }: CrearCitaE
                         )}
                     </div>
 
-                    {/* Fecha y hora */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-xs font-semibold text-slate-600 mb-1">Fecha *</label>
-                            <div className="relative">
-                                <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" />
-                                <input
-                                    type="date"
-                                    {...register("fechaProgramada")}
-                                    className="w-full h-10 pl-9 pr-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400"
-                                />
-                            </div>
-                            {errors.fechaProgramada && (
-                                <p className="mt-1 text-xs text-red-500">{errors.fechaProgramada.message}</p>
-                            )}
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-slate-600 mb-1">Hora *</label>
+                    {/* Fecha */}
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1">Fecha *</label>
+                        <div className="relative">
+                            <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" />
                             <input
-                                type="time"
-                                {...register("horaInicio")}
-                                className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400"
+                                type="date"
+                                {...register("fechaProgramada")}
+                                className="w-full h-10 pl-9 pr-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400"
                             />
-                            {errors.horaInicio && (
-                                <p className="mt-1 text-xs text-red-500">{errors.horaInicio.message}</p>
-                            )}
                         </div>
+                        {errors.fechaProgramada && (
+                            <p className="mt-1 text-xs text-red-500">{errors.fechaProgramada.message}</p>
+                        )}
+                    </div>
+
+                    {/* Horarios disponibles */}
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5">
+                            <Clock size={14} /> Hora disponible *
+                        </label>
+                        {!servicioIdValue || !fechaProgramadaValue ? (
+                            <p className="text-xs text-slate-400 bg-slate-50 rounded-xl px-3 py-2">
+                                Selecciona un servicio y una fecha para ver los horarios disponibles.
+                            </p>
+                        ) : isLoadingSlots ? (
+                            <div className="flex items-center justify-center py-3">
+                                <Loader2 size={16} className="animate-spin text-teal-500" />
+                            </div>
+                        ) : slotsError ? (
+                            <p className="text-xs text-red-500 bg-red-50 rounded-xl px-3 py-2">{slotsError}</p>
+                        ) : availableSlots.length === 0 ? (
+                            <p className="text-xs text-slate-500 bg-slate-50 rounded-xl px-3 py-2">
+                                No hay horarios disponibles para esta fecha.
+                            </p>
+                        ) : (
+                            <div className="grid grid-cols-3 gap-2">
+                                {availableSlots.map((slot) => {
+                                    const value = formatSlot(slot);
+                                    const selected = horaInicioValue === value;
+                                    return (
+                                        <button
+                                            key={slot}
+                                            type="button"
+                                            onClick={() => setValue("horaInicio", value, { shouldValidate: true })}
+                                            className={`py-2 rounded-xl text-sm font-semibold border transition-all ${selected
+                                                ? "bg-teal-500 border-teal-500 text-white"
+                                                : "bg-white border-slate-200 text-slate-700 hover:border-teal-300"
+                                                }`}
+                                        >
+                                            {value}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                        {errors.horaInicio && (
+                            <p className="mt-1 text-xs text-red-500">{errors.horaInicio.message}</p>
+                        )}
                     </div>
 
                     {/* Notas */}
@@ -263,7 +320,7 @@ export const CrearCitaEmpresaModal = ({ isOpen, onClose, onSuccess }: CrearCitaE
                         </button>
                         <button
                             type="submit"
-                            disabled={createMutation.isPending}
+                            disabled={createMutation.isPending || !horaInicioValue}
                             className="flex-1 h-11 rounded-xl bg-teal-500 hover:bg-teal-600 text-white text-sm font-semibold transition-colors disabled:opacity-50"
                         >
                             {createMutation.isPending ? "Creando..." : "Crear Cita"}
