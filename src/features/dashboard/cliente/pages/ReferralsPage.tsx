@@ -26,8 +26,9 @@ export const ReferralsPage = () => {
       ]);
       if (referralCode.status === "fulfilled") setCode(referralCode.value);
       if (count.status === "fulfilled") setStats(count.value);
-      if (referralCode.status === "rejected" && count.status === "rejected") {
-        throw referralCode.reason;
+      if (referralCode.status === "rejected") {
+        setError("No se pudo cargar tu código de referido");
+        return;
       }
     } catch (err: any) {
       const msg = err?.response?.data?.message || "No se pudieron cargar los datos de referidos";
@@ -38,6 +39,7 @@ export const ReferralsPage = () => {
   };
 
   const handleCopy = async () => {
+    if (!code) return;
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
@@ -48,6 +50,7 @@ export const ReferralsPage = () => {
   };
 
   const handleShare = async () => {
+    if (!code) return;
     if (navigator.share) {
       try {
         await navigator.share({
