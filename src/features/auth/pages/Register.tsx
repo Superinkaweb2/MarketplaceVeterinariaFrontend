@@ -1,4 +1,5 @@
-import { Link, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "../../../components/ui/Button";
@@ -7,6 +8,12 @@ import { useAuth } from "../context/useAuth";
 export const Register = () => {
   const { loginWithRedirect } = useAuth0();
   const { isAuthenticated } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) sessionStorage.setItem("pendingReferralCode", ref);
+  }, [searchParams]);
 
   // Si ya está autenticado, redirigir al selector de rol
   if (isAuthenticated) {

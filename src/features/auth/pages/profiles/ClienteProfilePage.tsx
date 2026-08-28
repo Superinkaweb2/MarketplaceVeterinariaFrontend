@@ -5,6 +5,7 @@ import { z } from "zod";
 import { User, Phone, MapPin, Check, Home, Globe } from "lucide-react";
 import { WizardLayout } from "../../../../components/ui/WizardLayout";
 import { profileService } from "../../services/profileService";
+import { referralService } from "../../../dashboard/cliente/services/referralService";
 import { useAuth } from "../../../auth/context/useAuth";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -72,6 +73,17 @@ export const ClienteProfilePage = () => {
     setIsSubmitting(true);
     try {
       await profileService.createClienteProfile(data);
+
+      const pendingRef = sessionStorage.getItem("pendingReferralCode");
+      if (pendingRef) {
+        try {
+          await referralService.applyCode(pendingRef);
+        } catch {
+          // Código inválido o ya utilizado: no bloqueamos el registro
+        }
+        sessionStorage.removeItem("pendingReferralCode");
+      }
+
       setPerfilCompleto(true);
       Swal.fire({
         icon: "success",

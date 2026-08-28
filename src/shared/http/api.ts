@@ -44,6 +44,16 @@ api.interceptors.response.use(
             await handleSessionExpired();
         }
 
+        if (status === 403) {
+            const message = error.response?.data?.message || "No tienes permiso para acceder a este recurso.";
+            await Swal.fire({
+                icon: "error",
+                title: "Acceso Denegado",
+                text: message,
+                confirmButtonColor: "#3b82f6",
+            });
+        }
+
         if (status === 409 && !url.includes("/users/me/role")) {
             const message = error.response?.data?.message || "El recurso ya existe o hay un conflicto de datos.";
             await Swal.fire({
@@ -59,6 +69,15 @@ api.interceptors.response.use(
                 icon: "warning",
                 title: "Archivo demasiado grande",
                 text: "El archivo excede el tamaño máximo permitido (10MB). Comprime el archivo e intenta de nuevo.",
+                confirmButtonColor: "#3b82f6",
+            });
+        }
+
+        if (!status && error.code !== "ERR_CANCELED") {
+            await Swal.fire({
+                icon: "error",
+                title: "Error de Conexión",
+                text: "No se pudo conectar con el servidor. Verifica tu conexión a internet e intenta de nuevo.",
                 confirmButtonColor: "#3b82f6",
             });
         }
