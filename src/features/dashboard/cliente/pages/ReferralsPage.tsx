@@ -136,14 +136,16 @@ export const ReferralsPage = () => {
           <div className="flex gap-3 justify-center">
             <button
               onClick={handleCopy}
-              className="flex items-center gap-2 rounded-lg px-4 py-2.5 font-bold transition-all bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm border border-white/25 cursor-pointer"
+              disabled={!code}
+              className="flex items-center gap-2 rounded-lg px-4 py-2.5 font-bold transition-all bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm border border-white/25 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {copied ? <Check size={16} /> : <Copy size={16} />}
               {copied ? "Copiado" : "Copiar codigo"}
             </button>
             <button
               onClick={handleShare}
-              className="flex items-center gap-2 rounded-lg px-4 py-2.5 font-bold transition-all bg-white text-primary hover:bg-slate-50 cursor-pointer"
+              disabled={!code}
+              className="flex items-center gap-2 rounded-lg px-4 py-2.5 font-bold transition-all bg-white text-primary hover:bg-slate-50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Share2 size={16} /> Compartir
             </button>
