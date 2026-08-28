@@ -5,14 +5,11 @@ import * as z from "zod";
 import {
     Settings,
     Building2,
-    CreditCard,
     Save,
     Loader2,
-    ShieldCheck,
     Mail,
     Phone,
     MapPin,
-    AlertCircle,
     Camera,
     Image as ImageIcon,
     Lock,
@@ -47,13 +44,6 @@ const generalDataSchema = z.object({
 
 type GeneralDataValues = z.infer<typeof generalDataSchema>;
 
-const mercadopagoSchema = z.object({
-    mpPublicKey: z.string().min(10, "Public Key inválida"),
-    mpAccessToken: z.string().min(10, "Access Token inválido"),
-});
-
-type MercadoPagoValues = z.infer<typeof mercadopagoSchema>;
-
 export const EmpresaConfigPage = () => {
     const { logout } = useAuth();
     const [activeTab, setActiveTab] = useState<"general" | "pago" | "seguridad" | "horarios">("general");
@@ -86,14 +76,6 @@ export const EmpresaConfigPage = () => {
     const tipoServicio = watchGeneral("tipoServicio");
     const latitud = watchGeneral("latitud");
     const longitud = watchGeneral("longitud");
-
-    const {
-        register: registerMP,
-        handleSubmit: handleSubmitMP,
-        formState: { errors: errorsMP, isSubmitting: isSubmittingMP },
-    } = useForm<MercadoPagoValues>({
-        resolver: zodResolver(mercadopagoSchema),
-    });
 
     useEffect(() => {
         fetchCompanyData();
@@ -194,7 +176,7 @@ export const EmpresaConfigPage = () => {
         try {
             const finalData = {
                 ...data,
-                tipoServicio: data.tipoServicio === "OTRO" ? data.tipoServicioOtro || "OTRO" : data.tipoServicio,
+                tipoServicio: data.tipoServicio === "OTRO" ? (data.tipoServicioOtro || "").trim() || "OTRO" : data.tipoServicio,
                 latitud: data.latitud,
                 longitud: data.longitud
             };
@@ -234,21 +216,6 @@ export const EmpresaConfigPage = () => {
             Swal.fire("Error", "No se pudieron guardar los cambios.", "error");
         } finally {
             setIsSaving(false);
-        }
-    };
-
-    const onUpdateMP = async (data: MercadoPagoValues) => {
-        try {
-            await api.patch("/companies/mercadopago", data);
-            Swal.fire({
-                icon: "success",
-                title: "Configuración Guardada",
-                text: "Credenciales de Mercado Pago actualizadas.",
-                timer: 2000,
-                showConfirmButton: false,
-            });
-        } catch (error) {
-            Swal.fire("Error", "No se pudo actualizar la configuración de pago.", "error");
         }
     };
 
@@ -394,16 +361,6 @@ export const EmpresaConfigPage = () => {
                     >
                         <Building2 size={18} />
                         <span>Datos Generales</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("pago")}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === "pago"
-                            ? "bg-primary text-white shadow-lg shadow-primary/20"
-                            : "bg-white text-slate-600 border border-slate-100 hover:bg-slate-50"
-                            }`}
-                    >
-                        <CreditCard size={18} />
-                        <span>Pagos & MercadoPago</span>
                     </button>
                     <button
                         onClick={() => setActiveTab("seguridad")}
@@ -580,6 +537,9 @@ export const EmpresaConfigPage = () => {
                                                 className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
                                                 placeholder="Ej: Guardería, Adiestramiento..."
                                             />
+                                            {errorsGeneral.tipoServicioOtro && (
+                                                <p className="text-xs text-red-500">{errorsGeneral.tipoServicioOtro.message}</p>
+                                            )}
                                         </div>
                                     )}
 
@@ -774,124 +734,14 @@ export const EmpresaConfigPage = () => {
                             )}
                         </div>
                     ) : (
-                        <div className="p-6 md:p-8">
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
-                                    <CreditCard size={24} />
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold text-slate-900">Credenciales de Pago</h2>
-                                    <p className="text-sm text-slate-500">Conecta tu cuenta de Mercado Pago para recibir pagos.</p>
-                                </div>
+                        <div className="p-6 md:p-8 space-y-4">
+                            <div>
+                                <h2 className="text-xl font-bold text-slate-900">Pagos</h2>
+                                <p className="text-sm text-slate-500">Procesamiento de pagos centralizado.</p>
                             </div>
-
-                            {import.meta.env.VITE_MP_PUBLIC_KEY?.startsWith("TEST-") && (
-                                <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl mb-6 flex gap-4 items-center">
-                                    <div className="bg-blue-600 p-2 rounded-xl text-white">
-                                        <AlertCircle size={20} />
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Modo Sandbox</span>
-                                            <span className="text-xs font-semibold text-blue-700">Entorno de Pruebas Activo</span>
-                                        </div>
-                                        <p className="text-sm text-blue-600/80">
-                                            Se detectaron credenciales de prueba. Puedes usar las tarjetas ficticias de Mercado Pago para simular pagos sin costo real.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl mb-8 flex gap-4">
-                                <ShieldCheck className="text-amber-600 shrink-0" size={24} />
-                                <div className="text-sm text-amber-800">
-                                    <p className="font-bold mb-1">Sobre la seguridad:</p>
-                                    <p>Tus credenciales están encriptadas y solo se utilizan para procesar transacciones seguras a través de nuestra plataforma oficial.</p>
-                                </div>
-                            </div>
-
-                            <div className="mb-10 p-6 bg-primary/5 rounded-3xl border border-primary/20">
-                                <h3 className="text-lg font-bold text-slate-900 mb-2">Conexión Recomendada</h3>
-                                <p className="text-sm text-slate-500 mb-6">
-                                    Vincular tu cuenta con un solo clic es el método más rápido y seguro.
-                                </p>
-                                <button
-                                    onClick={() => {
-                                        const clientId = import.meta.env.VITE_MP_CLIENT_ID || "TU_CLIENT_ID_AQUI";
-                                        const redirectUri = window.location.origin + "/portal/empresa/oauth/mercadopago";
-
-                                        // Usamos el dominio de Perú .com.pe y quitamos platform_id si está dando problemas
-                                        const mpUrl = `https://auth.mercadopago.com.pe/authorization?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}`;
-
-                                        window.location.href = mpUrl;
-                                    }}
-                                    className="w-full sm:w-auto px-8 py-3 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
-                                >
-                                    <CreditCard size={20} />
-                                    Conectar con Mercado Pago
-                                </button>
-                            </div>
-
-                            <div className="relative mb-8">
-                                <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t border-slate-100"></div>
-                                </div>
-                                <div className="relative flex justify-center text-xs uppercase">
-                                    <span className="bg-white px-2 text-slate-500">O configuración manual (Avanzado)</span>
-                                </div>
-                            </div>
-
-                            <form onSubmit={handleSubmitMP(onUpdateMP)} className="space-y-6 max-w-2xl">
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 flex justify-between">
-                                            Public Key
-                                            <span className="text-[10px] text-slate-400 font-normal italic uppercase">Ej: TEST-... o APP_USR-...</span>
-                                        </label>
-                                        <input
-                                            {...registerMP("mpPublicKey")}
-                                            type="text"
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none font-mono text-sm"
-                                            placeholder="TEST-XXX..."
-                                        />
-                                        {errorsMP.mpPublicKey && <p className="text-xs text-red-500">{errorsMP.mpPublicKey.message}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700 flex justify-between">
-                                            Access Token
-                                            <span className="text-[10px] text-slate-400 font-normal italic uppercase text-right">Tu token privado de seguridad</span>
-                                        </label>
-                                        <input
-                                            {...registerMP("mpAccessToken")}
-                                            type="password"
-                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none font-mono text-sm"
-                                            placeholder="TEST-XXX..."
-                                        />
-                                        {errorsMP.mpAccessToken && <p className="text-xs text-red-500">{errorsMP.mpAccessToken.message}</p>}
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-end pt-4">
-                                    <Button disabled={isSubmittingMP} className="gap-2 px-8">
-                                        {isSubmittingMP ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                                        Actualizar Credenciales
-                                    </Button>
-                                </div>
-                            </form>
-
-                            <div className="mt-12 pt-12 border-t border-slate-100">
-                                <h3 className="text-lg font-bold text-slate-900 mb-4">¿Cómo obtener mis credenciales?</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="flex gap-4 p-4 rounded-2xl bg-slate-50">
-                                        <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">1</div>
-                                        <p className="text-sm text-slate-600">Ingresa a Mercado Pago Developers y crea una aplicación.</p>
-                                    </div>
-                                    <div className="flex gap-4 p-4 rounded-2xl bg-slate-50">
-                                        <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shrink-0">2</div>
-                                        <p className="text-sm text-slate-600">Ve a la sección 'Credenciales de producción' y copia tu Public Key y Access Token.</p>
-                                    </div>
-                                </div>
+                            <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
+                                <p className="font-bold mb-1 text-blue-800">Pagos centralizados en la plataforma</p>
+                                <p className="text-sm text-blue-800">Los cobros se procesan a través de la cuenta oficial de Huella360. No necesitas configurar tu propia cuenta de Mercado Pago; el equipo gestiona los pagos y su liquidación de forma manual.</p>
                             </div>
                         </div>
                     )}

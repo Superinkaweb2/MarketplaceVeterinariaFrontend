@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Settings, Save, ShieldCheck, Briefcase, Award, FileText, Camera, Lock, CreditCard } from "lucide-react";
+import { User, Settings, Save, ShieldCheck, Briefcase, Award, FileText, Camera, Lock } from "lucide-react";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "../../../../components/ui/Button";
@@ -19,9 +19,7 @@ const vetProfileSchema = z.object({
  (val) => !val || /^\d+$/.test(val),
  "El número de colegiatura debe ser numérico"
  ),
- fotoPerfilUrl: z.string().optional().or(z.literal("")),
- mpAccessToken: z.string().optional().or(z.literal("")),
- mpPublicKey: z.string().optional().or(z.literal("")),
+  fotoPerfilUrl: z.string().optional().or(z.literal("")),
 });
 
 export const VetConfiguracionPage = () => {
@@ -39,10 +37,8 @@ export const VetConfiguracionPage = () => {
    biografia: "",
    aniosExperiencia: 0,
    numeroColegiatura: "",
-   fotoPerfilUrl: "",
-   mpAccessToken: "",
-   mpPublicKey: ""
- });
+    fotoPerfilUrl: ""
+  });
 
  useEffect(() => {
    if (profile) {
@@ -53,10 +49,8 @@ export const VetConfiguracionPage = () => {
        biografia: profile.biografia || "",
        aniosExperiencia: profile.aniosExperiencia || 0,
        numeroColegiatura: profile.numeroColegiatura || "",
-       fotoPerfilUrl: profile.fotoPerfilUrl || "",
-       mpAccessToken: profile.mpAccessToken || "",
-       mpPublicKey: profile.mpPublicKey || ""
-     });
+        fotoPerfilUrl: profile.fotoPerfilUrl || ""
+      });
    }
  }, [profile]);
 
@@ -207,27 +201,17 @@ export const VetConfiguracionPage = () => {
  <User size={18} />
  Mi Perfil
  </button>
- <button
- onClick={() => setActiveTab("seguridad")}
- className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "seguridad"
- ? "bg-white text-teal-600 shadow-sm"
- : "text-slate-500 hover:text-slate-700 :text-slate-300"
- }`}
- >
- <Lock size={18} />
- Seguridad
- </button>
- <button
- onClick={() => setActiveTab("pagos")}
- className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "pagos"
- ? "bg-white text-teal-600 shadow-sm"
- : "text-slate-500 hover:text-slate-700 :text-slate-300"
- }`}
- >
- <CreditCard size={18} />
- Pagos
- </button>
- </div>
+  <button
+  onClick={() => setActiveTab("seguridad")}
+  className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === "seguridad"
+  ? "bg-white text-teal-600 shadow-sm"
+  : "text-slate-500 hover:text-slate-700 :text-slate-300"
+  }`}
+  >
+  <Lock size={18} />
+  Seguridad
+  </button>
+  </div>
 
  <div className="max-w-6xl">
  {activeTab === "perfil" && (
@@ -412,59 +396,19 @@ export const VetConfiguracionPage = () => {
  </div>
  )}
 
- {activeTab === "pagos" && (
- <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-2xl">
- <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
- <div className="px-6 py-4 border-b border-slate-50 bg-slate-50/50 flex items-center gap-3">
- <CreditCard size={18} className="text-teal-500" />
- <h3 className="font-bold text-slate-900 ">Configuración de Pagos</h3>
- </div>
- <div className="p-8 space-y-6">
- <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl mb-4">
- <p className="text-xs text-amber-800 font-medium leading-relaxed">
- Configura tus credenciales de MercadoPago para recibir pagos directos de tus clientes. Recuerda usar credenciales de producción para cobros reales.
- </p>
- </div>
-
- <form onSubmit={handleSave} className="space-y-4">
- <div className="space-y-2">
- <label className="text-sm font-medium text-slate-700 ">MercadoPago Access Token</label>
- <input
- type="password"
- name="mpAccessToken"
- value={formData.mpAccessToken}
- onChange={handleChange}
- placeholder={formData.mpAccessToken === "CONFIGURADO" ? "••••••••••••••••" : "APP_USR-..."}
- className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-teal-500 transition-all outline-none"
- />
- {formData.mpAccessToken === "CONFIGURADO" && (
- <p className="text-[10px] text-teal-600 font-medium">✓ Ya tienes un token configurado. Ingrésalo de nuevo solo si deseas cambiarlo.</p>
- )}
- </div>
-
- <div className="space-y-2">
- <label className="text-sm font-medium text-slate-700 ">MercadoPago Public Key</label>
- <input
- type="text"
- name="mpPublicKey"
- value={formData.mpPublicKey}
- onChange={handleChange}
- placeholder="APP_USR-..."
- className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-teal-500 transition-all outline-none"
- />
- </div>
-
- <div className="pt-4">
- <Button type="submit" disabled={isSaving} className="w-full gap-2 bg-teal-500 hover:bg-teal-600">
- <Save size={18} />
- {isSaving ? "Guardando..." : "Guardar credenciales"}
- </Button>
- </div>
- </form>
- </div>
- </div>
- </div>
- )}
+  {activeTab === "pagos" && (
+  <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-2xl">
+  <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+  <div className="p-8">
+  <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
+  <p className="text-sm text-blue-800 font-medium leading-relaxed">
+  Los cobros se procesan de forma centralizada a través de la plataforma Huella360. No necesitas configurar tu propia cuenta de Mercado Pago; el equipo gestiona los pagos y su liquidación de forma manual.
+  </p>
+  </div>
+  </div>
+  </div>
+  </div>
+  )}
  </div>
  </div>
  );

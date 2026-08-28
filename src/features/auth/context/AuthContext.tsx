@@ -211,7 +211,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         }
                     }
                 }
-            } catch (error) {
+            } catch (error: any) {
+                if (error.response?.status === 403 || error.response?.status === 401 || !error.response) {
+                    clearAuthStorage();
+                    auth0Logout({ logoutParams: { returnTo: window.location.origin } });
+                    return;
+                }
                 console.error("Error sincronizando con el backend:", error);
             } finally {
                 setSyncComplete(true);
@@ -234,6 +239,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         config.headers.Authorization = `Bearer ${token}`;
                     } catch (error) {
                         console.error("Error al obtener token de Auth0:", error);
+                        clearAuthStorage();
+                        auth0Logout({ logoutParams: { returnTo: window.location.origin } });
                         return Promise.reject(error);
                     }
                 }
