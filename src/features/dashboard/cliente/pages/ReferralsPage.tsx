@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Share2, Copy, Users, Gift, Check, AlertCircle, Sparkles, UserPlus } from "lucide-react";
+import { Share2, Copy, Users, Gift, Check, AlertCircle, Sparkles, UserPlus, Info } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { referralService } from "../services/referralService";
 import type { ReferralCountResponse } from "../types/referral.types";
@@ -38,10 +38,12 @@ export const ReferralsPage = () => {
     }
   };
 
+  const referralUrl = code ? `${window.location.origin}/register?ref=${code}` : "";
+
   const handleCopy = async () => {
-    if (!code) return;
+    if (!referralUrl) return;
     try {
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText(referralUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -50,13 +52,13 @@ export const ReferralsPage = () => {
   };
 
   const handleShare = async () => {
-    if (!code) return;
+    if (!referralUrl) return;
     if (navigator.share) {
       try {
         await navigator.share({
           title: "Huella360",
           text: "Únete a Huella360 con mi código de referido y obtén beneficios:",
-          url: `${window.location.origin}/register?ref=${code}`,
+          url: referralUrl,
         });
       } catch {}
     } else {
@@ -140,7 +142,7 @@ export const ReferralsPage = () => {
               className="flex items-center gap-2 rounded-lg px-4 py-2.5 font-bold transition-all bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm border border-white/25 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {copied ? <Check size={16} /> : <Copy size={16} />}
-              {copied ? "Copiado" : "Copiar codigo"}
+              {copied ? "Copiado" : "Copiar enlace"}
             </button>
             <button
               onClick={handleShare}
@@ -157,7 +159,7 @@ export const ReferralsPage = () => {
           <h3 className="text-sm font-bold text-slate-900 mb-4">¿Como funciona?</h3>
           <div className="grid grid-cols-3 gap-4">
             {[
-              { step: "1", icon: Copy, title: "Comparte", desc: "Envia tu codigo a tus amigos" },
+              { step: "1", icon: Copy, title: "Comparte", desc: "Envia tu enlace a tus amigos" },
               { step: "2", icon: UserPlus, title: "Se registran", desc: "Tus amigos crean su cuenta" },
               { step: "3", icon: Gift, title: "Gana", desc: "Obten una 2da mascota gratis" },
             ].map(({ step, icon: Icon, title, desc }) => (
@@ -251,6 +253,14 @@ export const ReferralsPage = () => {
             <span className="font-mono text-xs text-slate-700">
               {window.location.origin}/register?ref={code}
             </span>
+          </p>
+        </div>
+
+        {/* Info */}
+        <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4">
+          <Info size={16} className="text-blue-500 mt-0.5 shrink-0" />
+          <p className="text-xs text-blue-700">
+            El referido solo se registra cuando tu amigo crea una cuenta de <strong>cliente</strong>. Si se registra como veterinario o empresa, el código no se contará.
           </p>
         </div>
       </div>
